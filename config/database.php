@@ -6,9 +6,9 @@
 
 define('DB_HOST', '127.0.0.1');
 define('DB_PORT', '3306');
-define('DB_NAME', 'custom_type_master_pro');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_NAME', 'jgryfuqubz');
+define('DB_USER', 'jgryfuqubz');
+define('DB_PASS', 'jgryfuqubzxD3F6P4ZzS');
 define('DB_CHARSET', 'utf8mb4');
 
 /**
