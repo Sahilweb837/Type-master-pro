@@ -136,6 +136,26 @@ CREATE TABLE IF NOT EXISTS `user_lesson_progress` (
     REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ---------------------------------------------------------------------
+-- 6. Table: user_game_scores
+-- Stores arcade game high scores (Keyboard Ninja, Space Defender, etc.)
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `user_game_scores` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT UNSIGNED NOT NULL,
+  `game_slug` VARCHAR(50) NOT NULL,
+  `score` INT UNSIGNED NOT NULL DEFAULT 0,
+  `highest_streak` INT UNSIGNED NOT NULL DEFAULT 0,
+  `accuracy` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  `difficulty` ENUM('easy', 'medium', 'hard') NOT NULL DEFAULT 'medium',
+  `mode` VARCHAR(50) NOT NULL DEFAULT 'all',
+  `played_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_user_game` (`user_id`, `game_slug`),
+  INDEX `idx_game_score` (`game_slug`, `score` DESC),
+  CONSTRAINT `fk_game_user` FOREIGN KEY (`user_id`) 
+    REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- =====================================================================
 -- SEED DATA
 -- Default administrator account and rich practice passages

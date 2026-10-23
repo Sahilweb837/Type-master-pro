@@ -115,6 +115,25 @@ CREATE TABLE IF NOT EXISTS `user_lesson_progress` (
     REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ---------------------------------------------------------------------
+-- 6. Table: user_game_scores
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `user_game_scores` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT UNSIGNED NOT NULL,
+  `game_slug` VARCHAR(50) NOT NULL,
+  `score` INT UNSIGNED NOT NULL DEFAULT 0,
+  `highest_streak` INT UNSIGNED NOT NULL DEFAULT 0,
+  `accuracy` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  `difficulty` ENUM('easy', 'medium', 'hard') NOT NULL DEFAULT 'medium',
+  `mode` VARCHAR(50) NOT NULL DEFAULT 'all',
+  `played_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_user_game` (`user_id`, `game_slug`),
+  INDEX `idx_game_score` (`game_slug`, `score` DESC),
+  CONSTRAINT `fk_schema_game_user` FOREIGN KEY (`user_id`) 
+    REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Admin & Demo Seed
 INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `full_name`, `role`) VALUES
 (1, 'admin', 'admin@typemaster.pro', '$2y$10$K7UcCDyvlBrG3mBGWXBXQuEw/KWL/SGfwUv7bdJMRkWZrUOzminr6', 'Master Administrator', 'admin'),

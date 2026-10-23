@@ -31,6 +31,11 @@ $isAdminSection = ($currentDir === 'admin');
       <span>Typing Lessons</span>
       <span class="badge ms-auto" style="font-size: 0.62rem; font-weight: 800; background: var(--first-color); color: #fff; padding: 2px 6px; border-radius: 4px;">NEW</span>
     </a>
+    <a href="<?= BASE_URL ?>/games.php" class="sidebar-link <?= ($currentPage === 'games.php' || $currentPage === 'game-ninja.php' || $currentPage === 'game-space.php') ? 'active' : '' ?>">
+      <i class="bi bi-controller" style="color: #ff3366;"></i>
+      <span>Arcade Games</span>
+      <span class="badge ms-auto" style="font-size: 0.62rem; font-weight: 800; background: #ff3366; color: #fff; padding: 2px 6px; border-radius: 4px;">ARCADE</span>
+    </a>
     <a href="<?= BASE_URL ?>/practice.php?mode=passage" class="sidebar-link <?= ($currentPage === 'practice.php' && (!isset($_GET['mode']) || $_GET['mode'] === 'passage')) ? 'active' : '' ?>">
       <i class="bi bi-keyboard-fill"></i>
       <span>Passage Practice</span>
