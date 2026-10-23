@@ -10,6 +10,9 @@
  * @return string
  */
 function get_csrf_token(): string {
+    if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        @session_start();
+    }
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
@@ -23,18 +26,32 @@ function get_csrf_token(): string {
  * @return bool
  */
 function verify_csrf_token(?string $token = null): bool {
+    if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        @session_start();
+    }
+
     if ($token === null) {
         $token = $_POST['csrf_token'] 
               ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
-              ?? '';
+              ?? ($_SERVER['HTTP_X_XSRF_TOKEN'] ?? '');
     }
 
     $sessionToken = $_SESSION['csrf_token'] ?? '';
     if (empty($token) || empty($sessionToken)) {
+        error_log(sprintf(
+            '[CSRF Warning] Validation failed: received_token=%s, session_token_present=%s, session_id=%s',
+            empty($token) ? 'EMPTY' : 'PROVIDED',
+            empty($sessionToken) ? 'NO' : 'YES',
+            session_id() ?: 'NONE'
+        ));
         return false;
     }
 
-    return hash_equals($sessionToken, $token);
+    $isValid = hash_equals($sessionToken, $token);
+    if (!$isValid) {
+        error_log('[CSRF Warning] Token mismatch detected.');
+    }
+    return $isValid;
 }
 
 /**

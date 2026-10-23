@@ -98,9 +98,11 @@ $pageTitle = $pageTitle ?? 'Custom Type Master Pro';
 $pdoCheck = getDBConnection();
 if (!$pdoCheck):
 ?>
-  <div class="alert alert-dark mb-0 border-0 rounded-0 text-center py-2 bg-black text-white">
-    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-    <strong>Database Connection Notice:</strong> Unable to connect to MySQL database service on localhost:3306. Please verify that the database server is running.
+  <div class="alert alert-dark mb-0 border-0 rounded-0 text-center py-2 bg-black text-white" style="border-bottom: 1px solid #262626 !important;">
+    <div class="container d-flex align-items-center justify-content-center gap-2 flex-wrap small">
+      <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+      <span><strong>Database Notice:</strong> Unable to connect to MySQL database service on <code><?= htmlspecialchars(defined('DB_HOST') ? DB_HOST : 'localhost') ?>:<?= htmlspecialchars(defined('DB_PORT') ? DB_PORT : '3306') ?></code> (Database: <code><?= htmlspecialchars(defined('DB_NAME') ? DB_NAME : '') ?></code>). Please verify that MySQL is running and database credentials in <code>config/database.php</code> or <code>.env</code> are correct.</span>
+    </div>
   </div>
 <?php endif; ?>
 

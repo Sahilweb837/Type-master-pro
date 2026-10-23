@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Custom Type Master Pro
  * SECURITY HONEYPOT / ACCESS LOCKOUT

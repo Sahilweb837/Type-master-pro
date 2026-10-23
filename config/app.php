@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Custom Type Master Pro
  * Application Configuration & Session Bootstrap
@@ -9,24 +9,46 @@ error_reporting(E_ALL);
 ini_set('display_errors', '0');
 ini_set('log_errors', '1');
 
+// Output buffering prevents premature header dispatch caused by whitespace or includes
+if (ob_get_level() === 0) {
+    ob_start();
+}
+
 // Set default timezone
 date_default_timezone_set('UTC');
 
+// Detect HTTPS behind reverse proxies, CDNs (e.g. Cloudflare), and standard SSL
+$isHttps = (
+    (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')
+    || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
+    || (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && strtolower($_SERVER['HTTP_X_FORWARDED_SSL']) === 'on')
+    || (!empty($_SERVER['HTTP_CF_VISITOR']) && strpos($_SERVER['HTTP_CF_VISITOR'], '"scheme":"https"') !== false)
+);
+
 // Secure Session Configuration
 if (session_status() === PHP_SESSION_NONE) {
-    // Only set cookie params if headers not sent
+    // If the server's session save path is misconfigured or unwriteable, fallback to system temp dir
+    $savePath = session_save_path();
+    if (!empty($savePath) && (!@is_dir($savePath) || !@is_writable($savePath))) {
+        $sysTmp = sys_get_temp_dir();
+        if (@is_dir($sysTmp) && @is_writable($sysTmp)) {
+            @session_save_path($sysTmp);
+        }
+    }
+
     if (!headers_sent()) {
         $cookieParams = [
             'lifetime' => 86400 * 7, // 7 days
             'path'     => '/',
             'domain'   => '',
-            'secure'   => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+            'secure'   => $isHttps,
             'httponly' => true,
             'samesite' => 'Lax'
         ];
         session_set_cookie_params($cookieParams);
     }
-    session_start();
+    @session_start();
 }
 
 // App Constants
@@ -39,13 +61,13 @@ define('ADMIN_SLUG', 'nickadmin005');
 define('ADMIN_HASH_TAG', 'nickadmin005#');
 
 // Determine Base URL dynamically
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)) ? "https://" : "http://";
+$protocol = $isHttps ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
 
 // Normalize base path (recognizes api, admin, nickadmin005, includes, config, assets)
 $basePath = preg_replace('#/(api|admin|nickadmin005|includes|config|assets)(/.*)?$#', '', $scriptDir);
-if ($basePath === '/' || $basePath === '\\') {
+if ($basePath === '/' || $basePath === '\\' || $basePath === '.') {
     $basePath = '';
 }
 define('BASE_URL', rtrim($protocol . $host . $basePath, '/'));

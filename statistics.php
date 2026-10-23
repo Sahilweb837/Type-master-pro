@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * Custom Type Master Pro
  * Deep Analytics & Statistics Page — B&W Redesign

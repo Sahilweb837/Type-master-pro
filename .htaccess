@@ -1,10 +1,12 @@
-﻿# Custom Type Master Pro - Security & Routing Configuration
+# Custom Type Master Pro - Security & Routing Configuration
 # High-Security Policy: Standard /admin route is permanently locked down.
 # New Administrative Gateway: /nickadmin005#
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /type%20master/
+    # Note: RewriteBase is omitted by default so rules work automatically in both root (live server) and subdirectories
+    # If your Apache configuration specifically requires it in a subfolder, uncomment and adjust:
+    # RewriteBase /type%20master/
 
     # 1. STRICT BLOCK: Terminate all direct access to legacy /admin namespace
     RewriteRule ^admin(/.*)?$ - [F,L]
