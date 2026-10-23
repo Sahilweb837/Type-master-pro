@@ -1,314 +1,354 @@
  <?php
 /**
  * Custom Type Master Pro
- * Global Footer Template — B&W Editorial Edition
+ * Global Footer Template — Pixel Theme / Sans-Serif Readable
  */
 ?>
     </main>
 
-    <!-- ============================================================
-         APP FOOTER — B&W Editorial
-         ============================================================ -->
     <style>
-    /* ============================================================
-       FOOTER SCOPED STYLES — .tm-footer
-       ============================================================ */
     .tm-footer {
-        --ft-paper:    #fafaf8;
-        --ft-paper-2:  #f2f1ec;
-        --ft-ink:      #0b0b0b;
-        --ft-ink-2:    #1f1f1f;
-        --ft-muted:    #6b6a63;
-        --ft-muted-2:  #94918a;
-        --ft-line:     #d8d6cd;
-        --ft-line-2:   #c4c1b6;
-        --ft-accent:   #ff4d00;
-        --ft-mono:     "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --ft-ink:      #000000;
+        --ft-paper:    #ffffff;
+        --ft-paper-2:  #f0f0f0;
+        --ft-paper-3:  #e0e0e0;
+        --ft-shadow:   3px;
         --ft-sans:     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --ft-pixel:    "Press Start 2P", "Courier New", monospace;
+        --ft-mono:     "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
         background: var(--ft-paper);
         color: var(--ft-ink);
-        border-top: 1px solid var(--ft-line);
+        border-top: 4px solid var(--ft-ink);
         font-family: var(--ft-sans);
         margin-top: auto;
         position: relative;
+        -webkit-font-smoothing: antialiased;
+        image-rendering: pixelated;
     }
     .tm-footer * { box-sizing: border-box; }
 
-    /* Inset top accent hairline */
     .tm-footer::before {
         content: "";
         position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 2px;
-        background: var(--ft-ink);
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        background-image:
+            linear-gradient(rgba(0,0,0,0.045) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,0,0,0.045) 1px, transparent 1px);
+        background-size: 4px 4px;
+    }
+    .tm-footer > * { position: relative; z-index: 2; }
+    html[data-theme="dark"] .tm-footer {
+        --ft-ink:      #ffffff;
+        --ft-paper:    #000000;
+        --ft-paper-2:  #1a1a1a;
+        --ft-paper-3:  #222222;
+    }
+    html[data-theme="dark"] .tm-footer::before {
+        background-image:
+            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
     }
 
     .tm-footer-inner {
         max-width: 1240px;
         margin: 0 auto;
-        padding: 3rem 2rem 1.75rem;
+        padding: 2.75rem 2rem 1.5rem;
     }
     @media (max-width: 640px) {
-        .tm-footer-inner { padding: 2.25rem 1.25rem 1.25rem; }
+        .tm-footer-inner { padding: 2rem 1.15rem 1.1rem; }
     }
 
-    /* ---------- Grid ---------- */
     .tm-footer-grid {
         display: grid;
         grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
-        gap: 2.5rem;
-        padding-bottom: 2.5rem;
-        border-bottom: 1px solid var(--ft-line);
+        gap: 2rem;
+        padding-bottom: 2rem;
         margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .tm-footer-grid::after {
+        content: "";
+        position: absolute;
+        left: 0; right: 0; bottom: 0;
+        height: 3px;
+        background: var(--ft-ink);
     }
     @media (max-width: 991px) {
-        .tm-footer-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
+        .tm-footer-grid { grid-template-columns: 1fr 1fr; gap: 1.75rem; }
     }
     @media (max-width: 575px) {
-        .tm-footer-grid {
-            grid-template-columns: 1fr;
-            gap: 1.75rem;
-        }
+        .tm-footer-grid { grid-template-columns: 1fr; gap: 1.5rem; }
     }
 
-    /* ---------- Col 1: Brand ---------- */
+    /* Brand */
     .tm-ft-brand {
         display: inline-flex;
         align-items: center;
-        gap: 0.65rem;
+        gap: 0.6rem;
         text-decoration: none;
         color: var(--ft-ink);
-        margin-bottom: 1rem;
+        margin-bottom: 1.1rem;
     }
     .tm-ft-brand-mark {
-        width: 34px;
-        height: 34px;
+        width: 36px; height: 36px;
         background: var(--ft-ink);
         color: var(--ft-paper);
-        border-radius: 7px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        transition: background 0.2s ease;
+        position: relative;
+        image-rendering: pixelated;
+        transition: transform 0.05s steps(1);
     }
+    .tm-ft-brand-mark::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(45deg, var(--ft-paper) 25%, transparent 25%),
+            linear-gradient(-45deg, var(--ft-paper) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, var(--ft-paper) 75%),
+            linear-gradient(-45deg, transparent 75%, var(--ft-paper) 75%);
+        background-size: 4px 4px;
+        background-position: 0 0, 0 2px, 2px -2px, -2px 0;
+        opacity: 0.15;
+        pointer-events: none;
+    }
+    .tm-ft-brand-mark svg { position: relative; z-index: 1; }
     .tm-ft-brand:hover .tm-ft-brand-mark {
-        background: var(--ft-accent);
+        transform: translate(2px, 2px);
+        box-shadow: -2px -2px 0 var(--ft-ink);
     }
+    /* DECORATIVE — pixel font allowed */
     .tm-ft-brand-name {
-        font-weight: 800;
-        font-size: 1.1rem;
-        letter-spacing: -0.02em;
-        color: var(--ft-ink);
-    }
-    .tm-ft-brand-name span {
+        font-family: var(--ft-pixel);
         font-weight: 400;
-        color: var(--ft-muted);
+        font-size: 0.65rem;
+        letter-spacing: 0.02em;
+        color: var(--ft-ink);
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        line-height: 1.5;
     }
+    .tm-ft-brand-name .dot-pro {
+        font-family: var(--ft-sans);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: var(--ft-ink);
+        opacity: 0.6;
+    }
+    /* Decorative badge — small pixel */
     .tm-ft-badge {
-        font-family: var(--ft-mono);
+        font-family: var(--ft-pixel);
         font-size: 0.55rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.04em;
         background: var(--ft-ink);
         color: var(--ft-paper);
-        padding: 0.15rem 0.35rem;
-        border-radius: 3px;
-        margin-left: 0.35rem;
-        vertical-align: middle;
+        padding: 0.18rem 0.35rem;
+        border: 2px solid var(--ft-ink);
+        line-height: 1.4;
+        display: inline-block;
     }
 
+    /* Description — sans-serif readable */
     .tm-ft-desc {
-        font-size: 0.86rem;
-        line-height: 1.65;
-        color: var(--ft-muted);
-        max-width: 320px;
-        margin: 0 0 1.15rem;
+        font-family: var(--ft-sans);
+        font-size: 0.88rem;
+        line-height: 1.6;
+        color: var(--ft-ink);
+        max-width: 340px;
+        margin: 0 0 1.1rem;
     }
 
     .tm-ft-status {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.4rem 0.75rem;
-        border: 1px solid var(--ft-line);
-        border-radius: 999px;
-        background: var(--ft-paper-2);
-        font-family: var(--ft-mono);
-        font-size: 0.68rem;
+        padding: 0.35rem 0.65rem;
+        border: 2px solid var(--ft-ink);
+        background: var(--ft-paper);
+        box-shadow: 2px 2px 0 var(--ft-ink);
+        font-family: var(--ft-sans);
+        font-size: 0.72rem;
         font-weight: 600;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
         color: var(--ft-ink);
     }
     .tm-ft-status .dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--ft-accent);
-        box-shadow: 0 0 0 3px rgba(255, 77, 0, 0.18);
-        animation: tmFtPulse 1.8s ease-in-out infinite;
+        width: 7px; height: 7px;
+        background: var(--ft-ink);
+        animation: tmFtBlink 1.2s steps(1) infinite;
     }
-    @keyframes tmFtPulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.4; }
+    @keyframes tmFtBlink {
+        0%, 49% { opacity: 1; }
+        50%, 100% { opacity: 0; }
     }
 
-    /* ---------- Column headings ---------- */
+    /* Headings — sans-serif */
     .tm-ft-heading {
-        font-family: var(--ft-mono);
-        font-size: 0.66rem;
-        font-weight: 600;
-        letter-spacing: 0.14em;
+        font-family: var(--ft-sans);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: var(--ft-muted);
+        color: var(--ft-ink);
         margin: 0 0 1rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.55rem;
     }
     .tm-ft-heading::before {
         content: "";
-        width: 14px;
-        height: 1px;
-        background: var(--ft-accent);
+        width: 12px; height: 12px;
+        background: var(--ft-ink);
         flex-shrink: 0;
     }
 
-    /* ---------- Links ---------- */
+    /* Links — sans-serif */
     .tm-ft-links {
         list-style: none;
         margin: 0;
         padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 0.6rem;
+        gap: 0.55rem;
     }
     .tm-ft-links a,
     .tm-ft-links button {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        font-size: 0.85rem;
+        font-family: var(--ft-sans);
+        font-size: 0.86rem;
         font-weight: 500;
-        color: var(--ft-ink-2);
+        color: var(--ft-ink);
         text-decoration: none;
         background: transparent;
         border: none;
-        padding: 0;
+        padding: 0.15rem 0;
         cursor: pointer;
-        font-family: inherit;
         line-height: 1.3;
-        transition: color 0.15s ease, transform 0.15s ease;
+        transition: transform 0.05s steps(1);
         text-align: left;
+        border-bottom: 2px solid transparent;
     }
     .tm-ft-links a:hover,
     .tm-ft-links button:hover {
-        color: var(--ft-accent);
+        border-bottom-color: var(--ft-ink);
         transform: translateX(2px);
     }
     .tm-ft-links a i,
     .tm-ft-links button i {
-        font-size: 0.78rem;
-        color: var(--ft-muted-2);
-        transition: color 0.15s ease;
+        font-size: 0.82rem;
+        color: var(--ft-ink);
         flex-shrink: 0;
     }
-    .tm-ft-links a:hover i,
-    .tm-ft-links button:hover i {
-        color: var(--ft-accent);
-    }
 
-    /* Theme swatches (kept minimal — B&W only) */
+    /* Theme swatches */
     .tm-ft-theme-row {
         display: flex;
-        gap: 0.5rem;
-        margin-top: 0.35rem;
+        gap: 0.55rem;
+        margin-top: 0.45rem;
     }
     .tm-ft-theme-swatch {
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        border: 2px solid var(--ft-line-2);
+        width: 30px; height: 30px;
+        border-radius: 0;
+        border: 3px solid var(--ft-ink);
+        box-shadow: 2px 2px 0 var(--ft-ink);
         cursor: pointer;
         padding: 0;
-        transition: all 0.15s ease;
+        transition: transform 0.05s steps(1), box-shadow 0.05s steps(1);
         position: relative;
+        background: var(--ft-paper);
+        -webkit-appearance: none;
+        appearance: none;
     }
-    .tm-ft-theme-swatch:hover {
-        border-color: var(--ft-ink);
-        transform: scale(1.08);
+    .tm-ft-theme-swatch:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ft-ink); }
+    .tm-ft-theme-swatch:active {
+        transform: translate(2px, 2px);
+        box-shadow: 0 0 0 var(--ft-ink);
     }
-    .tm-ft-theme-swatch.active {
-        border-color: var(--ft-accent);
-        box-shadow: 0 0 0 2px rgba(255, 77, 0, 0.25);
+    .tm-ft-theme-swatch.active { box-shadow: 0 0 0 var(--ft-ink), 0 0 0 2px var(--ft-paper) inset; }
+    .tm-ft-theme-swatch[data-set-theme="light"] { background: var(--ft-paper); }
+    .tm-ft-theme-swatch[data-set-theme="dark"]  { background: var(--ft-ink); }
+    .tm-ft-theme-swatch.active::after {
+        content: "";
+        position: absolute;
+        left: 50%; top: 50%;
+        width: 6px; height: 6px;
+        transform: translate(-50%, -50%);
+        background: var(--ft-ink);
     }
-    .tm-ft-theme-swatch[data-set-theme="light"] {
-        background: linear-gradient(135deg, #fafaf8 50%, #e8e6df 50%);
-    }
-    .tm-ft-theme-swatch[data-set-theme="dark"] {
-        background: linear-gradient(135deg, #0b0b0b 50%, #1f1f1f 50%);
-    }
+    .tm-ft-theme-swatch[data-set-theme="dark"].active::after { background: var(--ft-paper); }
 
-    /* ---------- Ergo card ---------- */
+    /* Ergo card */
     .tm-ft-ergo {
-        background: var(--ft-paper-2);
-        border: 1px solid var(--ft-line);
-        border-radius: 8px;
-        padding: 1rem;
+        background: var(--ft-paper);
+        border: 3px solid var(--ft-ink);
+        box-shadow: var(--ft-shadow) var(--ft-shadow) 0 var(--ft-ink);
+        padding: 0.9rem 1rem;
         display: flex;
         flex-direction: column;
-        gap: 0.65rem;
+        gap: 0.6rem;
     }
     .tm-ft-ergo-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 0.5rem;
-        font-size: 0.78rem;
-        color: var(--ft-muted);
+        font-family: var(--ft-sans);
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--ft-ink);
     }
     .tm-ft-ergo-row:not(:last-child) {
-        padding-bottom: 0.65rem;
-        border-bottom: 1px dashed var(--ft-line);
+        padding-bottom: 0.6rem;
+        border-bottom: 2px dashed var(--ft-ink);
     }
     .tm-ft-ergo-row kbd {
         font-family: var(--ft-mono);
-        font-size: 0.65rem;
-        background: var(--ft-paper);
-        color: var(--ft-ink);
-        border: 1px solid var(--ft-line-2);
-        border-radius: 3px;
+        font-size: 0.72rem;
+        background: var(--ft-ink);
+        color: var(--ft-paper);
+        border: 2px solid var(--ft-ink);
         padding: 0.1rem 0.35rem;
         font-weight: 700;
         display: inline-block;
-        min-width: 20px;
+        min-width: 22px;
         text-align: center;
+        line-height: 1.1;
     }
     .tm-ft-ergo-badge {
         font-family: var(--ft-mono);
-        font-size: 0.62rem;
+        font-size: 0.7rem;
         font-weight: 700;
         letter-spacing: 0.04em;
         background: var(--ft-ink);
         color: var(--ft-paper);
         padding: 0.15rem 0.45rem;
-        border-radius: 3px;
+        border: 2px solid var(--ft-ink);
         white-space: nowrap;
     }
 
-    /* ---------- Sub-footer ---------- */
+    /* Sub-footer */
     .tm-ft-bottom {
         display: flex;
         flex-direction: column;
-        gap: 0.9rem;
+        gap: 0.85rem;
         align-items: center;
         text-align: center;
-        font-size: 0.78rem;
-        color: var(--ft-muted);
+        font-family: var(--ft-sans);
+        font-size: 0.82rem;
+        color: var(--ft-ink);
     }
     @media (min-width: 768px) {
         .tm-ft-bottom {
@@ -329,35 +369,17 @@
         justify-content: center;
     }
     .tm-ft-pill {
-        font-family: var(--ft-mono);
-        font-size: 0.65rem;
+        font-family: var(--ft-sans);
+        font-size: 0.72rem;
         font-weight: 600;
         letter-spacing: 0.04em;
-        background: var(--ft-paper-2);
-        border: 1px solid var(--ft-line);
-        border-radius: 999px;
-        padding: 0.25rem 0.65rem;
-        color: var(--ft-ink-2);
+        text-transform: uppercase;
+        background: var(--ft-paper);
+        border: 2px solid var(--ft-ink);
+        box-shadow: 2px 2px 0 var(--ft-ink);
+        padding: 0.2rem 0.55rem;
+        color: var(--ft-ink);
         white-space: nowrap;
-    }
-
-    /* ---------- Dark theme overrides ---------- */
-    html[data-theme="dark"] .tm-footer {
-        --ft-paper:    #0b0b0b;
-        --ft-paper-2:  #141414;
-        --ft-ink:      #fafaf8;
-        --ft-ink-2:    #e5e5e5;
-        --ft-muted:    #8a8a8a;
-        --ft-muted-2:  #6b6b6b;
-        --ft-line:     #262626;
-        --ft-line-2:   #333333;
-    }
-    html[data-theme="dark"] .tm-footer .tm-ft-brand-mark {
-        background: var(--ft-ink);
-        color: var(--ft-paper);
-    }
-    html[data-theme="dark"] .tm-footer .tm-ft-theme-swatch[data-set-theme="light"] {
-        border-color: #444;
     }
     </style>
 
@@ -365,17 +387,21 @@
       <div class="tm-footer-inner">
         <div class="tm-footer-grid">
 
-          <!-- Col 1: Brand & Status -->
           <div>
             <a href="<?= BASE_URL ?>/dashboard.php" class="tm-ft-brand">
               <span class="tm-ft-brand-mark">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="2" y="2" width="20" height="20" rx="5" fill="currentColor"/>
-                  <path d="M8 9H16M12 9V17" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                <svg width="20" height="20" viewBox="0 0 8 8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                  <rect x="0" y="0" width="8" height="8" fill="currentColor"/>
+                  <rect x="1" y="1" width="3" height="1" fill="var(--ft-paper)"/>
+                  <rect x="2" y="2" width="1" height="4" fill="var(--ft-paper)"/>
+                  <rect x="5" y="1" width="1" height="5" fill="var(--ft-paper)"/>
+                  <rect x="6" y="1" width="1" height="1" fill="var(--ft-paper)"/>
+                  <rect x="6" y="3" width="1" height="1" fill="var(--ft-paper)"/>
+                  <rect x="6" y="5" width="1" height="1" fill="var(--ft-paper)"/>
                 </svg>
               </span>
               <span class="tm-ft-brand-name">
-                TypeMaster<span>.pro</span>
+                TypeMaster<span class="dot-pro">.pro</span>
                 <span class="tm-ft-badge">PRO</span>
               </span>
             </a>
@@ -386,13 +412,12 @@
 
             <div class="tm-ft-status">
               <span class="dot"></span>
-              <span>Typing Engine Active &bull; Zero Input Lag</span>
+              <span>Engine Active &bull; Zero Lag</span>
             </div>
           </div>
 
-          <!-- Col 2: Navigation -->
           <div>
-            <h6 class="tm-ft-heading">Quick Navigation</h6>
+            <h6 class="tm-ft-heading">Quick Nav</h6>
             <ul class="tm-ft-links">
               <li><a href="<?= BASE_URL ?>/practice.php"><i class="bi bi-play-circle"></i> Practice Arena</a></li>
               <li><a href="<?= BASE_URL ?>/games.php"><i class="bi bi-controller"></i> Arcade Games</a></li>
@@ -402,12 +427,11 @@
             </ul>
           </div>
 
-          <!-- Col 3: Themes -->
           <div>
             <h6 class="tm-ft-heading">Themes</h6>
             <ul class="tm-ft-links" style="margin-bottom: 0.75rem;">
-              <li><button type="button" data-set-theme="light"><i class="bi bi-sun-fill"></i> Light (White)</button></li>
-              <li><button type="button" data-set-theme="dark"><i class="bi bi-moon-stars-fill"></i> Dark (Obsidian)</button></li>
+              <li><button type="button" data-set-theme="light"><i class="bi bi-sun-fill"></i> Light</button></li>
+              <li><button type="button" data-set-theme="dark"><i class="bi bi-moon-stars-fill"></i> Dark</button></li>
             </ul>
             <div class="tm-ft-theme-row">
               <button type="button" class="tm-ft-theme-swatch" data-set-theme="light" title="Light theme" aria-label="Switch to light theme"></button>
@@ -415,20 +439,19 @@
             </div>
           </div>
 
-          <!-- Col 4: Ergonomics -->
           <div>
-            <h6 class="tm-ft-heading">Keyboard Ergonomics</h6>
+            <h6 class="tm-ft-heading">Ergonomics</h6>
             <div class="tm-ft-ergo">
               <div class="tm-ft-ergo-row">
-                <span>Quick Restart</span>
+                <span>Restart</span>
                 <span><kbd>Tab</kbd> + <kbd>Enter</kbd></span>
               </div>
               <div class="tm-ft-ergo-row">
-                <span>Formula Base</span>
-                <span class="tm-ft-ergo-badge">5-CHAR WORD</span>
+                <span>Formula</span>
+                <span class="tm-ft-ergo-badge">5-CHAR</span>
               </div>
               <div class="tm-ft-ergo-row">
-                <span>Default Duration</span>
+                <span>Duration</span>
                 <span class="tm-ft-ergo-badge">60 SEC</span>
               </div>
             </div>
@@ -436,7 +459,6 @@
 
         </div>
 
-        <!-- Sub-footer -->
         <div class="tm-ft-bottom">
           <div>
             &copy; <?= date('Y') ?> <strong><?= defined('APP_NAME') ? e(APP_NAME) : 'TypeMaster Pro' ?></strong>
@@ -456,33 +478,23 @@
   </div><!-- /.main-wrapper -->
 </div><!-- /.app-container -->
 
-<!-- ============================================================
-     THEME TOGGLE — wires all [data-set-theme] elements
-     ============================================================ -->
 <script>
 (function() {
     'use strict';
-
     function applyTheme(theme) {
         if (theme !== 'dark' && theme !== 'light') theme = 'light';
         document.documentElement.setAttribute('data-theme', theme);
         try { localStorage.setItem('typemaster_theme', theme); } catch (e) {}
-
-        // Sync active state on all swatches
         document.querySelectorAll('.tm-ft-theme-swatch').forEach(function(sw) {
             sw.classList.toggle('active', sw.getAttribute('data-set-theme') === theme);
         });
     }
-
-    // Wire up every theme toggle control anywhere on the page
     document.addEventListener('click', function(e) {
         var trigger = e.target.closest('[data-set-theme]');
         if (!trigger) return;
         e.preventDefault();
         applyTheme(trigger.getAttribute('data-set-theme'));
     });
-
-    // Boot: sync swatch active state to current theme
     var current = document.documentElement.getAttribute('data-theme') || 'light';
     if (current !== 'dark') current = 'light';
     document.querySelectorAll('.tm-ft-theme-swatch').forEach(function(sw) {
@@ -491,15 +503,10 @@
 })();
 </script>
 
-<!-- Bootstrap 5 Bundle JS with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Custom App Utilities -->
 <script src="<?= BASE_URL ?>/assets/js/app.js"></script>
-
 <?php if (!empty($extraScripts)): ?>
   <?= $extraScripts ?>
 <?php endif; ?>
-
 </body>
-</html> 
+</html>

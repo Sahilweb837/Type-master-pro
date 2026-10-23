@@ -1,8 +1,8 @@
-<?php
+ <?php
 /**
  * Custom Type Master Pro
- * Live Typing Practice Arena
- * Includes: Preset Passage Mode, Custom Text Drill, and Blank-Slate Free Typing (Write Anything)
+ * Live Typing Practice Arena — Pixel Theme, Clean Sans-Serif
+ * Modes: Passage, Free Typing, Custom Text
  */
 
 require_once __DIR__ . '/config/app.php';
@@ -12,35 +12,20 @@ require_once __DIR__ . '/includes/functions.php';
 
 $currentUser = current_user();
 $settings = $currentUser ? get_user_settings($currentUser['id']) : [
-    'theme'               => 'light',
-    'font_family'         => 'JetBrains Mono',
-    'font_size'           => 22,
-    'line_height'         => 1.8,
-    'caret_style'         => 'line',
-    'caret_color'         => '#38bdf8',
-    'correct_color'       => '#4ade80',
-    'incorrect_color'     => '#f87171',
-    'typing_area_width'   => '920px',
-    'sound_enabled'       => 1,
-    'sound_theme'         => 'mechanical',
-    'default_duration'    => 60,
-    'default_difficulty'  => 'intermediate',
-    'show_live_wpm'       => 1,
-    'show_live_accuracy'  => 1,
-    'show_live_word_count'=> 1
+    'theme' => 'light', 'font_family' => 'JetBrains Mono', 'font_size' => 22,
+    'line_height' => 1.8, 'caret_style' => 'line', 'caret_color' => '#38bdf8',
+    'correct_color' => '#4ade80', 'incorrect_color' => '#f87171',
+    'typing_area_width' => '920px', 'sound_enabled' => 1, 'sound_theme' => 'mechanical',
+    'default_duration' => 60, 'default_difficulty' => 'intermediate',
+    'show_live_wpm' => 1, 'show_live_accuracy' => 1, 'show_live_word_count' => 1
 ];
 
 $pdo = getDBConnection();
-
-// Initial selected difficulty & duration from query or user settings
 $selectedDifficulty = $_GET['difficulty'] ?? $settings['default_difficulty'] ?? 'intermediate';
 $selectedDuration = (int)($_GET['duration'] ?? $settings['default_duration'] ?? 60);
 $passageId = isset($_GET['passage_id']) ? (int)$_GET['passage_id'] : null;
-
-// Initial mode ('passage' or 'free')
 $initialMode = $_GET['mode'] ?? 'passage';
 
-// Load passage from DB or default fallback
 $activePassage = null;
 if ($pdo) {
     try {
@@ -49,19 +34,11 @@ if ($pdo) {
             $stmt->execute([':id' => $passageId]);
             $activePassage = $stmt->fetch();
         }
-
         if (!$activePassage) {
-            // Pick a random passage matching difficulty
-            $stmt = $pdo->prepare("
-                SELECT * FROM typing_passages 
-                WHERE difficulty = :diff AND status = 'active' 
-                ORDER BY RAND() LIMIT 1
-            ");
+            $stmt = $pdo->prepare("SELECT * FROM typing_passages WHERE difficulty = :diff AND status = 'active' ORDER BY RAND() LIMIT 1");
             $stmt->execute([':diff' => $selectedDifficulty]);
             $activePassage = $stmt->fetch();
         }
-
-        // If still no passage found, get any active passage
         if (!$activePassage) {
             $activePassage = $pdo->query("SELECT * FROM typing_passages WHERE status = 'active' LIMIT 1")->fetch();
         }
@@ -70,15 +47,14 @@ if ($pdo) {
     }
 }
 
-// Fallback text if DB is unreachable
 if (!$activePassage) {
     $activePassage = [
-        'id'          => 0,
-        'title'       => 'Welcome to Custom Type Master Pro',
-        'difficulty'  => 'intermediate',
-        'content'     => 'The World Wide Web relies on a foundational set of open protocols and standards. When a user requests a URL, the browser initiates a DNS lookup, establishes a secure TLS connection, and issues an HTTP request. The server interprets the request, queries relational databases using optimized SQL statements, and returns dynamic HTML, CSS, and JavaScript. Understanding this full-stack lifecycle empowers developers to build responsive and resilient web applications.',
-        'word_count'  => 68,
-        'char_count'  => 477
+        'id' => 0,
+        'title' => 'Welcome to Custom Type Master Pro',
+        'difficulty' => 'intermediate',
+        'content' => 'The World Wide Web relies on a foundational set of open protocols and standards. When a user requests a URL, the browser initiates a DNS lookup, establishes a secure TLS connection, and issues an HTTP request. The server interprets the request, queries relational databases using optimized SQL statements, and returns dynamic HTML, CSS, and JavaScript. Understanding this full-stack lifecycle empowers developers to build responsive and resilient web applications.',
+        'word_count' => 68,
+        'char_count' => 477
     ];
 }
 
@@ -86,336 +62,1593 @@ $pageTitle = 'Typing Practice Arena';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<div class="container-fluid px-md-4 py-3">
+<style>
+/* ============================================================
+   PRACTICE ARENA — Pixel Theme + Clean Sans-Serif
+   ============================================================ */
+.practice-arena-wrap {
+  --ink:        #000000;
+  --paper:      #ffffff;
+  --paper-soft: #f4f4f4;
+  --paper-hard: #e6e6e6;
+  --shadow:     3px;
+  --sans:       "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono:       "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-family: var(--sans);
+  color: var(--ink);
+}
+html[data-theme="dark"] .practice-arena-wrap {
+  --ink:        #ffffff;
+  --paper:      #000000;
+  --paper-soft: #141414;
+  --paper-hard: #222222;
+}
 
-  <!-- =====================================================================
-       LAZY SKELETON LOADING SHIMMER WRAPPER (PRACTICE ARENA)
-       ===================================================================== -->
+/* ---------- Generic surfaces ---------- */
+.practice-arena-wrap .pixel-card {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+}
+.practice-arena-wrap .pixel-card-lg {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+/* ---------- Buttons ---------- */
+.practice-arena-wrap .px-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.85rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: var(--paper);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  cursor: pointer;
+  line-height: 1.2;
+  transition: transform 0.05s steps(1), box-shadow 0.05s steps(1), background 0.05s steps(1);
+  -webkit-appearance: none;
+  appearance: none;
+  text-decoration: none;
+}
+.practice-arena-wrap .px-btn:hover { background: var(--paper-soft); color: var(--ink); }
+.practice-arena-wrap .px-btn:active {
+  transform: translate(var(--shadow), var(--shadow));
+  box-shadow: 0 0 0 var(--ink);
+}
+.practice-arena-wrap .px-btn i { font-size: 0.9rem; }
+.practice-arena-wrap .px-btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+.practice-arena-wrap .px-btn-primary:hover { background: var(--ink); color: var(--paper); }
+.practice-arena-wrap .px-btn-primary i { color: var(--paper); }
+.practice-arena-wrap .px-btn-sm {
+  padding: 0.4rem 0.65rem;
+  font-size: 0.74rem;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.practice-arena-wrap .px-btn-sm:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink);
+}
+.practice-arena-wrap .px-btn-danger {
+  color: #dc2626;
+  border-color: #dc2626;
+  box-shadow: 3px 3px 0 #dc2626;
+}
+.practice-arena-wrap .px-btn-danger:hover { background: #fee2e2; color: #dc2626; }
+html[data-theme="dark"] .practice-arena-wrap .px-btn-danger:hover { background: #3f0f0f; }
+.practice-arena-wrap .px-btn-danger:active { box-shadow: 0 0 0 #dc2626; }
+
+.practice-arena-wrap kbd {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--ink);
+  padding: 0.1rem 0.35rem;
+  line-height: 1.1;
+  display: inline-block;
+}
+
+/* ---------- Ribbon (top toolbar) ---------- */
+.practice-arena-wrap .ribbon {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  margin-bottom: 1rem;
+}
+.practice-arena-wrap .ribbon-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.practice-arena-wrap .ribbon-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.75;
+  margin-right: 0.15rem;
+}
+.practice-arena-wrap .ribbon-label i { color: var(--ink); opacity: 0.85; font-size: 0.8rem; }
+.practice-arena-wrap .ribbon-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+  line-height: 1.15;
+  text-decoration: none;
+  transition: transform 0.05s steps(1), box-shadow 0.05s steps(1), background 0.05s steps(1);
+  box-shadow: 2px 2px 0 var(--ink);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.practice-arena-wrap .ribbon-pill:hover { background: var(--paper-soft); color: var(--ink); }
+.practice-arena-wrap .ribbon-pill:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink);
+}
+.practice-arena-wrap .ribbon-pill.active {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 0 0 var(--ink);
+}
+.practice-arena-wrap .ribbon-pill.active i { color: var(--paper); }
+.practice-arena-wrap .ribbon-divider {
+  width: 2px;
+  height: 26px;
+  background: var(--ink);
+  opacity: 0.3;
+}
+
+/* ---------- Skeleton ---------- */
+.practice-arena-wrap .skeleton {
+  background: linear-gradient(90deg, var(--paper-soft) 0%, var(--paper-hard) 50%, var(--paper-soft) 100%);
+  background-size: 200% 100%;
+  animation: pxShimmer 1.4s ease-in-out infinite;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+}
+.practice-arena-wrap .skeleton-circle { border-radius: 50%; }
+@keyframes pxShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---------- Zen bar ---------- */
+.practice-arena-wrap .zen-bar {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.practice-arena-wrap .zen-bar .zen-title {
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.practice-arena-wrap .zen-bar .zen-meta {
+  font-family: var(--sans);
+  font-size: 0.74rem;
+  color: var(--ink);
+  opacity: 0.7;
+  font-weight: 500;
+}
+.practice-arena-wrap .zen-timer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.practice-arena-wrap .zen-timer-badge i { color: var(--ink); font-size: 1rem; }
+.practice-arena-wrap .zen-timer-val {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+.practice-arena-wrap .strict-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  background: var(--paper);
+  color: #dc2626;
+  border: 2px solid #dc2626;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.practice-arena-wrap .strict-badge i { color: #dc2626; font-size: 0.75rem; }
+
+/* ---------- Progress ---------- */
+.practice-arena-wrap .progress-wrap {
+  height: 8px;
+  background: var(--paper-hard);
+  border: 2px solid var(--ink);
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+.practice-arena-wrap .progress-bar-pixel {
+  height: 100%;
+  width: 0%;
+  background: var(--ink);
+  transition: width 0.15s linear;
+}
+
+/* ---------- Typing box ---------- */
+.practice-arena-wrap .typing-surface {
+  position: relative;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+  padding: 2rem 1.75rem;
+  min-height: 200px;
+  margin-bottom: 1rem;
+}
+.practice-arena-wrap .typing-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(45deg, rgba(0,0,0,0.03) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0,0,0,0.03) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.03) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.03) 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+  pointer-events: none;
+}
+html[data-theme="dark"] .practice-arena-wrap .typing-surface::before {
+  background-image:
+    linear-gradient(45deg, rgba(255,255,255,0.04) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,0.04) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.04) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.04) 75%);
+}
+.practice-arena-wrap .typing-surface > * { position: relative; z-index: 1; }
+
+.practice-arena-wrap .typing-box {
+  font-family: var(--mono);
+  font-size: 1.35rem;
+  line-height: 1.85;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  word-break: break-word;
+  user-select: none;
+}
+.practice-arena-wrap .typing-box .char { opacity: 0.35; }
+.practice-arena-wrap .typing-box .char.correct { opacity: 1; }
+.practice-arena-wrap .typing-box .char.incorrect {
+  background: var(--ink);
+  color: var(--paper);
+  opacity: 1;
+}
+.practice-arena-wrap .typing-box .char.active {
+  opacity: 1;
+  background: var(--paper-soft);
+  box-shadow: 0 0 0 3px var(--ink);
+  animation: pxCaret 1s steps(2) infinite;
+}
+@keyframes pxCaret {
+  0%, 49%   { box-shadow: 0 0 0 3px var(--ink); }
+  50%, 100% { box-shadow: 0 0 0 3px transparent; }
+}
+
+.practice-arena-wrap .hidden-typing-input {
+  position: absolute;
+  opacity: 0;
+  left: -9999px;
+  top: -9999px;
+  pointer-events: none;
+}
+
+/* Focus prompt overlay */
+.practice-arena-wrap .focus-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 0.2s ease;
+  z-index: 5;
+}
+.practice-arena-wrap .focus-overlay .focus-icon-box {
+  width: 60px;
+  height: 60px;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  border: 3px solid var(--ink);
+}
+.practice-arena-wrap .focus-overlay .focus-icon-box i {
+  font-size: 1.6rem;
+  color: var(--paper);
+}
+.practice-arena-wrap .focus-overlay .focus-title {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.35rem;
+}
+.practice-arena-wrap .focus-overlay .focus-sub {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--ink);
+  opacity: 0.7;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+/* Pause overlay */
+.practice-arena-wrap .pause-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 1.25rem;
+  text-align: center;
+  z-index: 6;
+  border: 3px solid var(--ink);
+}
+.practice-arena-wrap .pause-overlay.show { display: flex; }
+.practice-arena-wrap .pause-overlay .pause-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--paper);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--paper);
+  margin-bottom: 1rem;
+}
+.practice-arena-wrap .pause-overlay .pause-icon i {
+  font-size: 1.6rem;
+  color: var(--ink);
+}
+.practice-arena-wrap .pause-overlay h4 {
+  font-family: var(--sans);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--paper);
+  margin: 0 0 0.4rem;
+}
+.practice-arena-wrap .pause-overlay p {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--paper);
+  opacity: 0.75;
+  max-width: 340px;
+  margin-bottom: 1rem;
+}
+
+/* ---------- Controls toolbar ---------- */
+.practice-arena-wrap .controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  margin-bottom: 1rem;
+}
+.practice-arena-wrap .controls-bar .ctrl-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: var(--ink);
+  opacity: 0.75;
+  font-weight: 500;
+}
+
+/* ---------- Free typing area ---------- */
+.practice-arena-wrap .free-textarea-wrap {
+  position: relative;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+  padding: 0;
+  margin-bottom: 1rem;
+}
+.practice-arena-wrap .free-textarea {
+  width: 100%;
+  min-height: 340px;
+  padding: 1.5rem 1.75rem;
+  background: transparent;
+  color: var(--ink);
+  border: 0;
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+  resize: vertical;
+  outline: none;
+}
+.practice-arena-wrap .free-textarea::placeholder {
+  color: var(--ink);
+  opacity: 0.35;
+}
+.practice-arena-wrap .free-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  border-top: 2px dashed var(--ink);
+  font-family: var(--sans);
+  font-size: 0.74rem;
+  color: var(--ink);
+  opacity: 0.75;
+  background: var(--paper);
+}
+.practice-arena-wrap .free-stats kbd {
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--ink);
+  padding: 0.1rem 0.35rem;
+  font-size: 0.7rem;
+  font-family: var(--mono);
+}
+
+/* ---------- Free timer mode dropdown ---------- */
+.practice-arena-wrap .free-mode-select {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+  outline: none;
+}
+
+/* ---------- Last captured banner ---------- */
+.practice-arena-wrap .last-capture-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  margin-bottom: 1rem;
+}
+.practice-arena-wrap .last-capture-banner .lc-label {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.practice-arena-wrap .last-capture-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--paper-soft);
+  border: 2px solid var(--ink);
+}
+
+/* ---------- Modals ---------- */
+.practice-arena-wrap .modal-content,
+.modal.pixel-modal .modal-content {
+  background: var(--paper, #ffffff);
+  color: var(--ink, #000000);
+  border: 3px solid var(--ink, #000000);
+  border-radius: 0;
+  box-shadow: 6px 6px 0 var(--ink, #000000);
+  font-family: var(--sans, "Inter", sans-serif);
+  padding: 0;
+}
+html[data-theme="dark"] .modal.pixel-modal .modal-content,
+html[data-theme="dark"] .practice-arena-wrap .modal-content {
+  background: #000000;
+  color: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 6px 6px 0 #ffffff;
+}
+
+.modal.pixel-modal .modal-header {
+  border-bottom: 3px solid currentColor;
+  padding: 1rem 1.25rem;
+  background: transparent;
+}
+.modal.pixel-modal .modal-title {
+  font-family: "Inter", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: inherit;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.modal.pixel-modal .modal-title i { color: inherit; }
+.modal.pixel-modal .modal-body {
+  padding: 1.25rem;
+  color: inherit;
+}
+.modal.pixel-modal .modal-footer {
+  border-top: 3px solid currentColor;
+  padding: 1rem 1.25rem;
+  background: transparent;
+}
+
+.modal.pixel-modal .form-label {
+  font-family: "Inter", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: inherit;
+  margin-bottom: 0.4rem;
+}
+.modal.pixel-modal .form-control,
+.modal.pixel-modal .form-select {
+  font-family: "Inter", sans-serif;
+  font-size: 0.88rem;
+  background: transparent;
+  color: inherit;
+  border: 2px solid currentColor;
+  border-radius: 0;
+  padding: 0.55rem 0.7rem;
+  outline: none;
+}
+.modal.pixel-modal .form-control:focus,
+.modal.pixel-modal .form-select:focus {
+  border-color: currentColor;
+  box-shadow: 0 0 0 2px currentColor;
+}
+.modal.pixel-modal .form-control::placeholder {
+  color: inherit;
+  opacity: 0.35;
+}
+.modal.pixel-modal .form-text {
+  font-family: "Inter", sans-serif;
+  font-size: 0.72rem;
+  color: inherit;
+  opacity: 0.6;
+}
+.modal.pixel-modal .form-check-label {
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  color: inherit;
+}
+.modal.pixel-modal .form-check-input {
+  border: 2px solid currentColor;
+  background: transparent;
+  border-radius: 0;
+}
+.modal.pixel-modal .form-check-input:checked {
+  background: currentColor;
+  border-color: currentColor;
+}
+
+.modal.pixel-modal .btn-close {
+  filter: invert(0);
+}
+html[data-theme="dark"] .modal.pixel-modal .btn-close {
+  filter: invert(1);
+}
+
+.modal.pixel-modal .px-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.85rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: transparent;
+  color: inherit;
+  border: 3px solid currentColor;
+  box-shadow: 3px 3px 0 currentColor;
+  cursor: pointer;
+  transition: transform 0.05s steps(1), box-shadow 0.05s steps(1);
+}
+.modal.pixel-modal .px-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 currentColor;
+}
+.modal.pixel-modal .px-btn-primary {
+  background: currentColor;
+}
+.modal.pixel-modal .px-btn-primary span,
+.modal.pixel-modal .px-btn-primary i {
+  color: var(--paper, #ffffff);
+}
+html[data-theme="dark"] .modal.pixel-modal .px-btn-primary span,
+html[data-theme="dark"] .modal.pixel-modal .px-btn-primary i {
+  color: #000000;
+}
+
+/* ---------- Showing Card Modal ---------- */
+.showing-card-modal .modal-content {
+  background: var(--paper, #ffffff);
+  color: var(--ink, #000000);
+  border: 3px solid var(--ink, #000000);
+  border-radius: 0;
+  box-shadow: 8px 8px 0 var(--ink, #000000);
+  font-family: var(--sans, "Inter", sans-serif);
+  padding: 0;
+  overflow: hidden;
+}
+html[data-theme="dark"] .showing-card-modal .modal-content {
+  background: #000000;
+  color: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 8px 8px 0 #ffffff;
+}
+.showing-card-modal .sc-header {
+  padding: 1.25rem 1.5rem;
+  background: var(--paper, #ffffff);
+  color: var(--ink, #000000);
+  border-bottom: 3px solid var(--ink, #000000);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+html[data-theme="dark"] .showing-card-modal .sc-header {
+  background: #000000;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+.showing-card-modal .sc-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.showing-card-modal .sc-trophy-box {
+  width: 48px;
+  height: 48px;
+  background: var(--ink, #000000);
+  color: var(--paper, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--ink, #000000);
+  flex-shrink: 0;
+}
+html[data-theme="dark"] .showing-card-modal .sc-trophy-box {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+.showing-card-modal .sc-trophy-box i { font-size: 1.4rem; }
+.showing-card-modal .sc-headline {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: inherit;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.15rem;
+}
+.showing-card-modal .sc-subline {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.78rem;
+  color: inherit;
+  opacity: 0.7;
+  margin: 0;
+}
+.showing-card-modal .sc-body {
+  padding: 1.5rem;
+  background: var(--paper, #ffffff);
+  color: var(--ink, #000000);
+}
+html[data-theme="dark"] .showing-card-modal .sc-body {
+  background: #000000;
+  color: #ffffff;
+}
+
+/* Greeting */
+.showing-card-modal .sc-greeting {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  background: var(--paper-soft, #f4f4f4);
+  border: 3px solid currentColor;
+  box-shadow: 3px 3px 0 currentColor;
+  margin-bottom: 1.25rem;
+}
+html[data-theme="dark"] .showing-card-modal .sc-greeting {
+  background: #141414;
+}
+.showing-card-modal .sc-greeting-icon { font-size: 2rem; flex-shrink: 0; }
+.showing-card-modal .sc-greeting-title {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 1rem;
+  font-weight: 800;
+  color: inherit;
+  margin: 0 0 0.2rem;
+}
+.showing-card-modal .sc-greeting-sub {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.8rem;
+  color: inherit;
+  opacity: 0.75;
+  margin: 0;
+}
+
+/* Hero metric */
+.showing-card-modal .sc-hero-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.25rem;
+  background: var(--paper-soft, #f4f4f4);
+  border: 3px solid currentColor;
+  box-shadow: 3px 3px 0 currentColor;
+  height: 100%;
+}
+html[data-theme="dark"] .showing-card-modal .sc-hero-box {
+  background: #141414;
+}
+.showing-card-modal .sc-hero-label {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: inherit;
+  opacity: 0.7;
+  margin-bottom: 0.4rem;
+}
+.showing-card-modal .sc-hero-value {
+  font-family: var(--mono, "JetBrains Mono", monospace);
+  font-size: 3rem;
+  font-weight: 700;
+  color: inherit;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.3rem;
+}
+.showing-card-modal .sc-hero-sublabel {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: inherit;
+  opacity: 0.7;
+}
+.showing-card-modal .sc-rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--ink, #000000);
+  color: var(--paper, #ffffff);
+  border: 2px solid var(--ink, #000000);
+  margin-top: 0.75rem;
+  align-self: flex-start;
+}
+html[data-theme="dark"] .showing-card-modal .sc-rating-badge {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+.showing-card-modal .sc-strict-note {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Chart box */
+.showing-card-modal .sc-chart-box {
+  background: var(--paper-soft, #f4f4f4);
+  border: 3px solid currentColor;
+  box-shadow: 3px 3px 0 currentColor;
+  padding: 1rem;
+  height: 100%;
+}
+html[data-theme="dark"] .showing-card-modal .sc-chart-box {
+  background: #141414;
+}
+.showing-card-modal .sc-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.showing-card-modal .sc-chart-title {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: inherit;
+}
+.showing-card-modal .sc-chart-tag {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  background: var(--ink, #000000);
+  color: var(--paper, #ffffff);
+  border: 2px solid var(--ink, #000000);
+}
+html[data-theme="dark"] .showing-card-modal .sc-chart-tag {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+/* Stats grid */
+.showing-card-modal .sc-section-title {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: inherit;
+  opacity: 0.7;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+.showing-card-modal .sc-stat-card {
+  background: var(--paper, #ffffff);
+  border: 3px solid currentColor;
+  box-shadow: 3px 3px 0 currentColor;
+  padding: 0.85rem 0.65rem;
+  text-align: center;
+  height: 100%;
+}
+html[data-theme="dark"] .showing-card-modal .sc-stat-card {
+  background: #000000;
+}
+.showing-card-modal .sc-stat-icon {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink, #000000);
+  color: var(--paper, #ffffff);
+  border: 2px solid currentColor;
+}
+html[data-theme="dark"] .showing-card-modal .sc-stat-icon {
+  background: #ffffff;
+  color: #000000;
+}
+.showing-card-modal .sc-stat-icon i { font-size: 1rem; }
+.showing-card-modal .sc-stat-label {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: inherit;
+  opacity: 0.7;
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+  min-height: 1.6em;
+}
+.showing-card-modal .sc-stat-value {
+  font-family: var(--mono, "JetBrains Mono", monospace);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: inherit;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.showing-card-modal .sc-stat-sub {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.62rem;
+  color: inherit;
+  opacity: 0.6;
+  margin-top: 0.25rem;
+}
+
+/* Diagnostics */
+.showing-card-modal .sc-diagnostics {
+  background: var(--paper-soft, #f4f4f4);
+  border: 3px solid currentColor;
+  box-shadow: 3px 3px 0 currentColor;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+html[data-theme="dark"] .showing-card-modal .sc-diagnostics {
+  background: #141414;
+}
+.showing-card-modal .sc-diag-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: inherit;
+}
+.showing-card-modal .sc-diag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.75rem;
+  color: inherit;
+  opacity: 0.75;
+}
+.showing-card-modal .sc-diag-list strong {
+  font-family: var(--mono, "JetBrains Mono", monospace);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: inherit;
+  opacity: 1;
+  margin-left: 0.15rem;
+}
+
+.showing-card-modal .sc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--paper, #ffffff);
+  color: var(--ink, #000000);
+  border-top: 3px solid var(--ink, #000000);
+  flex-wrap: wrap;
+}
+html[data-theme="dark"] .showing-card-modal .sc-footer {
+  background: #000000;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+.showing-card-modal .sc-footer-note {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.76rem;
+  color: inherit;
+  opacity: 0.75;
+}
+.showing-card-modal .sc-footer-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.modal.pixel-modal .px-btn,
+.showing-card-modal .px-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.9rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: transparent;
+  color: inherit;
+  border: 3px solid currentColor;
+  box-shadow: 3px 3px 0 currentColor;
+  cursor: pointer;
+  transition: transform 0.05s steps(1), box-shadow 0.05s steps(1);
+}
+.modal.pixel-modal .px-btn:active,
+.showing-card-modal .px-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 currentColor;
+}
+.modal.pixel-modal .px-btn-primary,
+.showing-card-modal .px-btn-primary {
+  background: currentColor;
+}
+.modal.pixel-modal .px-btn-primary span,
+.modal.pixel-modal .px-btn-primary i,
+.showing-card-modal .px-btn-primary span,
+.showing-card-modal .px-btn-primary i {
+  color: var(--paper, #ffffff);
+}
+html[data-theme="dark"] .modal.pixel-modal .px-btn-primary span,
+html[data-theme="dark"] .modal.pixel-modal .px-btn-primary i,
+html[data-theme="dark"] .showing-card-modal .px-btn-primary span,
+html[data-theme="dark"] .showing-card-modal .px-btn-primary i {
+  color: #000000;
+}
+
+/* ---------- Certificate ---------- */
+.certificate-modal .modal-content {
+  background: var(--paper, #ffffff);
+  color: var(--ink, #000000);
+  border: 3px solid var(--ink, #000000);
+  border-radius: 0;
+  box-shadow: 6px 6px 0 var(--ink, #000000);
+  font-family: var(--sans, "Inter", sans-serif);
+  padding: 0;
+}
+html[data-theme="dark"] .certificate-modal .modal-content {
+  background: #000000;
+  color: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 6px 6px 0 #ffffff;
+}
+.certificate-modal .modal-header {
+  border-bottom: 3px solid currentColor;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.certificate-modal .modal-title {
+  font-family: "Inter", sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.certificate-modal .modal-body { padding: 1.5rem; }
+
+.certificate-modal .cert-frame {
+  border: 3px double currentColor;
+  padding: 2rem 1.75rem;
+  text-align: center;
+  position: relative;
+  background: var(--paper, #ffffff);
+  color: var(--ink, #000000);
+}
+html[data-theme="dark"] .certificate-modal .cert-frame {
+  background: #000000;
+  color: #ffffff;
+}
+.certificate-modal .cert-corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 3px solid currentColor;
+}
+.certificate-modal .cert-corner-tl { top: 8px; left: 8px; border-right: 0; border-bottom: 0; }
+.certificate-modal .cert-corner-tr { top: 8px; right: 8px; border-left: 0; border-bottom: 0; }
+.certificate-modal .cert-corner-bl { bottom: 8px; left: 8px; border-right: 0; border-top: 0; }
+.certificate-modal .cert-corner-br { bottom: 8px; right: 8px; border-left: 0; border-top: 0; }
+
+.certificate-modal .cert-emblem {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 0.85rem;
+  background: currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid currentColor;
+}
+.certificate-modal .cert-emblem i {
+  font-size: 1.8rem;
+  color: var(--paper, #ffffff);
+}
+html[data-theme="dark"] .certificate-modal .cert-emblem i {
+  color: #000000;
+}
+
+.certificate-modal .cert-board {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: inherit;
+  opacity: 0.75;
+  margin-bottom: 0.4rem;
+}
+.certificate-modal .cert-title {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: inherit;
+  margin: 0 0 0.35rem;
+}
+.certificate-modal .cert-subtitle {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.8rem;
+  color: inherit;
+  opacity: 0.7;
+  margin-bottom: 1.5rem;
+}
+.certificate-modal .cert-certifies {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.78rem;
+  color: inherit;
+  opacity: 0.7;
+  margin-bottom: 0.25rem;
+}
+.certificate-modal .cert-candidate {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: inherit;
+  letter-spacing: -0.01em;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid currentColor;
+  display: inline-block;
+  padding-bottom: 0.25rem;
+}
+.certificate-modal .cert-description {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.82rem;
+  color: inherit;
+  opacity: 0.8;
+  max-width: 560px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.5;
+}
+.certificate-modal .cert-metric-badge {
+  background: var(--paper-soft, #f4f4f4);
+  border: 3px solid currentColor;
+  box-shadow: 3px 3px 0 currentColor;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+}
+html[data-theme="dark"] .certificate-modal .cert-metric-badge {
+  background: #141414;
+}
+.certificate-modal .cert-metric-val {
+  font-family: var(--mono, "JetBrains Mono", monospace);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: inherit;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.certificate-modal .cert-metric-lbl {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: inherit;
+  opacity: 0.75;
+}
+.certificate-modal .cert-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  background: currentColor;
+  border: 2px solid currentColor;
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper, #ffffff);
+  margin-bottom: 0.4rem;
+}
+html[data-theme="dark"] .certificate-modal .cert-seal {
+  color: #000000;
+}
+.certificate-modal .cert-seal i { font-size: 0.75rem; }
+.certificate-modal .cert-meta-row {
+  font-family: var(--sans, "Inter", sans-serif);
+  font-size: 0.72rem;
+  color: inherit;
+  opacity: 0.7;
+}
+.certificate-modal .cert-meta-row strong {
+  font-family: var(--mono, "JetBrains Mono", monospace);
+  color: inherit;
+  opacity: 1;
+  font-weight: 700;
+}
+.certificate-modal .cert-signature {
+  font-family: var(--mono, "JetBrains Mono", monospace);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: inherit;
+  border-bottom: 2px solid currentColor;
+  padding-bottom: 0.15rem;
+  display: inline-block;
+}
+
+.certificate-modal .modal-footer {
+  border-top: 3px solid currentColor;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .practice-arena-wrap .typing-box { font-size: 1.1rem; line-height: 1.7; }
+  .practice-arena-wrap .ribbon { padding: 0.65rem 0.75rem; gap: 0.55rem; }
+  .practice-arena-wrap .ribbon-pill { font-size: 0.68rem; padding: 0.3rem 0.55rem; }
+  .practice-arena-wrap .ribbon-label { font-size: 0.64rem; }
+  .practice-arena-wrap .typing-surface { padding: 1.25rem 1rem; }
+  .practice-arena-wrap .free-textarea { font-size: 1rem; padding: 1.1rem 1rem; min-height: 260px; }
+  .showing-card-modal .sc-hero-value { font-size: 2.2rem; }
+  .certificate-modal .cert-title { font-size: 1.1rem; }
+  .certificate-modal .cert-candidate { font-size: 1.2rem; }
+  .certificate-modal .cert-frame { padding: 1.25rem 1rem; }
+}
+@media (max-width: 575px) {
+  .practice-arena-wrap .zen-bar { padding: 0.65rem 0.75rem; gap: 0.5rem; }
+  .practice-arena-wrap .zen-bar .zen-title { font-size: 0.84rem; }
+  .practice-arena-wrap .controls-bar { padding: 0.65rem 0.75rem; gap: 0.5rem; }
+  .practice-arena-wrap .px-btn { font-size: 0.72rem; padding: 0.4rem 0.65rem; }
+  .practice-arena-wrap .px-btn-sm { font-size: 0.66rem; padding: 0.35rem 0.55rem; }
+  .practice-arena-wrap .strict-badge { font-size: 0.6rem; padding: 0.2rem 0.45rem; }
+  .practice-arena-wrap .free-stats { font-size: 0.66rem; }
+  .showing-card-modal .sc-stat-value { font-size: 1.05rem; }
+  .showing-card-modal .sc-stat-label { font-size: 0.56rem; }
+  .showing-card-modal .sc-body { padding: 1rem; }
+}
+</style>
+
+<div class="practice-arena-wrap container-fluid px-md-4 py-3">
+
+  <!-- Skeleton loading wrapper -->
   <div id="practice-skeleton-view" class="skeleton-wrapper">
-    <!-- Skeleton Mode Switcher -->
-    <div class="glass-card p-3 mb-3 skeleton-card d-flex align-items-center justify-content-between">
-      <div class="skeleton" style="width: 320px; height: 38px; border-radius: 999px;"></div>
+    <div class="pixel-card p-3 mb-3 d-flex align-items-center justify-content-between" style="gap:0.75rem;flex-wrap:wrap;">
+      <div class="skeleton" style="width:320px;height:38px;max-width:100%;"></div>
       <div class="d-flex gap-2">
-        <div class="skeleton skeleton-circle" style="width: 36px; height: 36px;"></div>
-        <div class="skeleton skeleton-circle" style="width: 36px; height: 36px;"></div>
+        <div class="skeleton skeleton-circle" style="width:36px;height:36px;"></div>
+        <div class="skeleton skeleton-circle" style="width:36px;height:36px;"></div>
       </div>
     </div>
-    <!-- Skeleton The 7 Core Metrics HUD Pills -->
     <div class="d-flex gap-2 mb-3 overflow-hidden flex-wrap">
       <?php for ($i = 0; $i < 7; $i++): ?>
-        <div class="skeleton flex-fill p-3" style="min-width: 120px; min-height: 72px; border-radius: 12px;"></div>
+        <div class="skeleton flex-fill p-3" style="min-width:120px;min-height:72px;"></div>
       <?php endfor; ?>
     </div>
-    <!-- Skeleton Arena Box -->
-    <div class="glass-card p-4 skeleton-card mb-3" style="min-height: 240px;">
-      <div class="skeleton skeleton-title mb-3" style="width: 40%;"></div>
-      <div class="skeleton skeleton-text mb-2" style="width: 95%;"></div>
-      <div class="skeleton skeleton-text mb-2" style="width: 88%;"></div>
-      <div class="skeleton skeleton-text mb-2" style="width: 92%;"></div>
-      <div class="skeleton skeleton-text" style="width: 65%;"></div>
+    <div class="pixel-card p-4 mb-3" style="min-height:240px;">
+      <div class="skeleton mb-3" style="width:40%;height:24px;"></div>
+      <div class="skeleton mb-2" style="width:95%;height:14px;"></div>
+      <div class="skeleton mb-2" style="width:88%;height:14px;"></div>
+      <div class="skeleton mb-2" style="width:92%;height:14px;"></div>
+      <div class="skeleton" style="width:65%;height:14px;"></div>
     </div>
-    <!-- Skeleton Controls Toolbar -->
-    <div class="glass-card p-3 skeleton-card d-flex justify-content-between align-items-center">
-      <div class="d-flex gap-2">
-        <div class="skeleton" style="width: 110px; height: 36px; border-radius: 8px;"></div>
-        <div class="skeleton" style="width: 120px; height: 36px; border-radius: 8px;"></div>
-        <div class="skeleton" style="width: 110px; height: 36px; border-radius: 8px;"></div>
+    <div class="pixel-card p-3 d-flex justify-content-between align-items-center" style="gap:0.75rem;flex-wrap:wrap;">
+      <div class="d-flex gap-2 flex-wrap">
+        <div class="skeleton" style="width:110px;height:36px;"></div>
+        <div class="skeleton" style="width:120px;height:36px;"></div>
+        <div class="skeleton" style="width:110px;height:36px;"></div>
       </div>
-      <div class="skeleton" style="width: 180px; height: 28px; border-radius: 6px;"></div>
+      <div class="skeleton" style="width:180px;height:28px;"></div>
     </div>
   </div>
 
-  <!-- Real Interactive Arena (Smoothly revealed from skeleton) -->
-  <div id="practice-content-view" style="display: none;">
+  <!-- Real content -->
+  <div id="practice-content-view" style="display:none;">
     <div class="typing-arena-wrapper">
 
-    <!-- Unified Modern Product Ribbon -->
-    <div class="product-ribbon">
-      <!-- Mode Selection -->
-      <div class="ribbon-group">
-        <span class="ribbon-label"><i class="bi bi-grid-fill me-1 text-warning"></i>Mode:</span>
-        <button type="button" class="ribbon-pill <?= ($initialMode !== 'free') ? 'active' : '' ?>" id="btn-mode-passage">
-          <i class="bi bi-book-half"></i> Passage
-        </button>
-        <button type="button" class="ribbon-pill <?= ($initialMode === 'free') ? 'active' : '' ?>" id="btn-mode-free">
-          <i class="bi bi-pencil-square"></i> Free Typing
-        </button>
-        <button type="button" class="ribbon-pill" id="btn-mode-custom" data-bs-toggle="modal" data-bs-target="#customTextModal">
-          <i class="bi bi-code-slash"></i> Custom
-        </button>
-      </div>
-
-      <div class="ribbon-divider d-none d-md-block"></div>
-
-      <!-- Time Selectors (30s, 1m, 3m, 6m, 10m, 30m, Custom) -->
-      <div class="ribbon-group">
-        <span class="ribbon-label"><i class="bi bi-stopwatch-fill me-1" style="color: var(--first-color);"></i>Clock:</span>
-        <?php
-          $clockDurations = [
-            30   => '30s',
-            60   => '1m',
-            180  => '3m',
-            360  => '6m',
-            600  => '10m',
-            1800 => '30m'
-          ];
-          foreach ($clockDurations as $durSec => $durLabel):
-        ?>
-          <button type="button" class="ribbon-pill duration-selector-btn <?= ($selectedDuration === $durSec) ? 'active' : '' ?>" data-duration="<?= $durSec ?>">
-            <?= $durLabel ?>
+      <!-- Ribbon -->
+      <div class="ribbon">
+        <div class="ribbon-group">
+          <span class="ribbon-label"><i class="bi bi-grid-fill"></i> Mode:</span>
+          <button type="button" class="ribbon-pill <?= ($initialMode !== 'free') ? 'active' : '' ?>" id="btn-mode-passage">
+            <i class="bi bi-book-half"></i> Passage
           </button>
-        <?php endforeach; ?>
-        <button type="button" class="ribbon-pill" id="btn-custom-duration-open" data-bs-toggle="modal" data-bs-target="#customDurationModal" title="Set Custom Time">
-          <i class="bi bi-clock-history"></i> Custom
-        </button>
-      </div>
-
-      <div class="ribbon-divider d-none d-lg-block"></div>
-
-      <!-- Difficulty Selectors -->
-      <div class="ribbon-group">
-        <span class="ribbon-label"><i class="bi bi-speedometer2 me-1 text-warning"></i>Diff:</span>
-        <a href="?difficulty=beginner&duration=<?= $selectedDuration ?>" class="ribbon-pill <?= ($selectedDifficulty === 'beginner') ? 'active' : '' ?>">Beginner</a>
-        <a href="?difficulty=intermediate&duration=<?= $selectedDuration ?>" class="ribbon-pill <?= ($selectedDifficulty === 'intermediate') ? 'active' : '' ?>">Intermediate</a>
-        <a href="?difficulty=advanced&duration=<?= $selectedDuration ?>" class="ribbon-pill <?= ($selectedDifficulty === 'advanced') ? 'active' : '' ?>">Advanced</a>
-      </div>
-
-      <div class="ribbon-divider d-none d-xl-block"></div>
-
-      <!-- Quick Sound & Preferences Tools -->
-      <div class="ribbon-group ms-auto">
-        <button type="button" class="ribbon-pill" id="btn-sound-toggle" title="Toggle Typing Sounds">
-          <i class="bi <?= (!empty($settings['sound_enabled']) && $settings['sound_theme'] !== 'silent') ? 'bi-volume-up-fill text-success' : 'bi-volume-mute-fill text-secondary' ?>" id="sound-icon"></i>
-        </button>
-        <a href="<?= BASE_URL ?>/settings.php" class="ribbon-pill" title="Typing Preferences">
-          <i class="bi bi-gear-fill"></i>
-        </a>
-      </div>
-    </div>
-
-    <!-- =====================================================================
-         VIEW 1: PASSAGE DRILL (Character-by-character highlight against passage)
-         ===================================================================== -->
-    <div id="passage-arena-view" class="<?= ($initialMode === 'free') ? 'd-none' : '' ?>">
-      <!-- Last Test Captured & Quick Replay Banner -->
-      <div id="last-test-captured-banner" class="last-capture-banner mb-3 d-none">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          <i class="bi bi-bookmark-check-fill text-warning fs-5"></i>
-          <span class="text-light fw-bold">Last Session Captured:</span>
-          <span class="last-capture-badge" id="last-captured-net-wpm">0 WPM</span>
-          <span class="badge bg-dark border border-secondary text-success" id="last-captured-acc">100% Acc</span>
-          <span class="badge bg-dark border border-secondary text-info font-monospace" id="last-captured-cpm">0 CPM</span>
-          <span class="text-muted small" id="last-captured-time"></span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <button type="button" class="btn btn-sm btn-primary" id="btn-replay-last-captured">
-            <i class="bi bi-arrow-repeat me-1"></i> Replay Passage
+          <button type="button" class="ribbon-pill <?= ($initialMode === 'free') ? 'active' : '' ?>" id="btn-mode-free">
+            <i class="bi bi-pencil-square"></i> Free Typing
           </button>
-          <button type="button" class="btn-close btn-close-white btn-sm" id="btn-dismiss-last-captured" aria-label="Dismiss"></button>
-        </div>
-      </div>
-
-      <!-- Focused Zen Focus Bar (Distraction-Free Clean Typing: Telemetry Unlocks in Showing Card on Completion) -->
-      <div class="typing-zen-bar mb-3 p-3 glass-card d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-2">
-          <span class="fw-semibold text-light" id="passage-title-display"><?= e($activePassage['title']) ?></span>
-          <?= get_difficulty_badge($activePassage['difficulty']) ?>
-          <span class="text-muted small ms-2"><strong id="passage-word-count-badge"><?= (int)$activePassage['word_count'] ?></strong> words</span>
-          <span class="text-muted small">• <strong id="passage-char-count-badge"><?= (int)$activePassage['char_count'] ?></strong> chars</span>
-        </div>
-
-        <div class="d-flex align-items-center gap-3">
-          <div class="zen-timer-badge">
-            <i class="bi bi-stopwatch-fill text-warning fs-5"></i>
-            <span class="zen-timer-val font-monospace" id="live-timer"><?= $selectedDuration ?>s</span>
-          </div>
-          <span class="badge border border-danger text-danger bg-danger-subtle px-2 py-1 small fw-bold">
-            <i class="bi bi-slash-circle-fill me-1"></i>Strict Exam Rules Active
-          </span>
-        </div>
-
-        <!-- In-memory DOM elements to keep engine calculating precision telemetry smoothly -->
-        <div class="d-none" aria-hidden="true">
-          <span id="live-words-count">0</span>
-          <span id="live-accuracy">100%</span>
-          <span id="live-wpm">0</span>
-          <span id="live-cpm">0</span>
-          <span id="live-chars-count">0</span>
-          <span id="live-lines-count">1</span>
-          <span id="live-net-wpm">0</span>
-          <span id="live-errors-count">0</span>
-        </div>
-      </div>
-
-      <!-- Real-Time Progress Bar -->
-      <div class="typing-progress-container">
-        <div class="typing-progress-bar" id="typing-progress-bar"></div>
-      </div>
-
-      <!-- Main Interactive Typing Arena -->
-      <div class="position-relative">
-        <div id="typing-box" class="typing-box">
-          <!-- Rendered dynamically by TypingEngine -->
-        </div>
-
-        <!-- Hidden Key Capture Input -->
-        <input type="text" id="hidden-typing-input" class="hidden-typing-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-
-        <!-- Click to focus overlay prompt -->
-        <div id="typing-focus-prompt" class="typing-focus-prompt">
-          <div class="stat-icon" style="background: var(--first-color-light); color: var(--first-color); border: 1px solid var(--border-color);">
-            <i class="bi bi-cursor-fill fs-3"></i>
-          </div>
-          <div class="fw-bold text-light fs-5">Click anywhere here or start typing</div>
-          <div class="text-secondary small">Your live timer and word counter start on your first keypress</div>
-        </div>
-
-        <!-- Typing Paused Overlay -->
-        <div id="typing-pause-overlay" class="typing-paused-overlay hidden">
-          <div class="pause-icon-badge"><i class="bi bi-pause-fill"></i></div>
-          <h4 class="fw-bold text-light mb-1">Practice Paused</h4>
-          <p class="text-secondary small mb-3">Timer and metrics are frozen. Click Resume or press Space to continue.</p>
-          <button type="button" class="btn btn-primary px-4 py-2 fw-bold" id="btn-resume-overlay">
-            <i class="bi bi-play-fill me-1 fs-5"></i> Resume Test (<kbd class="text-white bg-dark">Space</kbd> / <kbd class="text-white bg-dark">Esc</kbd>)
-          </button>
-        </div>
-      </div>
-
-      <!-- Bottom Controls Toolbar -->
-      <div class="typing-controls-toolbar">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          <button type="button" class="btn btn-control" id="btn-pause-test" title="Pause / Resume Test (Esc)">
-            <i class="bi bi-pause-fill"></i>
-            <span id="pause-btn-text">Pause (<kbd class="kbd-pro">Esc</kbd>)</span>
-          </button>
-          <button type="button" class="btn btn-control" id="btn-restart-test" title="Restart Current Test (Tab + Enter)">
-            <i class="bi bi-arrow-clockwise"></i>
-            <span>Restart (<kbd class="kbd-pro">Tab+Enter</kbd>)</span>
-          </button>
-          <button type="button" class="btn btn-control" id="btn-next-passage" title="Load New Passage">
-            <i class="bi bi-shuffle"></i>
-            <span>New Passage</span>
-          </button>
-
-          <!-- Strict Mode: Backspace/Delete Disabled button requested by user -->
-          <button type="button" class="btn btn-control text-danger fw-bold border-danger" id="btn-toggle-backspace" title="Toggle Backspace/Delete strict mode">
-            <i class="bi bi-slash-circle-fill text-danger" id="backspace-mode-icon"></i>
-            <span id="backspace-mode-text">Backspace: <strong class="text-danger">Disabled</strong></span>
-          </button>
-
-          <!-- Dedicated Backspace / Delete button (Disabled by default as requested) -->
-          <button type="button" class="btn btn-control text-secondary" id="btn-touch-backspace" disabled title="Backspace & Delete are disabled in Strict Mode">
-            <i class="bi bi-backspace-reverse-fill"></i>
-            <span id="btn-touch-backspace-text">Backspace (Disabled)</span>
+          <button type="button" class="ribbon-pill" id="btn-mode-custom" data-bs-toggle="modal" data-bs-target="#customTextModal">
+            <i class="bi bi-code-slash"></i> Custom
           </button>
         </div>
 
-        <div class="d-flex align-items-center gap-2 text-muted small">
-          <span class="badge bg-danger-subtle text-danger border border-danger"><i class="bi bi-slash-circle me-1"></i>Strict Exam Rules</span>
-          <span class="d-none d-md-inline ms-1"><kbd class="kbd-pro">Esc</kbd> = Pause</span>
-          <span class="d-none d-md-inline ms-1"><kbd class="kbd-pro">Tab+Enter</kbd> = Restart</span>
-        </div>
-      </div>
-    </div>
+        <div class="ribbon-divider d-none d-md-block"></div>
 
-    <!-- =====================================================================
-         VIEW 2: FREE TYPING / WRITE ANYTHING (Zero pre-text - Blank Canvas)
-         User writes anything freely with real-time advanced word count & WPM
-         ===================================================================== -->
-    <div id="free-arena-view" class="<?= ($initialMode !== 'free') ? 'd-none' : '' ?>">
-      <!-- Focused Zen Focus Bar for Free Typing (Distraction-Free Clean Typing: Telemetry Unlocks in Showing Card on Completion) -->
-      <div class="typing-zen-bar mb-3 p-3 glass-card d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-2">
-          <span class="badge-pro-orange">
-            <i class="bi bi-pencil-fill me-1"></i>Free Typing
-          </span>
-          <div class="d-flex align-items-center gap-1 ms-2">
-            <span class="text-secondary small fw-bold"><i class="bi bi-stopwatch me-1"></i>Mode:</span>
-            <select id="free-timer-mode-select" class="form-select form-select-sm bg-dark text-light border-secondary" style="width: 150px; padding: 0.2rem 0.5rem; font-size: 0.8rem;">
-              <option value="stopwatch">⏱️ Stopwatch</option>
-              <option value="30">30 Seconds</option>
-              <option value="60">1 Minute</option>
-              <option value="180">3 Minutes</option>
-              <option value="360">6 Minutes</option>
-              <option value="600">10 Minutes</option>
-              <option value="1800">30 Minutes</option>
-              <option value="custom">⚙️ Custom Time...</option>
-            </select>
-          </div>
+        <div class="ribbon-group">
+          <span class="ribbon-label"><i class="bi bi-stopwatch-fill"></i> Clock:</span>
+          <?php
+            $clockDurations = [30 => '30s', 60 => '1m', 180 => '3m', 360 => '6m', 600 => '10m', 1800 => '30m'];
+            foreach ($clockDurations as $durSec => $durLabel):
+          ?>
+            <button type="button" class="ribbon-pill duration-selector-btn <?= ($selectedDuration === $durSec) ? 'active' : '' ?>" data-duration="<?= $durSec ?>">
+              <?= $durLabel ?>
+            </button>
+          <?php endforeach; ?>
+          <button type="button" class="ribbon-pill" id="btn-custom-duration-open" data-bs-toggle="modal" data-bs-target="#customDurationModal" title="Set Custom Time">
+            <i class="bi bi-clock-history"></i> Custom
+          </button>
         </div>
 
-        <div class="d-flex align-items-center gap-3">
-          <div class="zen-timer-badge">
-            <i class="bi bi-stopwatch-fill text-warning fs-5"></i>
-            <span class="zen-timer-val font-monospace" id="live-free-timer">0:00</span>
-          </div>
-          <span class="badge border border-danger text-danger bg-danger-subtle px-2 py-1 small fw-bold">
-            <i class="bi bi-slash-circle-fill me-1"></i>Strict Exam Rules Active
-          </span>
+        <div class="ribbon-divider d-none d-lg-block"></div>
+
+        <div class="ribbon-group">
+          <span class="ribbon-label"><i class="bi bi-speedometer2"></i> Diff:</span>
+          <a href="?difficulty=beginner&duration=<?= $selectedDuration ?>" class="ribbon-pill <?= ($selectedDifficulty === 'beginner') ? 'active' : '' ?>">Beginner</a>
+          <a href="?difficulty=intermediate&duration=<?= $selectedDuration ?>" class="ribbon-pill <?= ($selectedDifficulty === 'intermediate') ? 'active' : '' ?>">Intermediate</a>
+          <a href="?difficulty=advanced&duration=<?= $selectedDuration ?>" class="ribbon-pill <?= ($selectedDifficulty === 'advanced') ? 'active' : '' ?>">Advanced</a>
         </div>
 
-        <!-- In-memory DOM elements to keep FreeWritingEngine calculating precision telemetry smoothly without visual distraction -->
-        <div class="d-none" aria-hidden="true">
-          <span id="live-free-words">0</span>
-          <span id="live-free-accuracy">100%</span>
-          <span id="live-free-wpm">0</span>
-          <span id="live-free-cpm">0</span>
-          <span id="live-free-chars">0</span>
-          <span id="live-free-chars-nospace">0</span>
-          <span id="live-free-lines">0</span>
+        <div class="ribbon-divider d-none d-xl-block"></div>
+
+        <div class="ribbon-group ms-auto">
+          <button type="button" class="ribbon-pill" id="btn-sound-toggle" title="Toggle Typing Sounds">
+            <i class="bi <?= (!empty($settings['sound_enabled']) && $settings['sound_theme'] !== 'silent') ? 'bi-volume-up-fill' : 'bi-volume-mute-fill' ?>" id="sound-icon"></i>
+          </button>
+          <a href="<?= BASE_URL ?>/settings.php" class="ribbon-pill" title="Typing Preferences">
+            <i class="bi bi-gear-fill"></i>
+          </a>
         </div>
       </div>
 
-      <!-- Blank Canvas Textarea -->
-      <div class="free-typing-wrapper">
-        <textarea id="free-typing-textarea" class="free-typing-textarea" placeholder="Start typing anything here from scratch... (e.g. CSS code, ideas, speed typing drills). 
-
-Tab key is enabled for code indentation! Your real-time words, characters, accuracy, and WPM calculate silently in memory and unlock in the Showing Card when completed." autofocus></textarea>
-        
-        <div class="free-stats-footer">
-          <div class="d-flex align-items-center gap-3">
-            <span class="badge bg-dark border border-secondary text-secondary small">
-              <i class="bi bi-shield-lock me-1"></i>Distraction-free: Telemetry numbers unlock upon clicking Finish
-            </span>
-            <span class="free-stat-item"><kbd class="bg-dark text-info border border-secondary">Tab</kbd> = 4 Spaces</span>
+      <!-- PASSAGE VIEW -->
+      <div id="passage-arena-view" class="<?= ($initialMode === 'free') ? 'd-none' : '' ?>">
+        <div id="last-test-captured-banner" class="last-capture-banner d-none">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <i class="bi bi-bookmark-check-fill" style="font-size:1.1rem;"></i>
+            <span class="lc-label">Last Session Captured:</span>
+            <span class="last-capture-badge" id="last-captured-net-wpm">0 WPM</span>
+            <span class="last-capture-badge" id="last-captured-acc">100% Acc</span>
+            <span class="last-capture-badge" id="last-captured-cpm">0 CPM</span>
+            <span class="lc-label" style="font-weight:500;" id="last-captured-time"></span>
           </div>
           <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-insert-css-sample" title="Insert CSS :root Sample Code">
-              <i class="bi bi-code me-1 text-warning"></i> Insert CSS Sample
+            <button type="button" class="px-btn px-btn-sm px-btn-primary" id="btn-replay-last-captured">
+              <i class="bi bi-arrow-repeat"></i> Replay
+            </button>
+            <button type="button" class="btn-close" id="btn-dismiss-last-captured" aria-label="Dismiss"></button>
+          </div>
+        </div>
+
+        <div class="zen-bar">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="zen-title" id="passage-title-display"><?= e($activePassage['title']) ?></span>
+            <?= get_difficulty_badge($activePassage['difficulty']) ?>
+            <span class="zen-meta"><strong id="passage-word-count-badge"><?= (int)$activePassage['word_count'] ?></strong> words</span>
+            <span class="zen-meta">• <strong id="passage-char-count-badge"><?= (int)$activePassage['char_count'] ?></strong> chars</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="zen-timer-badge">
+              <i class="bi bi-stopwatch-fill"></i>
+              <span class="zen-timer-val" id="live-timer"><?= $selectedDuration ?>s</span>
+            </div>
+            <span class="strict-badge">
+              <i class="bi bi-slash-circle-fill"></i> Strict Rules
+            </span>
+          </div>
+
+          <div class="d-none" aria-hidden="true">
+            <span id="live-words-count">0</span>
+            <span id="live-accuracy">100%</span>
+            <span id="live-wpm">0</span>
+            <span id="live-cpm">0</span>
+            <span id="live-chars-count">0</span>
+            <span id="live-lines-count">1</span>
+            <span id="live-net-wpm">0</span>
+            <span id="live-errors-count">0</span>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-bar-pixel" id="typing-progress-bar"></div>
+        </div>
+
+        <div class="position-relative">
+          <div class="typing-surface" id="typing-box-wrapper">
+            <div id="typing-box" class="typing-box"></div>
+          </div>
+
+          <input type="text" id="hidden-typing-input" class="hidden-typing-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+          <div id="typing-focus-prompt" class="focus-overlay" style="position:absolute;top:0;left:0;">
+            <div class="focus-icon-box"><i class="bi bi-cursor-fill"></i></div>
+            <div class="focus-title">Click anywhere here or start typing</div>
+            <div class="focus-sub">Your live timer and word counter start on your first keypress</div>
+          </div>
+
+          <div id="typing-pause-overlay" class="pause-overlay">
+            <div class="pause-icon"><i class="bi bi-pause-fill"></i></div>
+            <h4>Practice Paused</h4>
+            <p>Timer and metrics are frozen. Click Resume or press Space / Esc to continue.</p>
+            <button type="button" class="px-btn px-btn-primary" id="btn-resume-overlay">
+              <i class="bi bi-play-fill"></i> Resume (<kbd>Space</kbd> / <kbd>Esc</kbd>)
             </button>
           </div>
         </div>
+
+        <div class="controls-bar">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <button type="button" class="px-btn" id="btn-pause-test">
+              <i class="bi bi-pause-fill"></i>
+              <span id="pause-btn-text">Pause (<kbd>Esc</kbd>)</span>
+            </button>
+            <button type="button" class="px-btn" id="btn-restart-test">
+              <i class="bi bi-arrow-clockwise"></i>
+              <span>Restart (<kbd>Tab+Enter</kbd>)</span>
+            </button>
+            <button type="button" class="px-btn" id="btn-next-passage">
+              <i class="bi bi-shuffle"></i>
+              <span>New Passage</span>
+            </button>
+            <button type="button" class="px-btn px-btn-danger" id="btn-toggle-backspace" title="Toggle strict mode">
+              <i class="bi bi-slash-circle-fill" id="backspace-mode-icon"></i>
+              <span id="backspace-mode-text">Backspace: <strong>Disabled</strong></span>
+            </button>
+            <button type="button" class="px-btn" id="btn-touch-backspace" disabled>
+              <i class="bi bi-backspace-reverse-fill"></i>
+              <span id="btn-touch-backspace-text">Backspace (Disabled)</span>
+            </button>
+          </div>
+          <div class="ctrl-hint">
+            <kbd>Esc</kbd> Pause · <kbd>Tab+Enter</kbd> Restart
+          </div>
+        </div>
       </div>
 
-      <!-- Free Typing Action Toolbar -->
-      <div class="typing-controls-toolbar">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          <button type="button" class="btn btn-primary fw-bold" id="btn-free-finish">
-            <i class="bi bi-check-circle-fill me-1"></i> Finish & Save Record
-          </button>
-          <!-- Free Typing Backspace Disabled Toggle -->
-          <button type="button" class="btn btn-control text-danger fw-bold border-danger" id="btn-free-toggle-backspace" title="Toggle Backspace/Delete strict mode">
-            <i class="bi bi-slash-circle-fill text-danger" id="free-backspace-mode-icon"></i>
-            <span id="free-backspace-mode-text">Backspace: <strong class="text-danger">Disabled</strong></span>
-          </button>
-          <button type="button" class="btn btn-control text-secondary" id="btn-free-backspace-touch" disabled title="Backspace is disabled in Strict Mode">
-            <i class="bi bi-backspace-reverse-fill"></i>
-            <span id="free-backspace-btn-text">Backspace (Disabled)</span>
-          </button>
-          <button type="button" class="btn btn-control" id="btn-free-clear">
-            <i class="bi bi-trash3 me-1"></i> Clear Canvas
-          </button>
-          <button type="button" class="btn btn-control" id="btn-free-copy">
-            <i class="bi bi-clipboard me-1"></i> Copy Text
-          </button>
-          <button type="button" class="btn btn-control" id="btn-free-download">
-            <i class="bi bi-download me-1"></i> Download File
-          </button>
+      <!-- FREE TYPING VIEW -->
+      <div id="free-arena-view" class="<?= ($initialMode !== 'free') ? 'd-none' : '' ?>">
+        <div class="zen-bar">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="ribbon-pill active" style="cursor:default;">
+              <i class="bi bi-pencil-fill"></i> Free Typing
+            </span>
+            <div class="d-flex align-items-center gap-1">
+              <span class="ribbon-label"><i class="bi bi-stopwatch"></i> Mode:</span>
+              <select id="free-timer-mode-select" class="free-mode-select">
+                <option value="stopwatch">Stopwatch</option>
+                <option value="30">30 Seconds</option>
+                <option value="60">1 Minute</option>
+                <option value="180">3 Minutes</option>
+                <option value="360">6 Minutes</option>
+                <option value="600">10 Minutes</option>
+                <option value="1800">30 Minutes</option>
+                <option value="custom">Custom Time...</option>
+              </select>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="zen-timer-badge">
+              <i class="bi bi-stopwatch-fill"></i>
+              <span class="zen-timer-val" id="live-free-timer">0:00</span>
+            </div>
+            <span class="strict-badge"><i class="bi bi-slash-circle-fill"></i> Strict Rules</span>
+          </div>
+          <div class="d-none" aria-hidden="true">
+            <span id="live-free-words">0</span>
+            <span id="live-free-accuracy">100%</span>
+            <span id="live-free-wpm">0</span>
+            <span id="live-free-cpm">0</span>
+            <span id="live-free-chars">0</span>
+            <span id="live-free-chars-nospace">0</span>
+            <span id="live-free-lines">0</span>
+          </div>
         </div>
 
-        <div class="d-flex align-items-center gap-2">
-          <button type="button" class="btn btn-outline-info btn-sm" id="btn-free-to-passage">
-            <i class="bi bi-arrow-repeat me-1"></i> Use as Passage Drill
+        <div class="free-textarea-wrap">
+          <textarea id="free-typing-textarea" class="free-textarea" placeholder="Start typing anything here... (CSS, ideas, drill text)
+
+Tab key is enabled for code indentation. Your real-time words, characters, accuracy and WPM calculate silently in memory and unlock in the Showing Card when you finish." autofocus></textarea>
+
+          <div class="free-stats">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+              <span><i class="bi bi-shield-lock me-1"></i>Distraction-free · telemetry unlocks on Finish</span>
+              <span><kbd>Tab</kbd> = 4 spaces</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" class="px-btn px-btn-sm" id="btn-insert-css-sample">
+                <i class="bi bi-code"></i> Insert CSS Sample
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls-bar">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <button type="button" class="px-btn px-btn-primary" id="btn-free-finish">
+              <i class="bi bi-check-circle-fill"></i> Finish &amp; Save
+            </button>
+            <button type="button" class="px-btn px-btn-danger" id="btn-free-toggle-backspace">
+              <i class="bi bi-slash-circle-fill" id="free-backspace-mode-icon"></i>
+              <span id="free-backspace-mode-text">Backspace: <strong>Disabled</strong></span>
+            </button>
+            <button type="button" class="px-btn" id="btn-free-backspace-touch" disabled>
+              <i class="bi bi-backspace-reverse-fill"></i>
+              <span id="free-backspace-btn-text">Backspace (Disabled)</span>
+            </button>
+            <button type="button" class="px-btn" id="btn-free-clear">
+              <i class="bi bi-trash3"></i> Clear
+            </button>
+            <button type="button" class="px-btn" id="btn-free-copy">
+              <i class="bi bi-clipboard"></i> Copy
+            </button>
+            <button type="button" class="px-btn" id="btn-free-download">
+              <i class="bi bi-download"></i> Download
+            </button>
+          </div>
+          <button type="button" class="px-btn px-btn-sm" id="btn-free-to-passage">
+            <i class="bi bi-arrow-repeat"></i> Use as Passage
           </button>
         </div>
       </div>
@@ -423,279 +1656,213 @@ Tab key is enabled for code indentation! Your real-time words, characters, accur
   </div>
 </div>
 
-<!-- =====================================================================
-     Custom Text Input Modal
-     ===================================================================== -->
-<div class="modal fade" id="customTextModal" tabindex="-1" aria-labelledby="customTextModalLabel" aria-hidden="true">
+<!-- Custom Text Modal -->
+<div class="modal fade pixel-modal" id="customTextModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content glass-card border-secondary">
-      <div class="modal-header border-secondary">
-        <h5 class="modal-title text-light fw-bold" id="customTextModalLabel">
-          <i class="bi bi-pencil-square text-info me-2"></i>Practice with Custom Text / Code
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-pencil-square"></i> Practice with Custom Text / Code
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="text-secondary small">
-          Paste your custom text, programming code, or CSS variables. Our engine will calculate real-time word count and character-by-character accuracy automatically.
+        <p class="form-text mb-3">
+          Paste your custom text, code, or CSS. The engine calculates real-time word count and character-by-character accuracy automatically.
         </p>
 
-        <!-- Quick Sample Snippet Buttons -->
-        <div class="mb-3 d-flex align-items-center gap-2">
-          <span class="text-secondary small fw-semibold">Quick Snippets:</span>
-          <button type="button" class="btn btn-xs btn-outline-info py-1 px-2 small" id="btn-snippet-css">
-            <i class="bi bi-filetype-css me-1"></i> CSS :root Variables
-          </button>
-          <button type="button" class="btn btn-xs btn-outline-secondary py-1 px-2 small" id="btn-snippet-js">
-            <i class="bi bi-filetype-js me-1"></i> JavaScript Function
-          </button>
+        <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+          <span class="form-label" style="margin:0;">Quick Snippets:</span>
+          <button type="button" class="px-btn px-btn-sm" id="btn-snippet-css"><i class="bi bi-filetype-css"></i> CSS :root</button>
+          <button type="button" class="px-btn px-btn-sm" id="btn-snippet-js"><i class="bi bi-filetype-js"></i> JS Function</button>
         </div>
 
         <div class="mb-3">
-          <label class="form-label text-secondary small fw-bold">Passage Title (Optional)</label>
-          <input type="text" id="custom-text-title" class="form-control bg-dark text-light border-secondary" placeholder="e.g. CSS Variables Practice Drill">
+          <label class="form-label">Passage Title (Optional)</label>
+          <input type="text" id="custom-text-title" class="form-control" placeholder="e.g. CSS Variables Practice Drill">
         </div>
+
         <div class="mb-3">
-          <label class="form-label text-secondary small fw-bold">Text / Code Content</label>
-          <textarea id="custom-text-content" rows="6" class="form-control bg-dark text-light border-secondary font-monospace" placeholder="Paste your practice text or code here..."></textarea>
-          <div class="form-text text-muted d-flex justify-content-between">
+          <label class="form-label">Text / Code Content</label>
+          <textarea id="custom-text-content" rows="6" class="form-control" style="font-family:'JetBrains Mono',monospace;" placeholder="Paste your practice text or code here..."></textarea>
+          <div class="form-text d-flex justify-content-between mt-2">
             <span id="custom-word-counter">0 words</span>
-            <span>Accurate real-time token count</span>
+            <span>Accurate token count</span>
           </div>
         </div>
       </div>
-      <div class="modal-footer border-secondary">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary fw-bold" id="btn-apply-custom-text">
-          <i class="bi bi-play-circle-fill me-1"></i> Start Practice Drill
+      <div class="modal-footer">
+        <button type="button" class="px-btn" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="px-btn px-btn-primary" id="btn-apply-custom-text">
+          <i class="bi bi-play-circle-fill"></i> Start Practice
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- =====================================================================
-     Test Results Modal
-     ===================================================================== -->
-<!-- =====================================================================
-     Official 7-Metric Showing Card Results Modal (Unlocked Upon Completion)
-     ===================================================================== -->
-<div class="modal fade" id="resultsModal" tabindex="-1" aria-labelledby="resultsModalLabel" aria-hidden="true" data-bs-backdrop="static">
+<!-- Showing Card Results Modal -->
+<div class="modal fade showing-card-modal" id="resultsModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
   <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-    <div class="modal-content results-modal-card p-0 overflow-hidden">
-      <!-- Modal Header Banner -->
-      <div class="modal-header border-0 p-4" style="background: linear-gradient(135deg, rgba(255, 106, 0, 0.16) 0%, rgba(18, 24, 38, 0.98) 100%); border-bottom: 1px solid rgba(255, 106, 0, 0.3) !important;">
-        <div class="d-flex align-items-center gap-3">
-          <div class="results-trophy-badge">
-            <i class="bi bi-trophy-fill"></i>
-          </div>
+    <div class="modal-content">
+
+      <!-- Header -->
+      <div class="sc-header">
+        <div class="sc-title-wrap">
+          <div class="sc-trophy-box"><i class="bi bi-trophy-fill"></i></div>
           <div>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-              <h4 class="modal-title fw-bold text-light mb-0" id="resultsModalLabel">
-                Typing Performance Showing Card
-              </h4>
-              <span class="badge-pro-orange"><i class="bi bi-shield-check me-1"></i>Official Telemetry</span>
-            </div>
-            <p class="text-secondary small mb-0 mt-1">
-              Typing session complete. All 7 core metrics and keystroke trajectory diagnostics unlocked below.
-            </p>
+            <h4 class="sc-headline">Typing Performance Showing Card</h4>
+            <p class="sc-subline">Session complete · 7 core metrics &amp; trajectory diagnostics unlocked</p>
           </div>
         </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <div class="modal-body p-4">
-        <!-- Dynamic Performance Greeting & Accolades Banner -->
-        <div id="res-greeting-alert" class="alert alert-soft-ui mb-4 d-flex align-items-center gap-3 p-3" role="alert" style="background: rgba(255, 85, 50, 0.08); border: 1px solid rgba(255, 85, 50, 0.3); border-radius: 14px;">
-          <div class="fs-1" id="res-greeting-icon">🎉</div>
+      <div class="sc-body">
+        <!-- Greeting -->
+        <div class="sc-greeting">
+          <div class="sc-greeting-icon" id="res-greeting-icon">🎉</div>
           <div class="flex-grow-1">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-              <h5 class="fw-bold mb-1" id="res-greeting-title" style="color: var(--first-color, #ff5532);">
-                Outstanding Effort! Drill Completed
-              </h5>
-              <button type="button" class="btn btn-sm btn-outline-warning fw-bold d-inline-flex align-items-center gap-1" id="btn-quick-cert-view">
+              <h5 class="sc-greeting-title" id="res-greeting-title">Outstanding Effort! Drill Completed</h5>
+              <button type="button" class="px-btn px-btn-sm" id="btn-quick-cert-view">
                 <i class="bi bi-award-fill"></i> View Certificate
               </button>
             </div>
-            <p class="mb-0 small text-secondary" id="res-greeting-subtitle">
-              <?= $currentUser ? 'Excellent job, ' . e($currentUser['username']) . '!' : 'Congratulations!' ?> Your telemetry was officially recorded with full character metrics below.
+            <p class="sc-greeting-sub" id="res-greeting-subtitle">
+              <?= $currentUser ? 'Excellent job, ' . e($currentUser['username']) . '!' : 'Congratulations!' ?> Your telemetry was officially recorded.
             </p>
           </div>
         </div>
 
-        <!-- Top Row: Hero Speed Score + Live Speed Trajectory Graph -->
-        <div class="row g-4 mb-4 align-items-stretch">
-          <!-- Left: Hero Net WPM Showcase Card -->
+        <!-- Hero + chart -->
+        <div class="row g-3 mb-3">
           <div class="col-lg-5">
-            <div class="result-hero-metric h-100 d-flex flex-column justify-content-center p-4">
-              <span class="text-uppercase fw-bold small text-warning letter-spacing-1 mb-1">Final Performance</span>
-              <div class="result-hero-val font-monospace" id="res-net-wpm">0</div>
-              <div class="result-hero-lbl">Net Words Per Minute (WPM)</div>
-              <div class="mt-3" id="res-rating-badge">
-                <span class="badge bg-primary fs-6 px-3 py-1">Professional</span>
+            <div class="sc-hero-box">
+              <span class="sc-hero-label">Final Performance</span>
+              <div class="sc-hero-value" id="res-net-wpm">0</div>
+              <div class="sc-hero-sublabel">Net Words Per Minute (WPM)</div>
+              <div class="mt-2" id="res-rating-badge">
+                <span class="sc-rating-badge"><i class="bi bi-star-fill"></i> Professional</span>
               </div>
-              <div class="mt-3 text-muted small" id="res-strict-mode-note">
-                <i class="bi bi-slash-circle-fill text-danger me-1"></i> Strict Exam Rules: Backspace/Delete Disabled
+              <div class="sc-strict-note" id="res-strict-mode-note">
+                <i class="bi bi-slash-circle-fill" style="color:#dc2626;"></i> Strict Exam Rules: Backspace disabled
               </div>
             </div>
           </div>
-
-          <!-- Right: Speed Trajectory Live Curve -->
           <div class="col-lg-7">
-            <div class="glass-card p-3 h-100 d-flex flex-column justify-content-between">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold text-light small">
-                  <i class="bi bi-graph-up text-warning me-1"></i> Live Speed Trajectory (WPM / Second)
-                </span>
-                <span class="badge bg-dark border border-secondary text-secondary small">Real-Time Progression</span>
+            <div class="sc-chart-box">
+              <div class="sc-chart-head">
+                <span class="sc-chart-title"><i class="bi bi-graph-up me-1"></i> Live Speed Trajectory (WPM/sec)</span>
+                <span class="sc-chart-tag">Real-Time</span>
               </div>
-              <div style="height: 180px; position: relative;">
+              <div style="height:180px;position:relative;">
                 <canvas id="sessionSpeedChart"></canvas>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- The 7 Core Metrics Showing Cards Grid (Symmetrical 4x2 Luxury Layout) -->
-        <div class="mb-2">
-          <span class="text-uppercase fw-bold small text-secondary letter-spacing-1">Core 7-Metric Telemetry Breakdown</span>
-        </div>
-        <div class="row g-3 mb-4">
-          <!-- 1. Elapsed / Timer -->
+        <!-- Stat cards -->
+        <span class="sc-section-title">Core 7-Metric Telemetry Breakdown</span>
+        <div class="row g-3 mb-3">
           <div class="col-6 col-md-3">
-            <div class="stat-showing-card p-3 text-center h-100 border-start border-3 border-warning">
-              <div class="showing-card-icon mx-auto bg-warning-subtle text-warning">
-                <i class="bi bi-stopwatch-fill"></i>
-              </div>
-              <div class="showing-card-lbl">1. Elapsed / Timer</div>
-              <div class="showing-card-num text-warning" id="res-elapsed-timer">0:00</div>
-              <div class="showing-card-sub" id="res-time-elapsed">0s duration</div>
+            <div class="sc-stat-card">
+              <div class="sc-stat-icon"><i class="bi bi-stopwatch-fill"></i></div>
+              <div class="sc-stat-label">1. Elapsed / Timer</div>
+              <div class="sc-stat-value" id="res-elapsed-timer">0:00</div>
+              <div class="sc-stat-sub" id="res-time-elapsed">0s duration</div>
             </div>
           </div>
-
-          <!-- 2. Real-Time Words -->
           <div class="col-6 col-md-3">
-            <div class="stat-showing-card p-3 text-center h-100 border-start border-3 border-success">
-              <div class="showing-card-icon mx-auto bg-success-subtle text-success">
-                <i class="bi bi-fonts"></i>
-              </div>
-              <div class="showing-card-lbl">2. Real-Time Words</div>
-              <div class="showing-card-num text-success" id="res-words-typed">0</div>
-              <div class="showing-card-sub">Completed words</div>
+            <div class="sc-stat-card">
+              <div class="sc-stat-icon"><i class="bi bi-fonts"></i></div>
+              <div class="sc-stat-label">2. Real-Time Words</div>
+              <div class="sc-stat-value" id="res-words-typed">0</div>
+              <div class="sc-stat-sub">Completed words</div>
             </div>
           </div>
-
-          <!-- 3. Live Accuracy -->
           <div class="col-6 col-md-3">
-            <div class="stat-showing-card p-3 text-center h-100 border-start border-3 border-info">
-              <div class="showing-card-icon mx-auto bg-info-subtle text-info">
-                <i class="bi bi-bullseye"></i>
-              </div>
-              <div class="showing-card-lbl">3. Live Accuracy</div>
-              <div class="showing-card-num text-info" id="res-accuracy">100%</div>
-              <div class="showing-card-sub">Keystroke precision</div>
+            <div class="sc-stat-card">
+              <div class="sc-stat-icon"><i class="bi bi-bullseye"></i></div>
+              <div class="sc-stat-label">3. Live Accuracy</div>
+              <div class="sc-stat-value" id="res-accuracy">100%</div>
+              <div class="sc-stat-sub">Keystroke precision</div>
             </div>
           </div>
-
-          <!-- 4. Gross WPM -->
           <div class="col-6 col-md-3">
-            <div class="stat-showing-card p-3 text-center h-100 border-start border-3 border-primary">
-              <div class="showing-card-icon mx-auto bg-primary-subtle text-primary">
-                <i class="bi bi-speedometer2"></i>
-              </div>
-              <div class="showing-card-lbl">4. Gross WPM</div>
-              <div class="showing-card-num text-light" id="res-gross-wpm">0</div>
-              <div class="showing-card-sub">Raw typing speed</div>
+            <div class="sc-stat-card">
+              <div class="sc-stat-icon"><i class="bi bi-speedometer2"></i></div>
+              <div class="sc-stat-label">4. Gross WPM</div>
+              <div class="sc-stat-value" id="res-gross-wpm">0</div>
+              <div class="sc-stat-sub">Raw typing speed</div>
             </div>
           </div>
-
-          <!-- 5. CPM (Speed) -->
           <div class="col-6 col-md-3">
-            <div class="stat-showing-card p-3 text-center h-100 border-start border-3 border-warning">
-              <div class="showing-card-icon mx-auto bg-warning-subtle text-warning">
-                <i class="bi bi-lightning-charge-fill"></i>
-              </div>
-              <div class="showing-card-lbl">5. CPM (Speed)</div>
-              <div class="showing-card-num text-warning" id="res-cpm">0</div>
-              <div class="showing-card-sub">Chars per minute</div>
+            <div class="sc-stat-card">
+              <div class="sc-stat-icon"><i class="bi bi-lightning-charge-fill"></i></div>
+              <div class="sc-stat-label">5. CPM (Speed)</div>
+              <div class="sc-stat-value" id="res-cpm">0</div>
+              <div class="sc-stat-sub">Chars per minute</div>
             </div>
           </div>
-
-          <!-- 6. Characters -->
           <div class="col-6 col-md-3">
-            <div class="stat-showing-card p-3 text-center h-100 border-start border-3 border-secondary">
-              <div class="showing-card-icon mx-auto bg-dark border border-secondary text-light">
-                <i class="bi bi-keyboard-fill"></i>
-              </div>
-              <div class="showing-card-lbl">6. Characters</div>
-              <div class="showing-card-num text-light" id="res-chars-count">0</div>
-              <div class="showing-card-sub">Total characters</div>
+            <div class="sc-stat-card">
+              <div class="sc-stat-icon"><i class="bi bi-keyboard-fill"></i></div>
+              <div class="sc-stat-label">6. Characters</div>
+              <div class="sc-stat-value" id="res-chars-count">0</div>
+              <div class="sc-stat-sub">Total characters</div>
             </div>
           </div>
-
-          <!-- 7. Lines -->
           <div class="col-6 col-md-3">
-            <div class="stat-showing-card p-3 text-center h-100 border-start border-3 border-warning">
-              <div class="showing-card-icon mx-auto bg-warning-subtle text-warning">
-                <i class="bi bi-text-paragraph"></i>
-              </div>
-              <div class="showing-card-lbl">7. Lines</div>
-              <div class="showing-card-num text-warning" id="res-lines-count">1</div>
-              <div class="showing-card-sub">Paragraph structure</div>
+            <div class="sc-stat-card">
+              <div class="sc-stat-icon"><i class="bi bi-text-paragraph"></i></div>
+              <div class="sc-stat-label">7. Lines</div>
+              <div class="sc-stat-value" id="res-lines-count">1</div>
+              <div class="sc-stat-sub">Paragraph structure</div>
             </div>
           </div>
-
-          <!-- 8. Keystroke Quality -->
           <div class="col-6 col-md-3">
-            <div class="stat-showing-card p-3 text-center h-100 border-start border-3 border-success">
-              <div class="showing-card-icon mx-auto bg-success-subtle text-success">
-                <i class="bi bi-shield-check"></i>
-              </div>
-              <div class="showing-card-lbl">Keystroke Quality</div>
-              <div class="showing-card-num text-success" id="res-quality-score">100%</div>
-              <div class="showing-card-sub">Error-free execution</div>
+            <div class="sc-stat-card">
+              <div class="sc-stat-icon"><i class="bi bi-shield-check"></i></div>
+              <div class="sc-stat-label">Keystroke Quality</div>
+              <div class="sc-stat-value" id="res-quality-score">100%</div>
+              <div class="sc-stat-sub">Error-free execution</div>
             </div>
           </div>
         </div>
 
-        <!-- Keystroke Detailed Diagnostic Bar -->
-        <div class="showing-diagnostics-bar p-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
-          <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-cpu-fill text-warning fs-5"></i>
-            <span class="small fw-bold text-light">Keystroke Diagnostics:</span>
-          </div>
-          <div class="d-flex align-items-center gap-4 text-muted small font-monospace flex-wrap">
-            <span>Total Keys: <strong class="text-light fs-6" id="res-total-keys">0</strong></span>
-            <span>Correct: <strong class="text-success fs-6" id="res-correct-keys">0</strong></span>
-            <span>Errors: <strong class="text-danger fs-6" id="res-error-keys">0</strong></span>
-            <span>Backspaces: <strong class="text-warning fs-6" id="res-backspaces">0</strong></span>
-            <span class="badge border border-danger text-danger bg-danger-subtle"><i class="bi bi-slash-circle-fill me-1"></i>Exam Rules Active</span>
+        <!-- Diagnostics -->
+        <div class="sc-diagnostics">
+          <div class="sc-diag-title"><i class="bi bi-cpu-fill"></i> Keystroke Diagnostics</div>
+          <div class="sc-diag-list">
+            <span>Total: <strong id="res-total-keys">0</strong></span>
+            <span>Correct: <strong id="res-correct-keys">0</strong></span>
+            <span>Errors: <strong id="res-error-keys">0</strong></span>
+            <span>Backspaces: <strong id="res-backspaces">0</strong></span>
           </div>
         </div>
       </div>
 
-      <div class="modal-footer border-secondary justify-content-between p-3 px-4">
-        <div>
+      <!-- Footer -->
+      <div class="sc-footer">
+        <div class="sc-footer-note">
           <?php if (!$currentUser): ?>
-            <span class="text-secondary small">
-              <i class="bi bi-info-circle me-1"></i>
-              <a href="<?= BASE_URL ?>/register.php" class="text-warning fw-bold">Register</a> to permanently save results & track progress!
-            </span>
+            <i class="bi bi-info-circle me-1"></i>
+            <a href="<?= BASE_URL ?>/register.php" style="color:inherit;font-weight:700;text-decoration:underline;">Register</a> to save results permanently.
           <?php else: ?>
-            <span class="text-success small fw-semibold">
-              <i class="bi bi-check-circle-fill me-1"></i>Session automatically recorded to your personal history.
-            </span>
+            <i class="bi bi-check-circle-fill me-1"></i> Session recorded to your personal history.
           <?php endif; ?>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
-          <button type="button" class="btn btn-outline-warning fw-bold" id="btn-generate-cert">
-            <i class="bi bi-award-fill me-1"></i> Generate Certificate
+        <div class="sc-footer-actions">
+          <button type="button" class="px-btn" id="btn-generate-cert">
+            <i class="bi bi-award-fill"></i> Generate Certificate
           </button>
-          <button type="button" class="btn btn-outline-secondary" id="btn-res-retry">
-            <i class="bi bi-arrow-clockwise me-1"></i> Practice Again
+          <button type="button" class="px-btn" id="btn-res-retry">
+            <i class="bi bi-arrow-clockwise"></i> Practice Again
           </button>
-          <button type="button" class="btn btn-primary fw-bold px-4" id="btn-res-next">
-            <i class="bi bi-arrow-right-circle me-1"></i> Continue
+          <button type="button" class="px-btn px-btn-primary" id="btn-res-next">
+            <i class="bi bi-arrow-right-circle"></i> Continue
           </button>
         </div>
       </div>
@@ -703,44 +1870,37 @@ Tab key is enabled for code indentation! Your real-time words, characters, accur
   </div>
 </div>
 
-<!-- =====================================================================
-     Custom Time / Clock Modal
-     ===================================================================== -->
-<div class="modal fade" id="customDurationModal" tabindex="-1" aria-labelledby="customDurationModalLabel" aria-hidden="true">
+<!-- Custom Duration Modal -->
+<div class="modal fade pixel-modal" id="customDurationModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content glass-card border-secondary">
-      <div class="modal-header border-secondary">
-        <h5 class="modal-title fw-bold text-light" id="customDurationModalLabel">
-          <i class="bi bi-clock-history text-warning me-2"></i>Set Custom Practice Time
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-clock-history"></i> Set Custom Practice Time</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="text-secondary small mb-3">
-          Configure a custom countdown clock or free watch timer. Pick a quick preset or type any custom duration in seconds or minutes.
-        </p>
+        <p class="form-text mb-3">Configure a countdown clock or free watch timer.</p>
 
-        <!-- Quick Presets -->
         <div class="mb-3">
-          <label class="form-label text-secondary small fw-bold">Quick Clock Presets</label>
+          <label class="form-label">Quick Presets</label>
           <div class="d-flex flex-wrap gap-2">
-            <button type="button" class="btn btn-outline-secondary btn-sm quick-duration-btn" data-sec="30">30s</button>
-            <button type="button" class="btn btn-outline-secondary btn-sm quick-duration-btn" data-sec="60">1 Min</button>
-            <button type="button" class="btn btn-outline-secondary btn-sm quick-duration-btn" data-sec="180">3 Min</button>
-            <button type="button" class="btn btn-outline-secondary btn-sm quick-duration-btn" data-sec="360">6 Min</button>
-            <button type="button" class="btn btn-outline-secondary btn-sm quick-duration-btn" data-sec="600">10 Min</button>
-            <button type="button" class="btn btn-outline-secondary btn-sm quick-duration-btn" data-sec="1800">30 Min</button>
+            <button type="button" class="px-btn px-btn-sm quick-duration-btn" data-sec="30">30s</button>
+            <button type="button" class="px-btn px-btn-sm quick-duration-btn" data-sec="60">1 Min</button>
+            <button type="button" class="px-btn px-btn-sm quick-duration-btn" data-sec="180">3 Min</button>
+            <button type="button" class="px-btn px-btn-sm quick-duration-btn" data-sec="360">6 Min</button>
+            <button type="button" class="px-btn px-btn-sm quick-duration-btn" data-sec="600">10 Min</button>
+            <button type="button" class="px-btn px-btn-sm quick-duration-btn" data-sec="1800">30 Min</button>
           </div>
         </div>
 
         <div class="row g-2 mb-3">
           <div class="col-8">
-            <label class="form-label text-secondary small fw-bold">Custom Time Value</label>
-            <input type="number" id="custom-time-val" class="form-control bg-dark text-light border-secondary" min="5" max="7200" value="90" placeholder="e.g. 90">
+            <label class="form-label">Custom Time Value</label>
+            <input type="number" id="custom-time-val" class="form-control" min="5" max="7200" value="90">
           </div>
           <div class="col-4">
-            <label class="form-label text-secondary small fw-bold">Unit</label>
-            <select id="custom-time-unit" class="form-select bg-dark text-light border-secondary">
+            <label class="form-label">Unit</label>
+            <select id="custom-time-unit" class="form-select">
               <option value="sec" selected>Seconds</option>
               <option value="min">Minutes</option>
             </select>
@@ -748,136 +1908,110 @@ Tab key is enabled for code indentation! Your real-time words, characters, accur
         </div>
 
         <div class="mb-2">
-          <label class="form-label text-secondary small fw-bold">Apply To Mode</label>
+          <label class="form-label">Apply To</label>
           <div class="d-flex gap-3">
             <div class="form-check">
               <input class="form-check-input" type="radio" name="customTimeTarget" id="targetPassage" value="passage" checked>
-              <label class="form-check-label small text-light" for="targetPassage">
-                Passage Drill
-              </label>
+              <label class="form-check-label" for="targetPassage">Passage Drill</label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="customTimeTarget" id="targetFree" value="free">
-              <label class="form-check-label small text-light" for="targetFree">
-                Free Typing Watch
-              </label>
+              <label class="form-check-label" for="targetFree">Free Typing</label>
             </div>
           </div>
         </div>
       </div>
-      <div class="modal-footer border-secondary">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary fw-bold px-4" id="btn-apply-custom-duration">
-          <i class="bi bi-check-circle-fill me-1"></i> Apply & Start Drill
+      <div class="modal-footer">
+        <button type="button" class="px-btn" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="px-btn px-btn-primary" id="btn-apply-custom-duration">
+          <i class="bi bi-check-circle-fill"></i> Apply &amp; Start
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- =====================================================================
-     Official Typing Proficiency Certificate Modal
-     ===================================================================== -->
-<div class="modal fade" id="certificateModal" tabindex="-1" aria-labelledby="certificateModalLabel" aria-hidden="true">
+<!-- Certificate Modal -->
+<div class="modal fade certificate-modal" id="certificateModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content glass-card p-0 border-secondary overflow-hidden">
-      <div class="modal-header border-secondary p-3 px-4">
-        <div class="d-flex align-items-center gap-2">
-          <i class="bi bi-award-fill text-warning fs-4"></i>
-          <h5 class="modal-title fw-bold text-light mb-0" id="certificateModalLabel">Official Typing Proficiency Certificate</h5>
-        </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-award-fill"></i> Official Typing Proficiency Certificate</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <div class="modal-body p-4 bg-dark">
-        <!-- Printable Certificate Box -->
-        <div class="certificate-preview-box" id="printable-certificate">
-          <div class="certificate-border-frame text-center">
-            <!-- Frame Corners -->
-            <div class="cert-corner cert-corner-tl"></div>
-            <div class="cert-corner cert-corner-tr"></div>
-            <div class="cert-corner cert-corner-bl"></div>
-            <div class="cert-corner cert-corner-br"></div>
+      <div class="modal-body">
+        <div class="cert-frame" id="printable-certificate">
+          <div class="cert-corner cert-corner-tl"></div>
+          <div class="cert-corner cert-corner-tr"></div>
+          <div class="cert-corner cert-corner-bl"></div>
+          <div class="cert-corner cert-corner-br"></div>
 
-            <div class="cert-emblem mb-2">
-              <i class="bi bi-award"></i>
-            </div>
-            <div class="small fw-bold text-uppercase letter-spacing-2" style="color: var(--first-color, #ff5532);">
-              Type Master Accreditation Board
-            </div>
-            <h2 class="cert-title mb-1">Certificate of Typing Proficiency</h2>
-            <div class="text-secondary small mb-3">Standardized Examination & Keying Velocity Verification</div>
+          <div class="cert-emblem"><i class="bi bi-award"></i></div>
+          <div class="cert-board">Type Master Accreditation Board</div>
+          <h2 class="cert-title">Certificate of Typing Proficiency</h2>
+          <div class="cert-subtitle">Standardized Examination &amp; Keying Velocity Verification</div>
 
-            <p class="text-muted small mb-1">This official credential certifies that</p>
-            <div class="cert-candidate-name" id="certCandidateName">
-              <?= e($currentUser['username'] ?? 'Candidate Typist') ?>
-            </div>
-            <p class="text-secondary small mt-1 mb-4" style="max-width: 620px; margin: 0 auto;">
-              has demonstrated typing velocity, accuracy, and keystroke integrity on standardized evaluation passages with the following verified metrics:
-            </p>
+          <p class="cert-certifies">This official credential certifies that</p>
+          <div class="cert-candidate" id="certCandidateName">
+            <?= e($currentUser['username'] ?? 'Candidate Typist') ?>
+          </div>
+          <p class="cert-description">
+            has demonstrated typing velocity, accuracy, and keystroke integrity on standardized evaluation passages with the following verified metrics:
+          </p>
 
-            <!-- 4 Core Achievement Badges -->
-            <div class="row g-3 justify-content-center mb-4">
-              <div class="col-6 col-md-3">
-                <div class="cert-metric-badge">
-                  <div class="cert-metric-val" id="certNetWpm">--</div>
-                  <div class="cert-metric-lbl">Net Speed (WPM)</div>
-                </div>
-              </div>
-              <div class="col-6 col-md-3">
-                <div class="cert-metric-badge">
-                  <div class="cert-metric-val" id="certGrossWpm">--</div>
-                  <div class="cert-metric-lbl">Gross Speed (WPM)</div>
-                </div>
-              </div>
-              <div class="col-6 col-md-3">
-                <div class="cert-metric-badge">
-                  <div class="cert-metric-val" id="certAccuracy">--%</div>
-                  <div class="cert-metric-lbl">Accuracy</div>
-                </div>
-              </div>
-              <div class="col-6 col-md-3">
-                <div class="cert-metric-badge">
-                  <div class="cert-metric-val" id="certDuration">--</div>
-                  <div class="cert-metric-lbl">Timed Duration</div>
-                </div>
+          <div class="row g-3 justify-content-center mb-4">
+            <div class="col-6 col-md-3">
+              <div class="cert-metric-badge">
+                <div class="cert-metric-val" id="certNetWpm">--</div>
+                <div class="cert-metric-lbl">Net Speed (WPM)</div>
               </div>
             </div>
-
-            <!-- Verification Footer Details -->
-            <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mt-4 pt-3 border-top border-secondary text-start">
-              <div>
-                <div class="cert-seal mb-1">
-                  <i class="bi bi-shield-fill-check"></i>
-                  <span>VERIFIED RECORD</span>
-                </div>
-                <div class="text-muted" style="font-size: 0.72rem;">
-                  Credential ID: <strong class="text-secondary font-monospace" id="certHash">TM-<?= strtoupper(substr(bin2hex(random_bytes(5)), 0, 10)) ?></strong>
-                </div>
-                <div class="text-muted" style="font-size: 0.72rem;">
-                  Issue Date: <strong class="text-secondary" id="certDate"><?= date('F j, Y') ?></strong>
-                </div>
+            <div class="col-6 col-md-3">
+              <div class="cert-metric-badge">
+                <div class="cert-metric-val" id="certGrossWpm">--</div>
+                <div class="cert-metric-lbl">Gross Speed (WPM)</div>
               </div>
-
-              <div class="text-end">
-                <div class="fw-bold font-monospace text-light" style="border-bottom: 1px solid var(--first-color, #ff5532); padding-bottom: 2px;">
-                  Automated Evaluation Engine
-                </div>
-                <div class="text-muted small" style="font-size: 0.72rem;">Type Master Verification Authority</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="cert-metric-badge">
+                <div class="cert-metric-val" id="certAccuracy">--%</div>
+                <div class="cert-metric-lbl">Accuracy</div>
               </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="cert-metric-badge">
+                <div class="cert-metric-val" id="certDuration">--</div>
+                <div class="cert-metric-lbl">Timed Duration</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mt-4 pt-3 border-top" style="border-color: currentColor !important;">
+            <div class="text-start">
+              <div class="cert-seal"><i class="bi bi-shield-fill-check"></i> VERIFIED RECORD</div>
+              <div class="cert-meta-row">
+                Credential ID: <strong id="certHash">TM-<?= strtoupper(substr(bin2hex(random_bytes(5)), 0, 10)) ?></strong>
+              </div>
+              <div class="cert-meta-row">
+                Issue Date: <strong id="certDate"><?= date('F j, Y') ?></strong>
+              </div>
+            </div>
+
+            <div class="text-end">
+              <div class="cert-signature">Automated Evaluation Engine</div>
+              <div class="cert-meta-row" style="margin-top:0.3rem;">Type Master Verification Authority</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="modal-footer border-secondary justify-content-between p-3 px-4">
-        <span class="text-muted small">
-          <i class="bi bi-info-circle me-1"></i>You can print this certificate or save it directly as a PDF.
-        </span>
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary fw-bold" onclick="window.print()">
-            <i class="bi bi-printer-fill me-1"></i> Print / Save as PDF
+      <div class="modal-footer">
+        <span class="cert-meta-row"><i class="bi bi-info-circle me-1"></i>Print or save this certificate as PDF.</span>
+        <div class="d-flex gap-2 flex-wrap">
+          <button type="button" class="px-btn" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="px-btn px-btn-primary" onclick="window.print()">
+            <i class="bi bi-printer-fill"></i> Print / PDF
           </button>
         </div>
       </div>
@@ -901,7 +2035,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultsModal = new bootstrap.Modal(document.getElementById('resultsModal'));
   let sessionChartInstance = null;
 
-  // CSS Sample snippet requested by user
   const cssSampleSnippet = `:root {
     --header-height: 3.5rem;
     --first-color: #ff5532;
@@ -916,10 +2049,8 @@ document.addEventListener('DOMContentLoaded', () => {
     --z-fixed: 100;
 }`;
 
-  // Strict Exam Mode: Backspace & Delete disabled by default as requested
   let isBackspaceDisabled = true;
 
-  // 1. Initialize Passage Engine with All 7 Core Metric Displays
   const engine = new TypingEngine({
     containerId: 'typing-box',
     hiddenInputId: 'hidden-typing-input',
@@ -942,14 +2073,11 @@ document.addEventListener('DOMContentLoaded', () => {
     difficulty: currentDifficulty,
     csrfToken: csrfToken,
     backspaceDisabled: isBackspaceDisabled,
-    onFinish: (result) => {
-      displayResultsModal(result);
-    }
+    onFinish: (result) => { displayResultsModal(result); }
   });
 
   engine.loadText(initialPassage.content);
 
-  // 2. Initialize Free Writing Engine (Blank Canvas) with All 7 Displays
   const freeEngine = new FreeWritingEngine({
     textareaId: 'free-typing-textarea',
     timerDisplayId: 'live-free-timer',
@@ -966,12 +2094,9 @@ document.addEventListener('DOMContentLoaded', () => {
     mode: 'stopwatch',
     csrfToken: csrfToken,
     backspaceDisabled: isBackspaceDisabled,
-    onFinish: (result) => {
-      displayResultsModal(result);
-    }
+    onFinish: (result) => { displayResultsModal(result); }
   });
 
-  // Lazy Skeleton Reveal: Smooth transition to interactive typing arena
   setTimeout(() => {
     const skel = document.getElementById('practice-skeleton-view');
     const content = document.getElementById('practice-content-view');
@@ -982,7 +2107,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 220);
 
-  // Mode Switcher Controls
   const btnModePassage = document.getElementById('btn-mode-passage');
   const btnModeFree = document.getElementById('btn-mode-free');
   const passageView = document.getElementById('passage-arena-view');
@@ -1004,14 +2128,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('free-typing-textarea').focus();
   });
 
-  // Free Typing Timer Mode Dropdown
   document.getElementById('free-timer-mode-select').addEventListener('change', (e) => {
     const val = e.target.value;
     if (val === 'custom') {
       const targetFree = document.getElementById('targetFree');
       if (targetFree) targetFree.checked = true;
-      const customModal = new bootstrap.Modal(document.getElementById('customDurationModal'));
-      customModal.show();
+      new bootstrap.Modal(document.getElementById('customDurationModal')).show();
       return;
     }
     if (val === 'stopwatch') {
@@ -1023,22 +2145,15 @@ document.addEventListener('DOMContentLoaded', () => {
     freeEngine.clear();
   });
 
-  // Free Typing Toolbar Actions
-  document.getElementById('btn-free-finish').addEventListener('click', () => {
-    freeEngine.finish();
-  });
+  document.getElementById('btn-free-finish').addEventListener('click', () => freeEngine.finish());
 
   document.getElementById('btn-free-clear').addEventListener('click', () => {
-    if (confirm('Clear the canvas and reset the word counter?')) {
-      freeEngine.clear();
-    }
+    if (confirm('Clear the canvas and reset the word counter?')) freeEngine.clear();
   });
 
   document.getElementById('btn-free-copy').addEventListener('click', () => {
     const text = document.getElementById('free-typing-textarea').value;
-    navigator.clipboard.writeText(text).then(() => {
-      showToast('success', 'Text copied to clipboard!');
-    });
+    navigator.clipboard.writeText(text).then(() => showToast('success', 'Text copied!'));
   });
 
   document.getElementById('btn-free-download').addEventListener('click', () => {
@@ -1053,42 +2168,31 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('info', 'File downloaded!');
   });
 
-  // Insert CSS Sample Button
   document.getElementById('btn-insert-css-sample').addEventListener('click', () => {
     const textarea = document.getElementById('free-typing-textarea');
     textarea.value = cssSampleSnippet;
     freeEngine.handleInput();
     textarea.focus();
-    showToast('info', 'CSS Variables snippet loaded into canvas!');
+    showToast('info', 'CSS snippet loaded!');
   });
 
-  // Convert Free Text to Passage Drill
   document.getElementById('btn-free-to-passage').addEventListener('click', () => {
     const text = document.getElementById('free-typing-textarea').value.trim();
-    if (text.length < 10) {
-      alert('Please write at least 10 characters before converting to a passage drill.');
-      return;
-    }
+    if (text.length < 10) { alert('Please write at least 10 characters.'); return; }
     const words = text.split(/\s+/).filter(w => w.length > 0);
     initialPassage = {
-      id: null,
-      title: 'Converted Free Writing Drill',
-      content: text,
-      difficulty: 'custom',
-      word_count: words.length,
-      char_count: text.length
+      id: null, title: 'Converted Free Writing Drill', content: text,
+      difficulty: 'custom', word_count: words.length, char_count: text.length
     };
     document.getElementById('passage-title-display').textContent = initialPassage.title;
     document.getElementById('passage-word-count-badge').textContent = words.length;
     engine.options.passageId = null;
     engine.options.difficulty = 'custom';
     engine.loadText(text);
-
     btnModePassage.click();
-    showToast('success', 'Converted to Passage Drill! Start typing to begin test.');
+    showToast('success', 'Converted to Passage Drill!');
   });
 
-  // Strict Exam Mode: Backspace/Delete State Controller
   function setBackspaceMode(disabled) {
     isBackspaceDisabled = disabled;
     engine.options.backspaceDisabled = disabled;
@@ -1099,7 +2203,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleText = document.getElementById('backspace-mode-text');
     const touchBtn = document.getElementById('btn-touch-backspace');
     const touchBtnText = document.getElementById('btn-touch-backspace-text');
-
     const freeToggleBtn = document.getElementById('btn-free-toggle-backspace');
     const freeToggleIcon = document.getElementById('free-backspace-mode-icon');
     const freeToggleText = document.getElementById('free-backspace-mode-text');
@@ -1107,57 +2210,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const freeTouchBtnText = document.getElementById('free-backspace-btn-text');
 
     if (disabled) {
-      if (toggleBtn) toggleBtn.className = 'btn btn-control text-danger fw-bold border-danger';
-      if (toggleIcon) toggleIcon.className = 'bi bi-slash-circle-fill text-danger';
-      if (toggleText) toggleText.innerHTML = 'Backspace: <strong class="text-danger">Disabled</strong>';
-      if (touchBtn) {
-        touchBtn.disabled = true;
-        touchBtn.className = 'btn btn-control text-secondary';
-        touchBtn.title = 'Backspace & Delete are disabled in Strict Mode';
-      }
+      if (toggleText) toggleText.innerHTML = 'Backspace: <strong>Disabled</strong>';
+      if (touchBtn) { touchBtn.disabled = true; }
       if (touchBtnText) touchBtnText.textContent = 'Backspace (Disabled)';
-
-      if (freeToggleBtn) freeToggleBtn.className = 'btn btn-control text-danger fw-bold border-danger';
-      if (freeToggleIcon) freeToggleIcon.className = 'bi bi-slash-circle-fill text-danger';
-      if (freeToggleText) freeToggleText.innerHTML = 'Backspace: <strong class="text-danger">Disabled</strong>';
-      if (freeTouchBtn) {
-        freeTouchBtn.disabled = true;
-        freeTouchBtn.className = 'btn btn-control text-secondary';
-        freeTouchBtn.title = 'Backspace & Delete are disabled in Strict Mode';
-      }
+      if (freeToggleText) freeToggleText.innerHTML = 'Backspace: <strong>Disabled</strong>';
+      if (freeTouchBtn) { freeTouchBtn.disabled = true; }
       if (freeTouchBtnText) freeTouchBtnText.textContent = 'Backspace (Disabled)';
     } else {
-      if (toggleBtn) toggleBtn.className = 'btn btn-control text-success fw-bold border-success';
-      if (toggleIcon) toggleIcon.className = 'bi bi-check-circle-fill text-success';
-      if (toggleText) toggleText.innerHTML = 'Backspace: <strong class="text-success">Enabled</strong>';
-      if (touchBtn) {
-        touchBtn.disabled = false;
-        touchBtn.className = 'btn btn-control text-warning';
-        touchBtn.title = 'Manual Backspace (Tap to delete last char)';
-      }
-      if (touchBtnText) touchBtnText.textContent = 'Backspace (Touch)';
-
-      if (freeToggleBtn) freeToggleBtn.className = 'btn btn-control text-success fw-bold border-success';
-      if (freeToggleIcon) freeToggleIcon.className = 'bi bi-check-circle-fill text-success';
-      if (freeToggleText) freeToggleText.innerHTML = 'Backspace: <strong class="text-success">Enabled</strong>';
-      if (freeTouchBtn) {
-        freeTouchBtn.disabled = false;
-        freeTouchBtn.className = 'btn btn-control text-warning';
-        freeTouchBtn.title = 'Manual Backspace (Tap to delete last char)';
-      }
-      if (freeTouchBtnText) freeTouchBtnText.textContent = 'Backspace (Touch)';
+      if (toggleText) toggleText.innerHTML = 'Backspace: <strong>Enabled</strong>';
+      if (touchBtn) { touchBtn.disabled = false; }
+      if (touchBtnText) touchBtnText.textContent = 'Backspace';
+      if (freeToggleText) freeToggleText.innerHTML = 'Backspace: <strong>Enabled</strong>';
+      if (freeTouchBtn) { freeTouchBtn.disabled = false; }
+      if (freeTouchBtnText) freeTouchBtnText.textContent = 'Backspace';
     }
   }
 
-  // Initialize Strict Exam Mode (Disabled by default as requested by user)
   setBackspaceMode(true);
 
-  // Toggle Backspace / Delete Strict Mode buttons
   const toggleBackspaceBtn = document.getElementById('btn-toggle-backspace');
   if (toggleBackspaceBtn) {
     toggleBackspaceBtn.addEventListener('click', () => {
       setBackspaceMode(!isBackspaceDisabled);
-      showToast(isBackspaceDisabled ? 'warning' : 'info', isBackspaceDisabled ? 'Strict Exam Mode: Backspace & Delete disabled' : 'Standard Mode: Backspace & Delete enabled');
+      showToast(isBackspaceDisabled ? 'warning' : 'info', isBackspaceDisabled ? 'Strict Mode ON' : 'Standard Mode ON');
     });
   }
 
@@ -1165,43 +2240,22 @@ document.addEventListener('DOMContentLoaded', () => {
   if (freeToggleBackspaceBtn) {
     freeToggleBackspaceBtn.addEventListener('click', () => {
       setBackspaceMode(!isBackspaceDisabled);
-      showToast(isBackspaceDisabled ? 'warning' : 'info', isBackspaceDisabled ? 'Strict Exam Mode: Backspace & Delete disabled' : 'Standard Mode: Backspace & Delete enabled');
+      showToast(isBackspaceDisabled ? 'warning' : 'info', isBackspaceDisabled ? 'Strict Mode ON' : 'Standard Mode ON');
     });
   }
 
-  // Dedicated Touch Backspace Buttons (Mobile & Desktop)
   const touchBackspaceBtn = document.getElementById('btn-touch-backspace');
-  if (touchBackspaceBtn) {
-    touchBackspaceBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      engine.manualBackspace();
-    });
-  }
+  if (touchBackspaceBtn) touchBackspaceBtn.addEventListener('click', (e) => { e.preventDefault(); engine.manualBackspace(); });
 
   const freeTouchBackspaceBtn = document.getElementById('btn-free-backspace-touch');
-  if (freeTouchBackspaceBtn) {
-    freeTouchBackspaceBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      freeEngine.manualBackspace();
-    });
-  }
+  if (freeTouchBackspaceBtn) freeTouchBackspaceBtn.addEventListener('click', (e) => { e.preventDefault(); freeEngine.manualBackspace(); });
 
-  // Pause / Resume Test Controls
   const btnPauseTest = document.getElementById('btn-pause-test');
-  if (btnPauseTest) {
-    btnPauseTest.addEventListener('click', () => {
-      engine.togglePause();
-    });
-  }
+  if (btnPauseTest) btnPauseTest.addEventListener('click', () => engine.togglePause());
 
   const btnResumeOverlay = document.getElementById('btn-resume-overlay');
-  if (btnResumeOverlay) {
-    btnResumeOverlay.addEventListener('click', () => {
-      engine.resumeTest();
-    });
-  }
+  if (btnResumeOverlay) btnResumeOverlay.addEventListener('click', () => engine.resumeTest());
 
-  // Last Test Captured & Quick Replay Banner Logic
   function renderLastCapturedBanner() {
     const banner = document.getElementById('last-test-captured-banner');
     if (!banner) return;
@@ -1219,7 +2273,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (wpmEl) wpmEl.textContent = `${lastResult.net_wpm || 0} WPM`;
       if (accEl) accEl.textContent = `${lastResult.accuracy || 100}% Acc`;
       if (cpmEl) cpmEl.textContent = `${lastResult.cpm || 0} CPM`;
-      if (timeEl) timeEl.textContent = `(${lastResult.elapsed_seconds || 0}s duration)`;
+      if (timeEl) timeEl.textContent = `(${lastResult.elapsed_seconds || 0}s)`;
 
       banner.classList.remove('d-none');
     } catch (e) {}
@@ -1247,13 +2301,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Quick Restart Keyboard Shortcut (Tab + Enter)
   let tabPressed = false;
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
-      tabPressed = true;
-      setTimeout(() => { tabPressed = false; }, 800);
-    } else if (e.key === 'Enter' && tabPressed) {
+    if (e.key === 'Tab') { tabPressed = true; setTimeout(() => { tabPressed = false; }, 800); }
+    else if (e.key === 'Enter' && tabPressed) {
       e.preventDefault();
       tabPressed = false;
       if (!passageView.classList.contains('d-none')) {
@@ -1265,44 +2316,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Passage Controls
-  document.getElementById('btn-restart-test').addEventListener('click', () => {
-    engine.loadText(initialPassage.content);
-  });
+  document.getElementById('btn-restart-test').addEventListener('click', () => engine.loadText(initialPassage.content));
+  document.getElementById('btn-next-passage').addEventListener('click', () => loadNewRandomPassage(currentDifficulty));
 
-  document.getElementById('btn-next-passage').addEventListener('click', () => {
-    loadNewRandomPassage(currentDifficulty);
-  });
-
-  // Sound Toggle Button
   const soundBtn = document.getElementById('btn-sound-toggle');
   const soundIcon = document.getElementById('sound-icon');
   soundBtn.addEventListener('click', () => {
     isSoundEnabled = !isSoundEnabled;
     engine.options.soundEnabled = isSoundEnabled;
     freeEngine.options.soundEnabled = isSoundEnabled;
-    if (isSoundEnabled) {
-      soundIcon.className = 'bi bi-volume-up-fill text-success';
-      showToast('info', 'Sound effects enabled (' + soundTheme + ')');
-    } else {
-      soundIcon.className = 'bi bi-volume-mute-fill text-secondary';
-      showToast('info', 'Sound effects muted');
-    }
+    soundIcon.className = isSoundEnabled ? 'bi bi-volume-up-fill' : 'bi bi-volume-mute-fill';
+    showToast('info', isSoundEnabled ? 'Sound ON' : 'Sound muted');
   });
 
-  // Duration Selector Buttons for Passage Drill
   document.querySelectorAll('.duration-selector-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.duration-selector-btn').forEach(b => b.classList.remove('active', 'text-info', 'fw-bold'));
-      btn.classList.add('active', 'text-info', 'fw-bold');
-
+      document.querySelectorAll('.duration-selector-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       currentDuration = parseInt(btn.dataset.duration);
       engine.options.duration = currentDuration;
       engine.loadText(initialPassage.content);
     });
   });
 
-  // Custom Text Modal Snippets
   const customTextArea = document.getElementById('custom-text-content');
   const customWordCounter = document.getElementById('custom-word-counter');
 
@@ -1320,61 +2356,37 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-snippet-js').addEventListener('click', () => {
-    document.getElementById('custom-text-title').value = 'Fibonacci Sequence';
+    document.getElementById('custom-text-title').value = 'Fibonacci';
     customTextArea.value = `function fibonacci(n) {\n    if (n <= 1) return n;\n    return fibonacci(n - 1) + fibonacci(n - 2);\n}`;
     updateCustomCounter();
   });
 
-  // Apply Custom Text
   document.getElementById('btn-apply-custom-text').addEventListener('click', () => {
     const customContent = customTextArea.value.trim();
     const customTitle = document.getElementById('custom-text-title').value.trim() || 'Custom Text Drill';
-
-    if (customContent.length < 5) {
-      alert('Please enter some practice text or code.');
-      return;
-    }
-
+    if (customContent.length < 5) { alert('Please enter some text.'); return; }
     const words = customContent.split(/\s+/).filter(w => w.length > 0);
-
-    initialPassage = {
-      id: null,
-      title: customTitle,
-      content: customContent,
-      difficulty: 'custom',
-      word_count: words.length,
-      char_count: customContent.length
-    };
-
+    initialPassage = { id: null, title: customTitle, content: customContent, difficulty: 'custom', word_count: words.length, char_count: customContent.length };
     document.getElementById('passage-title-display').textContent = customTitle;
     document.getElementById('passage-word-count-badge').textContent = words.length;
-
     engine.options.passageId = null;
     engine.options.difficulty = 'custom';
     engine.loadText(customContent);
-
     bootstrap.Modal.getInstance(document.getElementById('customTextModal')).hide();
     btnModePassage.click();
-    showToast('success', 'Custom practice drill loaded!');
+    showToast('success', 'Custom drill loaded!');
   });
 
-  // Results Modal Buttons
   document.getElementById('btn-res-retry').addEventListener('click', () => {
     resultsModal.hide();
-    if (!passageView.classList.contains('d-none')) {
-      engine.loadText(initialPassage.content);
-    } else {
-      freeEngine.clear();
-    }
+    if (!passageView.classList.contains('d-none')) engine.loadText(initialPassage.content);
+    else freeEngine.clear();
   });
 
   document.getElementById('btn-res-next').addEventListener('click', () => {
     resultsModal.hide();
-    if (!passageView.classList.contains('d-none')) {
-      loadNewRandomPassage(currentDifficulty);
-    } else {
-      freeEngine.clear();
-    }
+    if (!passageView.classList.contains('d-none')) loadNewRandomPassage(currentDifficulty);
+    else freeEngine.clear();
   });
 
   function loadNewRandomPassage(difficulty) {
@@ -1393,136 +2405,86 @@ document.addEventListener('DOMContentLoaded', () => {
           engine.loadText(initialPassage.content);
         }
       })
-      .catch(() => {
-        engine.loadText(initialPassage.content);
-      });
+      .catch(() => engine.loadText(initialPassage.content));
   }
 
   let latestResultData = null;
 
   function displayResultsModal(res) {
     latestResultData = res;
-
-    // 1. Hero Net WPM & Rating Badge
     const netWpm = res.net_wpm ?? 0;
     const elNetWpm = document.getElementById('res-net-wpm');
     if (elNetWpm) elNetWpm.textContent = netWpm;
 
-    // Dynamic Greeting Alert
     const greetIcon = document.getElementById('res-greeting-icon');
     const greetTitle = document.getElementById('res-greeting-title');
     const greetSub = document.getElementById('res-greeting-subtitle');
     if (greetIcon && greetTitle && greetSub) {
       if (netWpm >= 80) {
         greetIcon.textContent = '🌟';
-        greetTitle.textContent = 'Godspeed Typist! Extraordinary Velocity!';
-        greetSub.textContent = `Magnificent execution! At ${netWpm} Net WPM, your typing speed is in the top 1% globally. Review your diagnostic showing card or claim your official Certificate of Proficiency below.`;
+        greetTitle.textContent = 'Godspeed Typist!';
+        greetSub.textContent = `At ${netWpm} Net WPM you are in the top 1% globally.`;
       } else if (netWpm >= 60) {
         greetIcon.textContent = '🚀';
-        greetTitle.textContent = 'Masterful Run! Blazing Speed & Precision!';
-        greetSub.textContent = `Impressive! You clocked ${netWpm} Net WPM with stellar consistency. Your official Certificate of Typing Proficiency is ready to claim.`;
+        greetTitle.textContent = 'Masterful Run!';
+        greetSub.textContent = `You clocked ${netWpm} Net WPM with stellar consistency.`;
       } else if (netWpm >= 40) {
         greetIcon.textContent = '⚡';
-        greetTitle.textContent = 'Great Job! Solid Professional Rhythm!';
-        greetSub.textContent = `Well done! ${netWpm} Net WPM demonstrates solid typing speed and control. Keep practicing or claim your verified Certificate below.`;
+        greetTitle.textContent = 'Great Job! Solid Rhythm!';
+        greetSub.textContent = `${netWpm} Net WPM demonstrates solid control.`;
       } else {
         greetIcon.textContent = '🎯';
-        greetTitle.textContent = 'Practice Complete! Steady Progress!';
-        greetSub.textContent = `Completed with ${netWpm} Net WPM. Consistent training sharpens muscle memory and quickly escalates typing speed!`;
+        greetTitle.textContent = 'Practice Complete!';
+        greetSub.textContent = `Completed at ${netWpm} Net WPM. Consistent training escalates speed!`;
       }
     }
 
     const ratingBadge = document.getElementById('res-rating-badge');
     if (ratingBadge) {
       const rating = getSpeedRating(netWpm);
-      ratingBadge.innerHTML = `<span class="badge fs-6 px-3 py-1" style="background-color: ${rating.color};"><i class="bi ${rating.icon} me-1"></i>${rating.label}</span>`;
+      ratingBadge.innerHTML = `<span class="sc-rating-badge"><i class="bi ${rating.icon}"></i> ${rating.label}</span>`;
     }
 
-    // Strict Mode Indicator in Results Modal
     const strictNote = document.getElementById('res-strict-mode-note');
     if (strictNote) {
       if (res.backspace_disabled || isBackspaceDisabled) {
-        strictNote.innerHTML = '<i class="bi bi-slash-circle-fill text-danger me-1"></i> Strict Exam Rules: Backspace/Delete Disabled';
-        strictNote.className = 'mt-3 text-danger small fw-bold';
+        strictNote.innerHTML = '<i class="bi bi-slash-circle-fill" style="color:#dc2626;"></i> Strict Exam Rules: Backspace disabled';
       } else {
-        strictNote.innerHTML = '<i class="bi bi-check-circle-fill text-success me-1"></i> Standard Mode: Backspace Enabled';
-        strictNote.className = 'mt-3 text-success small';
+        strictNote.innerHTML = '<i class="bi bi-check-circle-fill"></i> Standard Mode: Backspace enabled';
       }
     }
 
-    // =========================================================================
-    // The 7 Core Metrics Showing Card (As requested by user):
-    // 1) Elapsed / Timer (Format m:ss)
-    // 2) Real-Time Words
-    // 3) Live Accuracy
-    // 4) Gross WPM
-    // 5) CPM (Speed)
-    // 6) Characters
-    // 7) Lines
-    // =========================================================================
     const elapsedSec = Math.round(res.elapsed_seconds || 0);
     const minutes = Math.floor(elapsedSec / 60);
     const seconds = elapsedSec % 60;
     const timerStr = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
-    // 1. Elapsed / Timer
-    const elElapsedTimer = document.getElementById('res-elapsed-timer');
-    if (elElapsedTimer) elElapsedTimer.textContent = timerStr;
-    const elTimeElapsed = document.getElementById('res-time-elapsed');
-    if (elTimeElapsed) elTimeElapsed.textContent = `${res.elapsed_seconds || 0}s duration`;
+    document.getElementById('res-elapsed-timer').textContent = timerStr;
+    document.getElementById('res-time-elapsed').textContent = `${res.elapsed_seconds || 0}s duration`;
+    document.getElementById('res-words-typed').textContent = res.words_typed ?? 0;
+    document.getElementById('res-accuracy').textContent = `${res.accuracy ?? 100}%`;
+    document.getElementById('res-gross-wpm').textContent = res.gross_wpm ?? 0;
 
-    // 2. Real-Time Words
-    const elWords = document.getElementById('res-words-typed');
-    if (elWords) elWords.textContent = res.words_typed ?? 0;
-
-    // 3. Live Accuracy
-    const elAcc = document.getElementById('res-accuracy');
-    if (elAcc) elAcc.textContent = `${res.accuracy ?? 100}%`;
-
-    // 4. Gross WPM
-    const elGross = document.getElementById('res-gross-wpm');
-    if (elGross) elGross.textContent = res.gross_wpm ?? 0;
-
-    // 5. CPM (Speed)
     const totalChars = res.total_characters ?? res.total_keystrokes ?? ((res.words_typed ?? 0) * 5);
     const cpmVal = res.cpm || Math.round(totalChars / Math.max(0.1, (res.elapsed_seconds || 1) / 60));
-    const elCpm = document.getElementById('res-cpm');
-    if (elCpm) elCpm.textContent = cpmVal;
+    document.getElementById('res-cpm').textContent = cpmVal;
+    document.getElementById('res-chars-count').textContent = totalChars;
+    document.getElementById('res-lines-count').textContent = res.total_lines || Math.max(1, Math.ceil((res.words_typed || 1) / 12));
 
-    // 6. Characters
-    const elChars = document.getElementById('res-chars-count');
-    if (elChars) elChars.textContent = totalChars;
+    const tot = res.total_keystrokes || totalChars || 1;
+    const cor = res.correct_keystrokes ?? tot;
+    const qScore = Math.min(100, Math.max(0, Math.round((cor / Math.max(1, tot)) * 100)));
+    document.getElementById('res-quality-score').textContent = `${qScore}%`;
 
-    // 7. Lines
-    const linesVal = res.total_lines || Math.max(1, Math.ceil((res.words_typed || 1) / 12));
-    const elLines = document.getElementById('res-lines-count');
-    if (elLines) elLines.textContent = linesVal;
+    document.getElementById('res-total-keys').textContent = res.total_keystrokes ?? 0;
+    document.getElementById('res-correct-keys').textContent = res.correct_keystrokes ?? 0;
+    document.getElementById('res-error-keys').textContent = res.error_keystrokes ?? 0;
+    document.getElementById('res-backspaces').textContent = res.backspace_count ?? 0;
 
-    // 8. Keystroke Quality Score
-    const elQuality = document.getElementById('res-quality-score');
-    if (elQuality) {
-      const tot = res.total_keystrokes || totalChars || 1;
-      const cor = res.correct_keystrokes ?? tot;
-      const qScore = Math.min(100, Math.max(0, Math.round((cor / Math.max(1, tot)) * 100)));
-      elQuality.textContent = `${qScore}%`;
-    }
-
-    // Detailed Keystrokes Breakdown
-    const elTotalKeys = document.getElementById('res-total-keys');
-    if (elTotalKeys) elTotalKeys.textContent = res.total_keystrokes ?? 0;
-    const elCorrectKeys = document.getElementById('res-correct-keys');
-    if (elCorrectKeys) elCorrectKeys.textContent = res.correct_keystrokes ?? 0;
-    const elErrorKeys = document.getElementById('res-error-keys');
-    if (elErrorKeys) elErrorKeys.textContent = res.error_keystrokes ?? 0;
-    const elBackspaces = document.getElementById('res-backspaces');
-    if (elBackspaces) elBackspaces.textContent = res.backspace_count ?? 0;
-
-    // Render Trajectory Speed Graph with Dark Orange palette
     renderSessionChart(res.speed_history || []);
     resultsModal.show();
   }
 
-  // Certificate Modal Generator Logic
   function openCertificateModal() {
     const res = latestResultData || {
       net_wpm: document.getElementById('res-net-wpm')?.textContent || 0,
@@ -1530,30 +2492,19 @@ document.addEventListener('DOMContentLoaded', () => {
       accuracy: (document.getElementById('res-accuracy')?.textContent || '100%').replace('%', ''),
       elapsed_seconds: currentDuration || 60
     };
-    const elCertNet = document.getElementById('certNetWpm');
-    const elCertGross = document.getElementById('certGrossWpm');
-    const elCertAcc = document.getElementById('certAccuracy');
-    const elCertDur = document.getElementById('certDuration');
-
-    if (elCertNet) elCertNet.textContent = res.net_wpm || 0;
-    if (elCertGross) elCertGross.textContent = res.gross_wpm || res.net_wpm || 0;
-    if (elCertAcc) elCertAcc.textContent = `${res.accuracy || 100}%`;
+    document.getElementById('certNetWpm').textContent = res.net_wpm || 0;
+    document.getElementById('certGrossWpm').textContent = res.gross_wpm || res.net_wpm || 0;
+    document.getElementById('certAccuracy').textContent = `${res.accuracy || 100}%`;
     const durSec = Math.round(res.elapsed_seconds || currentDuration || 60);
-    if (elCertDur) {
-      if (durSec < 60) elCertDur.textContent = `${durSec}s`;
-      else elCertDur.textContent = `${Math.round(durSec / 60)} min`;
-    }
-    const certModal = new bootstrap.Modal(document.getElementById('certificateModal'));
-    certModal.show();
+    document.getElementById('certDuration').textContent = durSec < 60 ? `${durSec}s` : `${Math.round(durSec / 60)} min`;
+    new bootstrap.Modal(document.getElementById('certificateModal')).show();
   }
 
   const btnGenCert = document.getElementById('btn-generate-cert');
   if (btnGenCert) btnGenCert.addEventListener('click', openCertificateModal);
-
   const btnQuickCert = document.getElementById('btn-quick-cert-view');
   if (btnQuickCert) btnQuickCert.addEventListener('click', openCertificateModal);
 
-  // Custom Time Presets Logic
   document.querySelectorAll('.quick-duration-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const sec = parseInt(btn.dataset.sec);
@@ -1566,12 +2517,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (valInput) valInput.value = sec;
         if (unitInput) unitInput.value = 'sec';
       }
-      document.querySelectorAll('.quick-duration-btn').forEach(b => b.classList.remove('btn-warning', 'text-dark', 'fw-bold'));
-      btn.classList.add('btn-warning', 'text-dark', 'fw-bold');
     });
   });
 
-  // Apply Custom Time Duration
   const btnApplyCustomDuration = document.getElementById('btn-apply-custom-duration');
   if (btnApplyCustomDuration) {
     btnApplyCustomDuration.addEventListener('click', () => {
@@ -1580,59 +2528,53 @@ document.addEventListener('DOMContentLoaded', () => {
       const totalSeconds = unit === 'min' ? val * 60 : val;
       const targetMode = document.querySelector('input[name="customTimeTarget"]:checked')?.value || 'passage';
 
-      if (totalSeconds < 5) {
-        alert('Please enter a duration of at least 5 seconds.');
-        return;
-      }
+      if (totalSeconds < 5) { alert('Please enter at least 5 seconds.'); return; }
 
       if (targetMode === 'passage') {
         currentDuration = totalSeconds;
         engine.options.duration = totalSeconds;
-        const liveTimer = document.getElementById('live-timer');
-        if (liveTimer) liveTimer.textContent = `${totalSeconds}s`;
+        document.getElementById('live-timer').textContent = `${totalSeconds}s`;
         engine.loadText(initialPassage.content);
         btnModePassage.click();
       } else {
         freeEngine.options.mode = 'timed';
         freeEngine.options.duration = totalSeconds;
         const liveFreeTimer = document.getElementById('live-free-timer');
-        if (liveFreeTimer) {
-          const m = Math.floor(totalSeconds / 60);
-          const s = totalSeconds % 60;
-          liveFreeTimer.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
-        }
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        liveFreeTimer.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
         btnModeFree.click();
         freeEngine.clear();
       }
 
       bootstrap.Modal.getInstance(document.getElementById('customDurationModal'))?.hide();
-      showToast('success', `Custom time set: ${totalSeconds} seconds for ${targetMode === 'passage' ? 'Passage Drill' : 'Free Typing'}!`);
+      showToast('success', `Custom time: ${totalSeconds}s for ${targetMode === 'passage' ? 'Passage' : 'Free'}!`);
     });
   }
 
-  // Auto-open custom modal if mode=custom in URL
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('mode') === 'custom') {
-    const customModal = new bootstrap.Modal(document.getElementById('customDurationModal'));
-    customModal.show();
+    new bootstrap.Modal(document.getElementById('customDurationModal')).show();
   }
 
   function getSpeedRating(wpm) {
-    if (wpm >= 100) return { label: 'Typing God', color: '#ff6a00', icon: 'bi-trophy-fill' };
-    if (wpm >= 80) return { label: 'Grandmaster', color: '#ff8c33', icon: 'bi-award-fill' };
-    if (wpm >= 60) return { label: 'Professional', color: '#38bdf8', icon: 'bi-star-fill' };
-    if (wpm >= 40) return { label: 'Intermediate', color: '#10b981', icon: 'bi-check-circle-fill' };
-    if (wpm >= 25) return { label: 'Developing', color: '#f59e0b', icon: 'bi-graph-up-arrow' };
-    return { label: 'Beginner', color: '#94a3b8', icon: 'bi-seedling' };
+    if (wpm >= 100) return { label: 'Typing God', icon: 'bi-trophy-fill' };
+    if (wpm >= 80) return { label: 'Grandmaster', icon: 'bi-award-fill' };
+    if (wpm >= 60) return { label: 'Professional', icon: 'bi-star-fill' };
+    if (wpm >= 40) return { label: 'Intermediate', icon: 'bi-check-circle-fill' };
+    if (wpm >= 25) return { label: 'Developing', icon: 'bi-graph-up-arrow' };
+    return { label: 'Beginner', icon: 'bi-seedling' };
   }
 
   function renderSessionChart(history) {
     const ctx = document.getElementById('sessionSpeedChart');
     if (!ctx) return;
+    if (sessionChartInstance) sessionChartInstance.destroy();
 
-    if (sessionChartInstance) {
-      sessionChartInstance.destroy();
-    }
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const lineColor = isDark ? '#ffffff' : '#000000';
+    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+    const tickColor = isDark ? '#999999' : '#666666';
 
     const labels = (history && history.length > 0) ? history.map(h => `${h.second}s`) : ['0s', '1s'];
     const dataPoints = (history && history.length > 0) ? history.map(h => h.wpm) : [0, 0];
@@ -1644,15 +2586,14 @@ document.addEventListener('DOMContentLoaded', () => {
         datasets: [{
           label: 'WPM',
           data: dataPoints,
-          borderColor: '#ff6a00',
-          backgroundColor: 'rgba(255, 106, 0, 0.16)',
+          borderColor: lineColor,
+          backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
           fill: true,
           tension: 0.35,
-          borderWidth: 2.5,
+          borderWidth: 3,
           pointRadius: 2.5,
-          pointBackgroundColor: '#ff6a00',
-          pointHoverRadius: 5,
-          pointHoverBackgroundColor: '#ff8c33'
+          pointBackgroundColor: lineColor,
+          pointHoverRadius: 5
         }]
       },
       options: {
@@ -1661,17 +2602,27 @@ document.addEventListener('DOMContentLoaded', () => {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#121826',
-            borderColor: '#ff6a00',
-            borderWidth: 1,
-            titleColor: '#f1f5f9',
-            bodyColor: '#ff6a00',
-            displayColors: false
+            backgroundColor: isDark ? '#000000' : '#ffffff',
+            borderColor: lineColor,
+            borderWidth: 2,
+            titleColor: isDark ? '#ffffff' : '#000000',
+            bodyColor: isDark ? '#ffffff' : '#000000',
+            displayColors: false,
+            padding: 10,
+            titleFont: { family: 'Inter', weight: '700', size: 12 },
+            bodyFont: { family: 'JetBrains Mono', size: 12 }
           }
         },
         scales: {
-          x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b', font: { size: 10 } } },
-          y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b', font: { size: 10 } } }
+          x: {
+            grid: { color: gridColor },
+            ticks: { color: tickColor, font: { size: 10, family: 'Inter' } }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: gridColor },
+            ticks: { color: tickColor, font: { size: 10, family: 'JetBrains Mono' } }
+          }
         }
       }
     });

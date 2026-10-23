@@ -1,9 +1,7 @@
-<?php
+ <?php
 /**
  * Custom Type Master Pro
- * Interactive Student Lesson Player (Typing.com Experience)
- * Features: Visual On-Screen Keyboard, Finger Placement Guides, 
- * Step-by-Step Drill Progression, Star Ratings & Real-Time Telemetry
+ * Interactive Student Lesson Player — Pixel Theme, Clean Sans-Serif
  */
 
 require_once __DIR__ . '/config/app.php';
@@ -26,453 +24,942 @@ $currentUser = current_user();
 include __DIR__ . '/includes/header.php';
 ?>
 
-<div class="content-wrapper lesson-player-wrapper">
-  <!-- Top Navigation & Stage HUD -->
-  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-    <div class="d-flex align-items-center gap-3">
-      <a href="<?= BASE_URL ?>/lessons.php" class="btn btn-sm btn-control d-inline-flex align-items-center gap-1.5 px-3 py-1.5" title="Return to Curriculum">
-        <i class="bi bi-arrow-left"></i>
-        <span>All Lessons</span>
-      </a>
-
-      <div>
-        <div class="d-flex align-items-center gap-2 mb-0.5">
-          <span class="badge px-2 py-0.5 rounded text-uppercase" style="font-size: 0.65rem; font-weight: 800; background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
-            <?= e($lesson['stage_title']) ?>
-          </span>
-          <span class="text-secondary small fw-bold">Lesson <?= sprintf('%02d', $lesson['number']) ?></span>
-        </div>
-        <h4 class="fw-bold mb-0 text-white" style="letter-spacing: -0.02em; font-size: 1.25rem;">
-          <?= e($lesson['title']) ?>
-        </h4>
-      </div>
-    </div>
-
-    <!-- Live Telemetry Pill Badges -->
-    <div class="d-flex align-items-center gap-2">
-      <!-- Live Speed HUD -->
-      <div class="px-3 py-1.5 rounded-3 d-flex align-items-center gap-2" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
-        <i class="bi bi-speedometer2 text-info"></i>
-        <div>
-          <div class="text-secondary" style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">Speed</div>
-          <div class="fw-bold text-white fs-6 font-monospace" id="hud-wpm">0 <span class="text-secondary" style="font-size: 0.7rem;">WPM</span></div>
-        </div>
-      </div>
-
-      <!-- Live Accuracy HUD -->
-      <div class="px-3 py-1.5 rounded-3 d-flex align-items-center gap-2" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
-        <i class="bi bi-bullseye text-success"></i>
-        <div>
-          <div class="text-secondary" style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">Accuracy</div>
-          <div class="fw-bold text-white fs-6 font-monospace" id="hud-acc">100<span class="text-secondary" style="font-size: 0.7rem;">%</span></div>
-        </div>
-      </div>
-
-      <!-- Controls Dropdown / Audio Toggle -->
-      <button type="button" class="btn btn-sm btn-control px-2.5 py-2" id="toggle-sound-btn" title="Toggle Mechanical Audio Feedback">
-        <i class="bi bi-volume-up-fill fs-6" id="sound-icon"></i>
-      </button>
-
-      <button type="button" class="btn btn-sm btn-control px-2.5 py-2" id="toggle-keyboard-btn" title="Toggle On-Screen Keyboard">
-        <i class="bi bi-keyboard-fill fs-6"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- Screen Multi-Step Progression Bar -->
-  <div class="glass-card p-3 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px;">
-    <div class="d-flex align-items-center gap-2 flex-grow-1" id="stepPillsContainer">
-      <?php foreach ($lesson['exercises'] as $exIndex => $ex): ?>
-        <div class="step-pill-wrapper flex-grow-1" data-step-index="<?= $exIndex ?>">
-          <div class="step-pill <?= ($exIndex === 0) ? 'active' : '' ?>">
-            <span class="step-num"><?= $exIndex + 1 ?></span>
-            <span class="step-check"><i class="bi bi-check-lg"></i></span>
-          </div>
-        </div>
-      <?php endforeach; ?>
-    </div>
-
-    <div class="d-flex align-items-center gap-2 text-secondary small fw-bold ps-2 border-start" style="border-color: var(--border-color) !important;">
-      <span>Step <span id="currentStepText" class="text-white">1</span> of <?= count($lesson['exercises']) ?></span>
-    </div>
-  </div>
-
-  <!-- Main Interactive Typing Arena -->
-  <div class="glass-card p-4 p-md-5 mb-4 position-relative text-center overflow-hidden" id="lessonArenaContainer" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; min-height: 220px; box-shadow: var(--shadow-md);">
-    <!-- Focus Prompt Overlay -->
-    <div id="lessonFocusPrompt" class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background: rgba(10,10,10,0.85); backdrop-filter: blur(4px); z-index: 10; cursor: pointer; transition: opacity 0.25s ease;">
-      <div class="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background: rgba(255, 106, 0, 0.15); color: var(--first-color); border: 1px solid rgba(255, 106, 0, 0.3);">
-        <i class="bi bi-cursor-fill fs-3"></i>
-      </div>
-      <div class="fw-bold text-white fs-5 mb-1">Click to Focus or Start Typing</div>
-      <div class="text-secondary small">Your fingers will be guided by the visual keyboard below</div>
-    </div>
-
-    <!-- Hidden Input for Mobile / Virtual Focus -->
-    <input type="text" id="lessonVirtualInput" autocomplete="off" autocapitalize="none" spellcheck="false" style="position: absolute; opacity: 0; pointer-events: none; left: -9999px;">
-
-    <!-- Exercise Text Stream Display -->
-    <div class="typing-stream-wrap py-3" id="typingStreamWrap">
-      <div class="typing-text-display font-monospace" id="lessonTextDisplay" style="font-size: 2.1rem; letter-spacing: 0.08em; line-height: 1.8; user-select: none;">
-        <!-- Dynamically rendered character spans -->
-      </div>
-    </div>
-
-    <!-- Dynamic Finger & Hand Placement Hint -->
-    <div class="mt-4 pt-3 border-top d-flex align-items-center justify-content-center gap-2" style="border-color: var(--border-color) !important;">
-      <div class="finger-hint-pill d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill" id="fingerHintBadge" style="background: var(--bg-secondary); border: 1px solid var(--border-color); font-size: 0.88rem; font-weight: 600; color: var(--text-primary);">
-        <span class="finger-zone-dot" id="fingerHintDot"></span>
-        <span id="fingerHintText">Press <strong class="text-white">J</strong> with your <strong style="color: #facc15;">Right Index Finger</strong></span>
-      </div>
-    </div>
-  </div>
-
-  <!-- On-Screen Keyboard Guide (Typing.com Signature Component) -->
-  <div class="glass-card p-3 p-md-4 mb-4 keyboard-guide-container" id="visualKeyboardContainer" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px;">
-    <div class="d-flex align-items-center justify-content-between mb-3 px-1">
-      <div class="d-flex align-items-center gap-2 small text-secondary">
-        <i class="bi bi-hand-index-thumb"></i>
-        <span>Finger Guide Legend:</span>
-      </div>
-
-      <!-- Color Legend for Finger Placement Zones -->
-      <div class="d-none d-md-flex align-items-center gap-3" style="font-size: 0.72rem; font-weight: 700;">
-        <span class="d-inline-flex align-items-center gap-1.5"><span class="legend-color-dot" style="background: #a855f7;"></span> Left Pinky</span>
-        <span class="d-inline-flex align-items-center gap-1.5"><span class="legend-color-dot" style="background: #3b82f6;"></span> Left Ring</span>
-        <span class="d-inline-flex align-items-center gap-1.5"><span class="legend-color-dot" style="background: #06b6d4;"></span> Left Middle</span>
-        <span class="d-inline-flex align-items-center gap-1.5"><span class="legend-color-dot" style="background: #10b981;"></span> Left Index</span>
-        <span class="d-inline-flex align-items-center gap-1.5"><span class="legend-color-dot" style="background: #f59e0b;"></span> Thumbs</span>
-        <span class="d-inline-flex align-items-center gap-1.5"><span class="legend-color-dot" style="background: #eab308;"></span> Right Index</span>
-        <span class="d-inline-flex align-items-center gap-1.5"><span class="legend-color-dot" style="background: #06b6d4;"></span> Right Middle</span>
-        <span class="d-inline-flex align-items-center gap-1.5"><span class="legend-color-dot" style="background: #3b82f6;"></span> Right Ring</span>
-        <span class="d-inline-flex align-items-center gap-1.5"><span class="legend-color-dot" style="background: #a855f7;"></span> Right Pinky</span>
-      </div>
-    </div>
-
-    <!-- Visual QWERTY Keyboard Grid -->
-    <div class="keyboard-board" id="visualKeyboardBoard">
-      <!-- Row 1: Numbers -->
-      <div class="kb-row">
-        <div class="kb-key key-pinky-l" data-key="`" data-char="~">`</div>
-        <div class="kb-key key-pinky-l" data-key="1" data-char="!">1</div>
-        <div class="kb-key key-ring-l" data-key="2" data-char="@">2</div>
-        <div class="kb-key key-middle-l" data-key="3" data-char="#">3</div>
-        <div class="kb-key key-index-l" data-key="4" data-char="$">4</div>
-        <div class="kb-key key-index-l" data-key="5" data-char="%">5</div>
-        <div class="kb-key key-index-r" data-key="6" data-char="^">6</div>
-        <div class="kb-key key-index-r" data-key="7" data-char="&">7</div>
-        <div class="kb-key key-middle-r" data-key="8" data-char="*">8</div>
-        <div class="kb-key key-ring-r" data-key="9" data-char="(">9</div>
-        <div class="kb-key key-pinky-r" data-key="0" data-char=")">0</div>
-        <div class="kb-key key-pinky-r" data-key="-" data-char="_">-</div>
-        <div class="kb-key key-pinky-r" data-key="=" data-char="+">=</div>
-        <div class="kb-key kb-key-wide key-pinky-r" data-key="Backspace">⌫</div>
-      </div>
-
-      <!-- Row 2: Top Row (QWERTY) -->
-      <div class="kb-row">
-        <div class="kb-key kb-key-wide key-pinky-l" data-key="Tab">Tab</div>
-        <div class="kb-key key-pinky-l" data-key="q" data-char="Q">Q</div>
-        <div class="kb-key key-ring-l" data-key="w" data-char="W">W</div>
-        <div class="kb-key key-middle-l" data-key="e" data-char="E">E</div>
-        <div class="kb-key key-index-l" data-key="r" data-char="R">R</div>
-        <div class="kb-key key-index-l" data-key="t" data-char="T">T</div>
-        <div class="kb-key key-index-r" data-key="y" data-char="Y">Y</div>
-        <div class="kb-key key-index-r" data-key="u" data-char="U">U</div>
-        <div class="kb-key key-middle-r" data-key="i" data-char="I">I</div>
-        <div class="kb-key key-ring-r" data-key="o" data-char="O">O</div>
-        <div class="kb-key key-pinky-r" data-key="p" data-char="P">P</div>
-        <div class="kb-key key-pinky-r" data-key="[" data-char="{">[</div>
-        <div class="kb-key key-pinky-r" data-key="]" data-char="}">]</div>
-        <div class="kb-key key-pinky-r" data-key="\" data-char="|">\</div>
-      </div>
-
-      <!-- Row 3: Home Row (ASDF - JKL;) -->
-      <div class="kb-row">
-        <div class="kb-key kb-key-wider key-pinky-l" data-key="CapsLock">Caps</div>
-        <div class="kb-key key-pinky-l" data-key="a" data-char="A">A</div>
-        <div class="kb-key key-ring-l" data-key="s" data-char="S">S</div>
-        <div class="kb-key key-middle-l" data-key="d" data-char="D">D</div>
-        <div class="kb-key key-index-l kb-anchor-key" data-key="f" data-char="F">
-          <span>F</span>
-          <div class="home-bump"></div>
-        </div>
-        <div class="kb-key key-index-l" data-key="g" data-char="G">G</div>
-        <div class="kb-key key-index-r" data-key="h" data-char="H">H</div>
-        <div class="kb-key key-index-r kb-anchor-key" data-key="j" data-char="J">
-          <span>J</span>
-          <div class="home-bump"></div>
-        </div>
-        <div class="kb-key key-middle-r" data-key="k" data-char="K">K</div>
-        <div class="kb-key key-ring-r" data-key="l" data-char="L">L</div>
-        <div class="kb-key key-pinky-r" data-key=";" data-char=":">;</div>
-        <div class="kb-key key-pinky-r" data-key="'" data-char="&quot;">'</div>
-        <div class="kb-key kb-key-wider key-pinky-r" data-key="Enter">Enter ↵</div>
-      </div>
-
-      <!-- Row 4: Bottom Row (ZXCVBNM) -->
-      <div class="kb-row">
-        <div class="kb-key kb-key-widest key-pinky-l" data-key="ShiftLeft">Shift</div>
-        <div class="kb-key key-pinky-l" data-key="z" data-char="Z">Z</div>
-        <div class="kb-key key-ring-l" data-key="x" data-char="X">X</div>
-        <div class="kb-key key-middle-l" data-key="c" data-char="C">C</div>
-        <div class="kb-key key-index-l" data-key="v" data-char="V">V</div>
-        <div class="kb-key key-index-l" data-key="b" data-char="B">B</div>
-        <div class="kb-key key-index-r" data-key="n" data-char="N">N</div>
-        <div class="kb-key key-index-r" data-key="m" data-char="M">M</div>
-        <div class="kb-key key-middle-r" data-key="," data-char="<">,</div>
-        <div class="kb-key key-ring-r" data-key="." data-char=">">.</div>
-        <div class="kb-key key-pinky-r" data-key="/" data-char="?">/</div>
-        <div class="kb-key kb-key-widest key-pinky-r" data-key="ShiftRight">Shift</div>
-      </div>
-
-      <!-- Row 5: Space Bar -->
-      <div class="kb-row">
-        <div class="kb-key key-pinky-l" data-key="Control">Ctrl</div>
-        <div class="kb-key key-pinky-l" data-key="Alt">Alt</div>
-        <div class="kb-key kb-key-space key-thumb" data-key=" " data-char=" ">Space Bar</div>
-        <div class="kb-key key-pinky-r" data-key="AltGraph">Alt</div>
-        <div class="kb-key key-pinky-r" data-key="Control">Ctrl</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Lesson Completion Modal -->
-<div class="modal fade" id="lessonCompleteModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content glass-card p-4 text-center border-0" style="background: rgba(18, 18, 18, 0.98); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: var(--shadow-lg);">
-      <!-- Confetti Canvas -->
-      <canvas id="confettiCanvas" style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 1;"></canvas>
-
-      <div style="position: relative; z-index: 2;">
-        <div class="mb-3 d-inline-flex p-3 rounded-circle" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">
-          <i class="bi bi-award-fill fs-2"></i>
-        </div>
-
-        <h3 class="fw-bold text-white mb-1" style="letter-spacing: -0.03em;">Lesson Complete!</h3>
-        <p class="text-secondary small mb-4">Great work! You have finished all exercises in this lesson.</p>
-
-        <!-- Stars Earned Container -->
-        <div class="d-flex align-items-center justify-content-center gap-2 mb-4" id="modalStarsContainer">
-          <i class="bi bi-star-fill text-warning fs-1 star-pop" style="animation-delay: 0.1s;"></i>
-          <i class="bi bi-star-fill text-warning fs-1 star-pop" style="animation-delay: 0.25s;"></i>
-          <i class="bi bi-star-fill text-warning fs-1 star-pop" style="animation-delay: 0.4s;"></i>
-        </div>
-
-        <!-- Result Metrics Cards -->
-        <div class="row g-2 mb-4">
-          <div class="col-4">
-            <div class="p-2.5 rounded-3" style="background: var(--bg-primary); border: 1px solid var(--border-color);">
-              <div class="text-secondary" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Speed</div>
-              <div class="fw-bold text-white fs-5 font-monospace" id="modalWpm">0</div>
-              <div class="text-secondary" style="font-size: 0.65rem;">WPM</div>
-            </div>
-          </div>
-          <div class="col-4">
-            <div class="p-2.5 rounded-3" style="background: var(--bg-primary); border: 1px solid var(--border-color);">
-              <div class="text-secondary" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Accuracy</div>
-              <div class="fw-bold text-white fs-5 font-monospace" id="modalAccuracy">0%</div>
-              <div class="text-secondary" style="font-size: 0.65rem;">Precision</div>
-            </div>
-          </div>
-          <div class="col-4">
-            <div class="p-2.5 rounded-3" style="background: var(--bg-primary); border: 1px solid var(--border-color);">
-              <div class="text-secondary" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Time</div>
-              <div class="fw-bold text-white fs-5 font-monospace" id="modalTime">0s</div>
-              <div class="text-secondary" style="font-size: 0.65rem;">Duration</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="d-flex flex-column gap-2">
-          <a href="#" id="modalNextLessonBtn" class="btn btn-primary py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2" style="background: var(--first-color); border: none; border-radius: 10px;">
-            <span>Next Lesson</span>
-            <i class="bi bi-arrow-right"></i>
-          </a>
-          <button type="button" class="btn btn-outline-secondary py-2 fw-semibold text-white" id="modalRetryBtn" style="border-radius: 10px; border-color: var(--border-color);">
-            <i class="bi bi-arrow-counterclockwise me-1"></i> Practice This Lesson Again
-          </button>
-          <a href="<?= BASE_URL ?>/lessons.php" class="btn btn-link text-secondary text-decoration-none small py-1">
-            Back to Curriculum Overview
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <style>
-/* Step Pills Bar */
-.step-pill-wrapper {
-  position: relative;
+/* ============================================================
+   LESSON PLAYER — PIXEL THEME + CLEAN SANS-SERIF
+   ============================================================ */
+.lesson-player-wrapper {
+  --ink:        #000000;
+  --paper:      #ffffff;
+  --paper-soft: #f4f4f4;
+  --paper-hard: #e0e0e0;
+  --shadow:     3px;
+  --sans:       "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono:       "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  font-family: var(--sans);
+  color: var(--ink);
 }
-.step-pill {
-  height: 8px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 4px;
-  transition: all 0.3s ease;
+
+html[data-theme="dark"] .lesson-player-wrapper {
+  --ink:        #ffffff;
+  --paper:      #000000;
+  --paper-soft: #141414;
+  --paper-hard: #222222;
+}
+
+/* ---------- Top row ---------- */
+.lesson-player-wrapper .lp-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.lesson-player-wrapper .lp-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.05s steps(1), box-shadow 0.05s steps(1);
+}
+.lesson-player-wrapper .lp-back-btn:hover { background: var(--paper-soft); color: var(--ink); }
+.lesson-player-wrapper .lp-back-btn:active {
+  transform: translate(var(--shadow), var(--shadow));
+  box-shadow: 0 0 0 var(--ink);
+}
+
+/* ---------- Stage + title ---------- */
+.lesson-player-wrapper .lp-stage-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+.lesson-player-wrapper .lp-stage-badge {
+  font-family: var(--sans);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.55rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--ink);
+}
+.lesson-player-wrapper .lp-stage-num {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+  opacity: 0.65;
+}
+.lesson-player-wrapper .lp-title {
+  font-family: var(--sans);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--ink);
+}
+
+/* ---------- HUD pills ---------- */
+.lesson-player-wrapper .lp-hud-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.lesson-player-wrapper .lp-hud-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.85rem;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+}
+.lesson-player-wrapper .lp-hud-pill i {
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+.lesson-player-wrapper .lp-hud-label {
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.7;
+  line-height: 1;
+  margin-bottom: 0.2rem;
+}
+.lesson-player-wrapper .lp-hud-value {
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+.lesson-player-wrapper .lp-hud-value small {
+  font-size: 0.68rem;
+  font-weight: 600;
+  opacity: 0.65;
+  margin-left: 0.15rem;
+}
+
+.lesson-player-wrapper .lp-icon-btn {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  color: var(--ink);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.05s steps(1), box-shadow 0.05s steps(1), background 0.05s steps(1);
+}
+.lesson-player-wrapper .lp-icon-btn:hover { background: var(--paper-soft); }
+.lesson-player-wrapper .lp-icon-btn:active {
+  transform: translate(var(--shadow), var(--shadow));
+  box-shadow: 0 0 0 var(--ink);
+}
+.lesson-player-wrapper .lp-icon-btn i {
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+/* ---------- Step bar ---------- */
+.lesson-player-wrapper .lp-step-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.9rem 1rem;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  margin-bottom: 1.25rem;
+}
+.lesson-player-wrapper .lp-step-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+.lesson-player-wrapper .lp-step-pill-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+.lesson-player-wrapper .lp-step-pill {
+  height: 14px;
+  background: var(--paper-hard);
+  border: 2px solid var(--ink);
+  transition: background 0.1s steps(1);
+}
+.lesson-player-wrapper .lp-step-pill.active {
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--paper) inset;
+}
+.lesson-player-wrapper .lp-step-pill.completed {
+  background: var(--ink);
+  opacity: 0.5;
+}
+.lesson-player-wrapper .lp-step-counter {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+  padding-left: 1rem;
+  border-left: 3px solid var(--ink);
+  white-space: nowrap;
+}
+.lesson-player-wrapper .lp-step-counter strong {
+  font-family: var(--mono);
+  font-weight: 700;
+}
+
+/* ---------- Arena ---------- */
+.lesson-player-wrapper .lp-arena {
   position: relative;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  min-height: 240px;
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+}
+.lesson-player-wrapper .lp-arena::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(45deg, rgba(0,0,0,0.035) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0,0,0,0.035) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.035) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.035) 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+}
+html[data-theme="dark"] .lesson-player-wrapper .lp-arena::before {
+  background-image:
+    linear-gradient(45deg, rgba(255,255,255,0.045) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,0.045) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.045) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.045) 75%);
+}
+.lesson-player-wrapper .lp-arena > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Focus overlay */
+.lesson-player-wrapper .lp-focus-prompt {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  cursor: pointer;
+  padding: 1.5rem;
+  text-align: center;
+  transition: opacity 0.25s ease;
+}
+.lesson-player-wrapper .lp-focus-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  border: 3px solid var(--paper);
+}
+.lesson-player-wrapper .lp-focus-icon i {
+  font-size: 1.6rem;
+  color: var(--ink);
+}
+.lesson-player-wrapper .lp-focus-title {
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--paper);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.4rem;
+}
+.lesson-player-wrapper .lp-focus-sub {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--paper);
+  opacity: 0.75;
+  max-width: 360px;
+  line-height: 1.5;
+}
+
+/* Typing display */
+.lesson-player-wrapper .lp-stream-wrap {
+  padding: 1rem 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.lesson-player-wrapper .lp-text-display {
+  font-family: var(--mono);
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  line-height: 1.7;
+  color: var(--ink);
+  word-break: break-word;
+  user-select: none;
+}
+.lesson-player-wrapper .lp-char {
+  display: inline-block;
+  position: relative;
+  transition: color 0.05s ease, background-color 0.05s ease;
+  color: var(--ink);
+  opacity: 0.28;
+}
+.lesson-player-wrapper .lp-char.correct {
+  opacity: 1;
+}
+.lesson-player-wrapper .lp-char.incorrect {
+  background: var(--ink);
+  color: var(--paper);
+  opacity: 1;
+}
+.lesson-player-wrapper .lp-char.active {
+  opacity: 1;
+  background: var(--paper-soft);
+  box-shadow: 0 0 0 3px var(--ink);
+  animation: lpCaret 1s steps(2) infinite;
+}
+@keyframes lpCaret {
+  0%, 49%   { box-shadow: 0 0 0 3px var(--ink); }
+  50%, 100% { box-shadow: 0 0 0 3px transparent; }
+}
+
+/* Finger hint */
+.lesson-player-wrapper .lp-finger-hint-wrap {
+  padding-top: 1rem;
+  margin-top: 1rem;
+  border-top: 3px dashed var(--ink);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.step-pill.active {
-  background: var(--first-color);
-  box-shadow: 0 0 10px rgba(255, 106, 0, 0.4);
+.lesson-player-wrapper .lp-finger-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 1rem;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink);
 }
-.step-pill.completed {
-  background: #10b981;
+.lesson-player-wrapper .lp-finger-hint strong {
+  font-weight: 700;
+  color: var(--ink);
 }
-.step-pill .step-num,
-.step-pill .step-check {
-  display: none;
-}
-
-/* Typing Stream Area */
-.char-span {
+.lesson-player-wrapper .lp-finger-dot {
   display: inline-block;
-  position: relative;
-  transition: color 0.05s ease, background-color 0.05s ease;
-}
-.char-correct {
-  color: #10b981;
-}
-.char-incorrect {
-  color: #f43f5e;
-  background: rgba(244, 63, 94, 0.18);
-  border-radius: 2px;
-}
-.char-active {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  box-shadow: 0 0 0 2px var(--first-color);
-  animation: pulse-caret 1s infinite alternate;
-}
-@keyframes pulse-caret {
-  0% { box-shadow: 0 0 0 2px var(--first-color); }
-  100% { box-shadow: 0 0 10px 3px var(--first-color); }
+  width: 12px;
+  height: 12px;
+  background: var(--ink);
+  flex-shrink: 0;
 }
 
-/* Finger Hint Dot */
-.finger-zone-dot {
+/* ---------- Keyboard ---------- */
+.lesson-player-wrapper .lp-keyboard-wrap {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.lesson-player-wrapper .lp-kb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px dashed var(--ink);
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.lesson-player-wrapper .lp-kb-head i {
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+.lesson-player-wrapper .lp-kb-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+.lesson-player-wrapper .lp-legend-dot {
+  display: inline-block;
   width: 10px;
   height: 10px;
-  border-radius: 50%;
-  background: var(--first-color);
-  display: inline-block;
-}
-.legend-color-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
+  margin-right: 0.3rem;
+  vertical-align: middle;
+  border: 1.5px solid var(--ink);
 }
 
-/* Visual Keyboard Board */
-.keyboard-board {
+.lesson-player-wrapper .lp-kb-board {
   max-width: 880px;
   margin: 0 auto;
   user-select: none;
 }
-.kb-row {
+.lesson-player-wrapper .lp-kb-row {
   display: flex;
   justify-content: center;
   gap: 6px;
   margin-bottom: 6px;
 }
-.kb-key {
+.lesson-player-wrapper .lp-kb-key {
   width: 44px;
   height: 44px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--typing-font), monospace;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-bottom-width: 4px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
   font-weight: 700;
-  font-size: 0.88rem;
-  color: var(--text-primary);
-  box-shadow: 0 2px 0 rgba(0,0,0,0.4);
-  transition: all 0.08s ease;
+  color: var(--ink);
   position: relative;
+  transition: transform 0.08s ease, background 0.08s ease;
 }
+.lesson-player-wrapper .lp-kb-key.wide   { width: 68px;  font-size: 0.72rem; }
+.lesson-player-wrapper .lp-kb-key.wider  { width: 78px;  font-size: 0.72rem; }
+.lesson-player-wrapper .lp-kb-key.widest { width: 98px;  font-size: 0.72rem; }
+.lesson-player-wrapper .lp-kb-key.space  { width: 280px; font-size: 0.72rem; }
 
-/* Width multipliers */
-.kb-key-wide { width: 68px; font-size: 0.78rem; }
-.kb-key-wider { width: 78px; font-size: 0.78rem; }
-.kb-key-widest { width: 98px; font-size: 0.78rem; }
-.kb-key-space { width: 280px; font-size: 0.78rem; }
+/* Finger zone borders */
+.lesson-player-wrapper .lp-kb-key.zone-lp { border-bottom-color: #a855f7; }
+.lesson-player-wrapper .lp-kb-key.zone-lr { border-bottom-color: #3b82f6; }
+.lesson-player-wrapper .lp-kb-key.zone-lm { border-bottom-color: #06b6d4; }
+.lesson-player-wrapper .lp-kb-key.zone-li { border-bottom-color: #10b981; }
+.lesson-player-wrapper .lp-kb-key.zone-th { border-bottom-color: #f59e0b; }
+.lesson-player-wrapper .lp-kb-key.zone-ri { border-bottom-color: #eab308; }
+.lesson-player-wrapper .lp-kb-key.zone-rm { border-bottom-color: #06b6d4; }
+.lesson-player-wrapper .lp-kb-key.zone-rr { border-bottom-color: #3b82f6; }
+.lesson-player-wrapper .lp-kb-key.zone-rp { border-bottom-color: #a855f7; }
 
-/* Finger Zone Colors for border/accent */
-.key-pinky-l  { border-bottom: 3px solid #a855f7; }
-.key-ring-l   { border-bottom: 3px solid #3b82f6; }
-.key-middle-l { border-bottom: 3px solid #06b6d4; }
-.key-index-l  { border-bottom: 3px solid #10b981; }
-.key-thumb    { border-bottom: 3px solid #f59e0b; }
-.key-index-r  { border-bottom: 3px solid #eab308; }
-.key-middle-r { border-bottom: 3px solid #06b6d4; }
-.key-ring-r   { border-bottom: 3px solid #3b82f6; }
-.key-pinky-r  { border-bottom: 3px solid #a855f7; }
-
-/* Tactile Bump on F and J */
-.kb-anchor-key .home-bump {
+/* F / J anchor bumps */
+.lesson-player-wrapper .lp-kb-key.anchor .lp-kb-bump {
   position: absolute;
   bottom: 5px;
   width: 14px;
   height: 2px;
-  background: var(--text-secondary);
-  border-radius: 2px;
+  background: var(--ink);
 }
 
-/* Active Highlight Key (Current Target) */
-.kb-key.kb-target-key {
-  background: var(--first-color) !important;
-  color: #ffffff !important;
-  border-color: #ffffff !important;
-  box-shadow: 0 0 16px var(--first-color), 0 2px 0 #b33900 !important;
-  transform: translateY(-2px);
-  animation: key-bounce 0.8s infinite alternate ease-in-out;
+/* Target key highlight — inverted block */
+.lesson-player-wrapper .lp-kb-key.target {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+  border-bottom-color: var(--paper);
+  transform: translateY(-3px);
+  animation: lpKeyBounce 0.8s infinite alternate ease-in-out;
 }
-@keyframes key-bounce {
-  0% { transform: translateY(-2px); }
-  100% { transform: translateY(-4px) scale(1.05); }
+.lesson-player-wrapper .lp-kb-key.target .lp-kb-bump {
+  background: var(--paper);
 }
-
-/* Physical Key Pressed */
-.kb-key.kb-pressed {
-  transform: translateY(2px);
-  box-shadow: 0 0 0 rgba(0,0,0,0);
-  background: rgba(255,255,255,0.25) !important;
+@keyframes lpKeyBounce {
+  0%   { transform: translateY(-3px); }
+  100% { transform: translateY(-6px); }
 }
 
-/* Star Pop Animation in Modal */
+/* Pressed key */
+.lesson-player-wrapper .lp-kb-key.pressed {
+  transform: translateY(3px);
+  background: var(--paper-soft);
+}
+
+/* ---------- Modal ---------- */
+.lp-modal .modal-content {
+  background: #ffffff;
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 0;
+  box-shadow: 6px 6px 0 #000000;
+  font-family: "Inter", -apple-system, sans-serif;
+  padding: 1.75rem;
+}
+html[data-theme="dark"] .lp-modal .modal-content {
+  background: #000000;
+  color: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 6px 6px 0 #ffffff;
+}
+
+.lp-modal .lp-modal-award {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: #000000;
+  color: #ffffff;
+  border: 3px solid #000000;
+  margin-bottom: 1rem;
+}
+html[data-theme="dark"] .lp-modal .lp-modal-award {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+.lp-modal .lp-modal-award i {
+  font-size: 1.8rem;
+}
+
+.lp-modal .lp-modal-title {
+  font-family: "Inter", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: inherit;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+.lp-modal .lp-modal-sub {
+  font-family: "Inter", sans-serif;
+  font-size: 0.88rem;
+  color: inherit;
+  opacity: 0.75;
+  margin-bottom: 1.25rem;
+}
+
+.lp-modal .lp-stars-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+.lp-modal .lp-stars-row i {
+  font-size: 2rem;
+  color: inherit;
+}
+.lp-modal .lp-stars-row i.bi-star {
+  opacity: 0.18;
+}
+
+.lp-modal .lp-result-card {
+  background: #f4f4f4;
+  border: 2px solid #000000;
+  padding: 0.7rem 0.5rem;
+  text-align: center;
+}
+html[data-theme="dark"] .lp-modal .lp-result-card {
+  background: #141414;
+  border-color: #ffffff;
+}
+.lp-modal .lp-result-label {
+  font-family: "Inter", sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-bottom: 0.3rem;
+}
+.lp-modal .lp-result-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.lp-modal .lp-result-sub {
+  font-family: "Inter", sans-serif;
+  font-size: 0.62rem;
+  opacity: 0.6;
+  margin-top: 0.25rem;
+}
+
+.lp-modal .lp-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #000000;
+  color: #ffffff;
+  border: 3px solid #000000;
+  box-shadow: 3px 3px 0 #000000;
+  font-family: "Inter", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.05s steps(1), box-shadow 0.05s steps(1);
+}
+.lp-modal .lp-btn-primary:hover {
+  background: #000000;
+  color: #ffffff;
+}
+.lp-modal .lp-btn-primary:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 #000000;
+}
+html[data-theme="dark"] .lp-modal .lp-btn-primary {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  box-shadow: 3px 3px 0 #ffffff;
+}
+html[data-theme="dark"] .lp-modal .lp-btn-primary:active {
+  box-shadow: 0 0 0 #ffffff;
+}
+
+.lp-modal .lp-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: transparent;
+  color: inherit;
+  border: 3px solid currentColor;
+  box-shadow: 3px 3px 0 currentColor;
+  font-family: "Inter", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.05s steps(1), box-shadow 0.05s steps(1);
+}
+.lp-modal .lp-btn-outline:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 currentColor;
+}
+.lp-modal .lp-back-link {
+  display: block;
+  text-align: center;
+  padding: 0.5rem 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.78rem;
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.7;
+}
+.lp-modal .lp-back-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Star pop */
 .star-pop {
   animation: starPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 @keyframes starPop {
-  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  0%   { transform: scale(0) rotate(-45deg); opacity: 0; }
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
+/* ---------- Responsive ---------- */
 @media (max-width: 768px) {
-  .kb-key {
-    width: 28px;
-    height: 34px;
-    font-size: 0.72rem;
-  }
-  .kb-key-wide { width: 44px; }
-  .kb-key-wider { width: 50px; }
-  .kb-key-widest { width: 60px; }
-  .kb-key-space { width: 140px; }
-  .typing-text-display { font-size: 1.4rem !important; }
+  .lesson-player-wrapper .lp-text-display { font-size: 1.4rem; }
+  .lesson-player-wrapper .lp-arena { padding: 1.5rem 1rem; }
+  .lesson-player-wrapper .lp-title { font-size: 1.1rem; }
+  .lesson-player-wrapper .lp-hud-value { font-size: 1rem; }
+  .lesson-player-wrapper .lp-hud-pill { padding: 0.45rem 0.65rem; }
+  .lesson-player-wrapper .lp-finger-hint { font-size: 0.78rem; padding: 0.45rem 0.75rem; }
+
+  .lesson-player-wrapper .lp-kb-key { width: 28px; height: 34px; font-size: 0.66rem; }
+  .lesson-player-wrapper .lp-kb-key.wide   { width: 44px; }
+  .lesson-player-wrapper .lp-kb-key.wider  { width: 50px; }
+  .lesson-player-wrapper .lp-kb-key.widest { width: 60px; }
+  .lesson-player-wrapper .lp-kb-key.space  { width: 140px; }
+}
+@media (max-width: 575px) {
+  .lesson-player-wrapper .lp-kb-legend { display: none !important; }
+  .lesson-player-wrapper .lp-step-counter { font-size: 0.7rem; padding-left: 0.75rem; }
+  .lesson-player-wrapper .lp-hud-label { font-size: 0.56rem; }
 }
 </style>
 
-<!-- Pass lesson data cleanly into JavaScript -->
+<div class="content-wrapper lesson-player-wrapper">
+
+  <!-- Top bar -->
+  <div class="lp-topbar">
+    <div class="d-flex align-items-center gap-3">
+      <a href="<?= BASE_URL ?>/lessons.php" class="lp-back-btn">
+        <i class="bi bi-arrow-left"></i>
+        <span>All Lessons</span>
+      </a>
+      <div>
+        <div class="lp-stage-row">
+          <span class="lp-stage-badge"><?= e($lesson['stage_title']) ?></span>
+          <span class="lp-stage-num">Lesson <?= sprintf('%02d', $lesson['number']) ?></span>
+        </div>
+        <h4 class="lp-title"><?= e($lesson['title']) ?></h4>
+      </div>
+    </div>
+
+    <div class="lp-hud-group">
+      <div class="lp-hud-pill">
+        <i class="bi bi-speedometer2"></i>
+        <div>
+          <div class="lp-hud-label">Speed</div>
+          <div class="lp-hud-value" id="hud-wpm">0<small>WPM</small></div>
+        </div>
+      </div>
+      <div class="lp-hud-pill">
+        <i class="bi bi-bullseye"></i>
+        <div>
+          <div class="lp-hud-label">Accuracy</div>
+          <div class="lp-hud-value" id="hud-acc">100<small>%</small></div>
+        </div>
+      </div>
+      <button type="button" class="lp-icon-btn" id="toggle-sound-btn" title="Toggle sound">
+        <i class="bi bi-volume-up-fill" id="sound-icon"></i>
+      </button>
+      <button type="button" class="lp-icon-btn" id="toggle-keyboard-btn" title="Toggle keyboard">
+        <i class="bi bi-keyboard-fill"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step bar -->
+  <div class="lp-step-bar">
+    <div class="lp-step-pills" id="stepPillsContainer">
+      <?php foreach ($lesson['exercises'] as $exIndex => $ex): ?>
+        <div class="lp-step-pill-wrapper" data-step-index="<?= $exIndex ?>">
+          <div class="lp-step-pill <?= ($exIndex === 0) ? 'active' : '' ?>"></div>
+        </div>
+      <?php endforeach; ?>
+    </div>
+    <div class="lp-step-counter">
+      Step <strong id="currentStepText">1</strong> of <?= count($lesson['exercises']) ?>
+    </div>
+  </div>
+
+  <!-- Arena -->
+  <div class="lp-arena" id="lessonArenaContainer">
+    <div id="lessonFocusPrompt" class="lp-focus-prompt">
+      <div class="lp-focus-icon"><i class="bi bi-cursor-fill"></i></div>
+      <div class="lp-focus-title">Click to Focus or Start Typing</div>
+      <div class="lp-focus-sub">Your fingers will be guided by the visual keyboard below</div>
+    </div>
+
+    <input type="text" id="lessonVirtualInput" autocomplete="off" autocapitalize="none" spellcheck="false"
+           style="position:absolute;opacity:0;pointer-events:none;left:-9999px;">
+
+    <div class="lp-stream-wrap">
+      <div class="lp-text-display" id="lessonTextDisplay"></div>
+    </div>
+
+    <div class="lp-finger-hint-wrap">
+      <div class="lp-finger-hint" id="fingerHintBadge">
+        <span class="lp-finger-dot" id="fingerHintDot"></span>
+        <span id="fingerHintText">Press <strong>J</strong> with your <strong>Right Index Finger</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard -->
+  <div class="lp-keyboard-wrap" id="visualKeyboardContainer">
+    <div class="lp-kb-head">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-hand-index-thumb"></i>
+        <span>Finger Guide</span>
+      </div>
+      <div class="lp-kb-legend d-none d-md-flex">
+        <span><span class="lp-legend-dot" style="background:#a855f7;"></span>LP</span>
+        <span><span class="lp-legend-dot" style="background:#3b82f6;"></span>LR</span>
+        <span><span class="lp-legend-dot" style="background:#06b6d4;"></span>LM</span>
+        <span><span class="lp-legend-dot" style="background:#10b981;"></span>LI</span>
+        <span><span class="lp-legend-dot" style="background:#f59e0b;"></span>TH</span>
+        <span><span class="lp-legend-dot" style="background:#eab308;"></span>RI</span>
+        <span><span class="lp-legend-dot" style="background:#06b6d4;"></span>RM</span>
+        <span><span class="lp-legend-dot" style="background:#3b82f6;"></span>RR</span>
+        <span><span class="lp-legend-dot" style="background:#a855f7;"></span>RP</span>
+      </div>
+    </div>
+
+    <div class="lp-kb-board" id="visualKeyboardBoard">
+      <!-- Row 1 -->
+      <div class="lp-kb-row">
+        <div class="lp-kb-key zone-lp" data-key="`" data-char="~">`</div>
+        <div class="lp-kb-key zone-lp" data-key="1" data-char="!">1</div>
+        <div class="lp-kb-key zone-lr" data-key="2" data-char="@">2</div>
+        <div class="lp-kb-key zone-lm" data-key="3" data-char="#">3</div>
+        <div class="lp-kb-key zone-li" data-key="4" data-char="$">4</div>
+        <div class="lp-kb-key zone-li" data-key="5" data-char="%">5</div>
+        <div class="lp-kb-key zone-ri" data-key="6" data-char="^">6</div>
+        <div class="lp-kb-key zone-ri" data-key="7" data-char="&">7</div>
+        <div class="lp-kb-key zone-rm" data-key="8" data-char="*">8</div>
+        <div class="lp-kb-key zone-rr" data-key="9" data-char="(">9</div>
+        <div class="lp-kb-key zone-rp" data-key="0" data-char=")">0</div>
+        <div class="lp-kb-key zone-rp" data-key="-" data-char="_">-</div>
+        <div class="lp-kb-key zone-rp" data-key="=" data-char="+">=</div>
+        <div class="lp-kb-key wide zone-rp" data-key="Backspace">⌫</div>
+      </div>
+      <!-- Row 2 -->
+      <div class="lp-kb-row">
+        <div class="lp-kb-key wide zone-lp" data-key="Tab">Tab</div>
+        <div class="lp-kb-key zone-lp" data-key="q" data-char="Q">Q</div>
+        <div class="lp-kb-key zone-lr" data-key="w" data-char="W">W</div>
+        <div class="lp-kb-key zone-lm" data-key="e" data-char="E">E</div>
+        <div class="lp-kb-key zone-li" data-key="r" data-char="R">R</div>
+        <div class="lp-kb-key zone-li" data-key="t" data-char="T">T</div>
+        <div class="lp-kb-key zone-ri" data-key="y" data-char="Y">Y</div>
+        <div class="lp-kb-key zone-ri" data-key="u" data-char="U">U</div>
+        <div class="lp-kb-key zone-rm" data-key="i" data-char="I">I</div>
+        <div class="lp-kb-key zone-rr" data-key="o" data-char="O">O</div>
+        <div class="lp-kb-key zone-rp" data-key="p" data-char="P">P</div>
+        <div class="lp-kb-key zone-rp" data-key="[" data-char="{">[</div>
+        <div class="lp-kb-key zone-rp" data-key="]" data-char="}">]</div>
+        <div class="lp-kb-key zone-rp" data-key="\" data-char="|">\</div>
+      </div>
+      <!-- Row 3 -->
+      <div class="lp-kb-row">
+        <div class="lp-kb-key wider zone-lp" data-key="CapsLock">Caps</div>
+        <div class="lp-kb-key zone-lp" data-key="a" data-char="A">A</div>
+        <div class="lp-kb-key zone-lr" data-key="s" data-char="S">S</div>
+        <div class="lp-kb-key zone-lm" data-key="d" data-char="D">D</div>
+        <div class="lp-kb-key zone-li anchor" data-key="f" data-char="F">
+          <span>F</span><div class="lp-kb-bump"></div>
+        </div>
+        <div class="lp-kb-key zone-li" data-key="g" data-char="G">G</div>
+        <div class="lp-kb-key zone-ri" data-key="h" data-char="H">H</div>
+        <div class="lp-kb-key zone-ri anchor" data-key="j" data-char="J">
+          <span>J</span><div class="lp-kb-bump"></div>
+        </div>
+        <div class="lp-kb-key zone-rm" data-key="k" data-char="K">K</div>
+        <div class="lp-kb-key zone-rr" data-key="l" data-char="L">L</div>
+        <div class="lp-kb-key zone-rp" data-key=";" data-char=":">;</div>
+        <div class="lp-kb-key zone-rp" data-key="'" data-char="&quot;">'</div>
+        <div class="lp-kb-key wider zone-rp" data-key="Enter">Enter ↵</div>
+      </div>
+      <!-- Row 4 -->
+      <div class="lp-kb-row">
+        <div class="lp-kb-key widest zone-lp" data-key="ShiftLeft">Shift</div>
+        <div class="lp-kb-key zone-lp" data-key="z" data-char="Z">Z</div>
+        <div class="lp-kb-key zone-lr" data-key="x" data-char="X">X</div>
+        <div class="lp-kb-key zone-lm" data-key="c" data-char="C">C</div>
+        <div class="lp-kb-key zone-li" data-key="v" data-char="V">V</div>
+        <div class="lp-kb-key zone-li" data-key="b" data-char="B">B</div>
+        <div class="lp-kb-key zone-ri" data-key="n" data-char="N">N</div>
+        <div class="lp-kb-key zone-ri" data-key="m" data-char="M">M</div>
+        <div class="lp-kb-key zone-rm" data-key="," data-char="<">,</div>
+        <div class="lp-kb-key zone-rr" data-key="." data-char=">">.</div>
+        <div class="lp-kb-key zone-rp" data-key="/" data-char="?">/</div>
+        <div class="lp-kb-key widest zone-rp" data-key="ShiftRight">Shift</div>
+      </div>
+      <!-- Row 5 -->
+      <div class="lp-kb-row">
+        <div class="lp-kb-key zone-lp" data-key="Control">Ctrl</div>
+        <div class="lp-kb-key zone-lp" data-key="Alt">Alt</div>
+        <div class="lp-kb-key space zone-th" data-key=" " data-char=" ">Space Bar</div>
+        <div class="lp-kb-key zone-rp" data-key="AltGraph">Alt</div>
+        <div class="lp-kb-key zone-rp" data-key="Control">Ctrl</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Completion Modal -->
+<div class="modal fade lp-modal" id="lessonCompleteModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <canvas id="confettiCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
+
+      <div style="position:relative;z-index:2;">
+        <div class="lp-modal-award"><i class="bi bi-award-fill"></i></div>
+        <h3 class="lp-modal-title">Lesson Complete!</h3>
+        <p class="lp-modal-sub">Great work! You finished all exercises.</p>
+
+        <div class="lp-stars-row" id="modalStarsContainer">
+          <i class="bi bi-star-fill star-pop" style="animation-delay:0.1s;"></i>
+          <i class="bi bi-star-fill star-pop" style="animation-delay:0.25s;"></i>
+          <i class="bi bi-star-fill star-pop" style="animation-delay:0.4s;"></i>
+        </div>
+
+        <div class="row g-2 mb-4">
+          <div class="col-4">
+            <div class="lp-result-card">
+              <div class="lp-result-label">Speed</div>
+              <div class="lp-result-value" id="modalWpm">0</div>
+              <div class="lp-result-sub">WPM</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="lp-result-card">
+              <div class="lp-result-label">Accuracy</div>
+              <div class="lp-result-value" id="modalAccuracy">0%</div>
+              <div class="lp-result-sub">Precision</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="lp-result-card">
+              <div class="lp-result-label">Time</div>
+              <div class="lp-result-value" id="modalTime">0s</div>
+              <div class="lp-result-sub">Duration</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex flex-column gap-2">
+          <a href="#" id="modalNextLessonBtn" class="lp-btn-primary">
+            <span>Next Lesson</span>
+            <i class="bi bi-arrow-right"></i>
+          </a>
+          <button type="button" class="lp-btn-outline" id="modalRetryBtn">
+            <i class="bi bi-arrow-counterclockwise"></i>
+            <span>Practice Again</span>
+          </button>
+          <a href="<?= BASE_URL ?>/lessons.php" class="lp-back-link">Back to Curriculum</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 window.LESSON_CONFIG = {
   id: <?= json_encode($lesson['id']) ?>,
@@ -486,7 +973,6 @@ window.LESSON_CONFIG = {
 };
 </script>
 
-<!-- Interactive Lesson Engine Controller -->
 <script>
 (function() {
   const config = window.LESSON_CONFIG;
@@ -502,14 +988,12 @@ window.LESSON_CONFIG = {
   let isStepFinished = false;
   let soundEnabled = true;
 
-  // DOM Elements
   const textDisplay = document.getElementById('lessonTextDisplay');
   const focusPrompt = document.getElementById('lessonFocusPrompt');
   const virtualInput = document.getElementById('lessonVirtualInput');
   const hudWpm = document.getElementById('hud-wpm');
   const hudAcc = document.getElementById('hud-acc');
   const currentStepText = document.getElementById('currentStepText');
-  const fingerHintBadge = document.getElementById('fingerHintBadge');
   const fingerHintText = document.getElementById('fingerHintText');
   const fingerHintDot = document.getElementById('fingerHintDot');
   const soundBtn = document.getElementById('toggle-sound-btn');
@@ -517,20 +1001,16 @@ window.LESSON_CONFIG = {
   const kbToggleBtn = document.getElementById('toggle-keyboard-btn');
   const visualKbContainer = document.getElementById('visualKeyboardContainer');
 
-  // Web Audio Synthesizer
   let audioCtx = null;
-  function playBeep(type = 'click') {
+  function playBeep(type) {
     if (!soundEnabled) return;
     try {
       if (!audioCtx) {
-        const AudioClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioClass) audioCtx = new AudioClass();
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
       }
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       if (!audioCtx) return;
-
       const now = audioCtx.currentTime;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
@@ -541,68 +1021,51 @@ window.LESSON_CONFIG = {
         osc.frequency.exponentialRampToValueAtTime(150, now + 0.04);
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.04);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.04);
       } else if (type === 'error') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(140, now);
         osc.frequency.linearRampToValueAtTime(90, now + 0.1);
         gain.gain.setValueAtTime(0.25, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.1);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.1);
       } else if (type === 'chime') {
-        [523.25, 659.25, 783.99].forEach((freq, i) => {
+        [523.25, 659.25, 783.99].forEach(function(freq, i) {
           const o = audioCtx.createOscillator();
           const g = audioCtx.createGain();
           o.type = 'sine';
           o.frequency.setValueAtTime(freq, now + i * 0.08);
           g.gain.setValueAtTime(0.18, now + i * 0.08);
           g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.28);
-          o.connect(g);
-          g.connect(audioCtx.destination);
-          o.start(now + i * 0.08);
-          o.stop(now + i * 0.08 + 0.28);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(now + i * 0.08); o.stop(now + i * 0.08 + 0.28);
         });
       }
-    } catch(e) {}
+    } catch (e) {}
   }
 
-  // Load an exercise step
   function loadStep(index) {
-    if (index >= exercises.length) {
-      finishWholeLesson();
-      return;
-    }
-
+    if (index >= exercises.length) { finishWholeLesson(); return; }
     currentStepIndex = index;
     targetText = exercises[index];
     currentIndex = 0;
     isStepFinished = false;
     stepStartTime = null;
-
     currentStepText.textContent = (index + 1);
 
-    // Update Step Pills
-    document.querySelectorAll('.step-pill-wrapper').forEach((w, idx) => {
-      const pill = w.querySelector('.step-pill');
+    document.querySelectorAll('.lp-step-pill-wrapper').forEach(function(w, idx) {
+      const pill = w.querySelector('.lp-step-pill');
       pill.classList.remove('active');
-      if (idx < index) {
-        pill.classList.add('completed');
-      } else if (idx === index) {
-        pill.classList.add('active');
-      }
+      if (idx < index) pill.classList.add('completed');
+      else if (idx === index) pill.classList.add('active');
     });
 
-    // Render characters
     textDisplay.innerHTML = '';
     for (let i = 0; i < targetText.length; i++) {
       const span = document.createElement('span');
-      span.className = 'char-span' + (i === 0 ? ' char-active' : '');
+      span.className = 'lp-char' + (i === 0 ? ' active' : '');
       span.textContent = targetText[i];
       span.id = 'char-' + i;
       textDisplay.appendChild(span);
@@ -612,41 +1075,28 @@ window.LESSON_CONFIG = {
     focusInput();
   }
 
-  // Update on-screen keyboard target highlight & finger hint
   function updateActiveKeyGuide() {
-    // Clear existing target keys
-    document.querySelectorAll('.kb-key.kb-target-key').forEach(el => el.classList.remove('kb-target-key'));
-
+    document.querySelectorAll('.lp-kb-key.target').forEach(function(el) { el.classList.remove('target'); });
     if (currentIndex >= targetText.length) return;
     const nextChar = targetText[currentIndex];
 
-    // Find on-screen key
     let matchedKey = null;
-    const allKeys = document.querySelectorAll('.kb-key');
-    allKeys.forEach(k => {
+    document.querySelectorAll('.lp-kb-key').forEach(function(k) {
       const keyVal = k.getAttribute('data-key');
       const charVal = k.getAttribute('data-char');
-      if (nextChar === ' ' && keyVal === ' ') {
-        matchedKey = k;
-      } else if (keyVal && keyVal.toLowerCase() === nextChar.toLowerCase()) {
-        matchedKey = k;
-      } else if (charVal && charVal === nextChar) {
-        matchedKey = k;
-      }
+      if (nextChar === ' ' && keyVal === ' ') matchedKey = k;
+      else if (keyVal && keyVal.toLowerCase() === nextChar.toLowerCase()) matchedKey = k;
+      else if (charVal && charVal === nextChar) matchedKey = k;
     });
+    if (matchedKey) matchedKey.classList.add('target');
 
-    if (matchedKey) {
-      matchedKey.classList.add('kb-target-key');
-    }
-
-    // Finger guide text
     const lowerChar = nextChar.toLowerCase();
-    const hint = config.fingerHints && config.fingerHints[lowerChar] 
-      ? config.fingerHints[lowerChar] 
+    const hint = config.fingerHints && config.fingerHints[lowerChar]
+      ? config.fingerHints[lowerChar]
       : getGenericFingerHint(nextChar);
 
     if (hint) {
-      fingerHintText.innerHTML = `Press <strong class="text-white">${nextChar === ' ' ? 'SPACE' : nextChar.toUpperCase()}</strong> with your <strong style="color: var(--first-color);">${hint.finger}</strong>`;
+      fingerHintText.innerHTML = 'Press <strong>' + (nextChar === ' ' ? 'SPACE' : nextChar.toUpperCase()) + '</strong> with your <strong>' + hint.finger + '</strong>';
       fingerHintDot.style.background = getFingerZoneColor(hint.finger);
     }
   }
@@ -654,98 +1104,73 @@ window.LESSON_CONFIG = {
   function getGenericFingerHint(ch) {
     ch = ch.toLowerCase();
     if (ch === ' ') return { finger: 'Thumb' };
-    if ('1qaz'.includes(ch)) return { finger: 'Left Pinky' };
-    if ('2wsx'.includes(ch)) return { finger: 'Left Ring' };
-    if ('3edc'.includes(ch)) return { finger: 'Left Middle' };
-    if ('45rtfgvb'.includes(ch)) return { finger: 'Left Index' };
-    if ('67yuhjnm'.includes(ch)) return { finger: 'Right Index' };
-    if ('8ik,'.includes(ch)) return { finger: 'Right Middle' };
-    if ('9ol.'.includes(ch)) return { finger: 'Right Ring' };
-    if ('0p;/-=[]\''.includes(ch)) return { finger: 'Right Pinky' };
+    if ('1qaz'.indexOf(ch) !== -1) return { finger: 'Left Pinky' };
+    if ('2wsx'.indexOf(ch) !== -1) return { finger: 'Left Ring' };
+    if ('3edc'.indexOf(ch) !== -1) return { finger: 'Left Middle' };
+    if ('45rtfgvb'.indexOf(ch) !== -1) return { finger: 'Left Index' };
+    if ('67yuhjnm'.indexOf(ch) !== -1) return { finger: 'Right Index' };
+    if ('8ik,'.indexOf(ch) !== -1) return { finger: 'Right Middle' };
+    if ('9ol.'.indexOf(ch) !== -1) return { finger: 'Right Ring' };
+    if ('0p;/-=[]\''.indexOf(ch) !== -1) return { finger: 'Right Pinky' };
     return { finger: 'Index Finger' };
   }
 
-  function getFingerZoneColor(fingerName) {
-    if (fingerName.includes('Pinky')) return '#a855f7';
-    if (fingerName.includes('Ring')) return '#3b82f6';
-    if (fingerName.includes('Middle')) return '#06b6d4';
-    if (fingerName.includes('Left Index')) return '#10b981';
-    if (fingerName.includes('Right Index')) return '#eab308';
-    if (fingerName.includes('Thumb')) return '#f59e0b';
-    return 'var(--first-color)';
+  function getFingerZoneColor(name) {
+    if (name.indexOf('Pinky') !== -1) return '#a855f7';
+    if (name.indexOf('Ring') !== -1) return '#3b82f6';
+    if (name.indexOf('Middle') !== -1) return '#06b6d4';
+    if (name.indexOf('Left Index') !== -1) return '#10b981';
+    if (name.indexOf('Right Index') !== -1) return '#eab308';
+    if (name.indexOf('Thumb') !== -1) return '#f59e0b';
+    return '#000000';
   }
 
-  // Handle typing input
   function handleInputChar(charTyped) {
     if (isStepFinished) return;
-
-    if (!overallStartTime) {
-      overallStartTime = performance.now();
-    }
-    if (!stepStartTime) {
-      stepStartTime = performance.now();
-    }
+    if (!overallStartTime) overallStartTime = performance.now();
+    if (!stepStartTime) stepStartTime = performance.now();
 
     totalKeystrokes++;
     const expectedChar = targetText[currentIndex];
-
-    // Animate visual keyboard physical press
     highlightPhysicalKey(charTyped);
 
     if (charTyped === expectedChar) {
-      // Correct!
       correctKeystrokes++;
       playBeep('click');
-
       const span = document.getElementById('char-' + currentIndex);
-      if (span) {
-        span.className = 'char-span char-correct';
-      }
-
+      if (span) span.className = 'lp-char correct';
       currentIndex++;
-
       if (currentIndex < targetText.length) {
         const nextSpan = document.getElementById('char-' + currentIndex);
-        if (nextSpan) {
-          nextSpan.className = 'char-span char-active';
-        }
+        if (nextSpan) nextSpan.className = 'lp-char active';
         updateActiveKeyGuide();
       } else {
-        // Step complete!
         isStepFinished = true;
         playBeep('chime');
         updateTelemetries();
-
-        setTimeout(() => {
-          loadStep(currentStepIndex + 1);
-        }, 320);
+        setTimeout(function() { loadStep(currentStepIndex + 1); }, 320);
       }
     } else {
-      // Mistake!
       errorCount++;
       playBeep('error');
-
       const span = document.getElementById('char-' + currentIndex);
       if (span) {
-        span.classList.add('char-incorrect');
-        setTimeout(() => span.classList.remove('char-incorrect'), 280);
+        span.classList.add('incorrect');
+        setTimeout(function() { span.classList.remove('incorrect'); }, 280);
       }
     }
-
     updateTelemetries();
   }
 
-  // Animate on-screen key press for physical key
   function highlightPhysicalKey(char) {
-    const allKeys = document.querySelectorAll('.kb-key');
-    allKeys.forEach(k => {
+    document.querySelectorAll('.lp-kb-key').forEach(function(k) {
       const keyVal = k.getAttribute('data-key');
       const charVal = k.getAttribute('data-char');
-      if ((char === ' ' && keyVal === ' ') || 
-          (keyVal && keyVal.toLowerCase() === char.toLowerCase()) || 
+      if ((char === ' ' && keyVal === ' ') ||
+          (keyVal && keyVal.toLowerCase() === char.toLowerCase()) ||
           (charVal && charVal === char)) {
-        k.classList.add('kb-pressed');
-        setTimeout(() => k.classList.remove('kb-pressed'), 140);
+        k.classList.add('pressed');
+        setTimeout(function() { k.classList.remove('pressed'); }, 140);
       }
     });
   }
@@ -753,47 +1178,39 @@ window.LESSON_CONFIG = {
   function updateTelemetries() {
     if (!overallStartTime) return;
     const elapsedMinutes = (performance.now() - overallStartTime) / 60000;
-    const grossWpm = elapsedMinutes > 0 ? Math.round((correctKeystrokes / 5) / elapsedMinutes) : 0;
-    const accuracy = totalKeystrokes > 0 ? Math.round((correctKeystrokes / totalKeystrokes) * 100) : 100;
-
-    hudWpm.innerHTML = `${grossWpm} <span class="text-secondary" style="font-size: 0.7rem;">WPM</span>`;
-    hudAcc.innerHTML = `${accuracy}<span class="text-secondary" style="font-size: 0.7rem;">%</span>`;
+    const wpm = elapsedMinutes > 0 ? Math.round((correctKeystrokes / 5) / elapsedMinutes) : 0;
+    const acc = totalKeystrokes > 0 ? Math.round((correctKeystrokes / totalKeystrokes) * 100) : 100;
+    hudWpm.innerHTML = wpm + '<small>WPM</small>';
+    hudAcc.innerHTML = acc + '<small>%</small>';
   }
 
   function finishWholeLesson() {
     const elapsedSeconds = Math.max(1, Math.round((performance.now() - overallStartTime) / 1000));
     const elapsedMinutes = elapsedSeconds / 60;
     const finalWpm = elapsedMinutes > 0 ? Math.round((correctKeystrokes / 5) / elapsedMinutes) : 0;
-    const finalAccuracy = totalKeystrokes > 0 ? Math.round((correctKeystrokes / totalKeystrokes) * 100) : 100;
+    const finalAcc = totalKeystrokes > 0 ? Math.round((correctKeystrokes / totalKeystrokes) * 100) : 100;
 
-    // Determine Stars (Typing.com standard: 95%+ = 3 stars, 85%+ = 2 stars, 70%+ = 1 star)
     let stars = 1;
-    if (finalAccuracy >= 95) stars = 3;
-    else if (finalAccuracy >= 85) stars = 2;
+    if (finalAcc >= 95) stars = 3;
+    else if (finalAcc >= 85) stars = 2;
 
-    // Fill modal
     document.getElementById('modalWpm').textContent = finalWpm;
-    document.getElementById('modalAccuracy').textContent = finalAccuracy + '%';
+    document.getElementById('modalAccuracy').textContent = finalAcc + '%';
     document.getElementById('modalTime').textContent = elapsedSeconds + 's';
 
     const starsContainer = document.getElementById('modalStarsContainer');
     starsContainer.innerHTML = '';
     for (let s = 1; s <= 3; s++) {
       const star = document.createElement('i');
-      star.className = `bi bi-star${s <= stars ? '-fill text-warning' : ' text-secondary'} fs-1 star-pop`;
+      star.className = 'bi bi-star' + (s <= stars ? '-fill' : '') + ' star-pop';
       star.style.animationDelay = (s * 0.15) + 's';
       starsContainer.appendChild(star);
     }
 
-    // Save progress asynchronously
-    saveLessonProgress(stars, finalWpm, finalAccuracy);
-
-    // Launch Confetti Celebration
+    saveLessonProgress(stars, finalWpm, finalAcc);
     launchConfetti();
 
-    // Show modal
-    const modalEl = document.getElementById('lessonCompleteModal');
-    const modal = new bootstrap.Modal(modalEl);
+    const modal = new bootstrap.Modal(document.getElementById('lessonCompleteModal'));
     modal.show();
   }
 
@@ -806,29 +1223,22 @@ window.LESSON_CONFIG = {
       wpm: wpm,
       accuracy: accuracy
     };
-
     fetch(config.saveUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': config.csrfToken
-      },
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': config.csrfToken },
       body: JSON.stringify(payload)
     })
-    .then(r => r.json())
-    .then(data => {
-      if (data && data.next_lesson_id) {
-        document.getElementById('modalNextLessonBtn').href = 'lesson-player.php?id=' + encodeURIComponent(data.next_lesson_id);
-      } else {
-        document.getElementById('modalNextLessonBtn').href = config.curriculumUrl;
-      }
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      document.getElementById('modalNextLessonBtn').href = (data && data.next_lesson_id)
+        ? 'lesson-player.php?id=' + encodeURIComponent(data.next_lesson_id)
+        : config.curriculumUrl;
     })
-    .catch(() => {
+    .catch(function() {
       document.getElementById('modalNextLessonBtn').href = config.curriculumUrl;
     });
   }
 
-  // Pure Canvas Confetti particles
   function launchConfetti() {
     const canvas = document.getElementById('confettiCanvas');
     if (!canvas) return;
@@ -837,7 +1247,7 @@ window.LESSON_CONFIG = {
     canvas.height = canvas.parentElement.offsetHeight;
 
     const particles = [];
-    const colors = ['#ff5532', '#10b981', '#38bdf8', '#facc15', '#a855f7', '#ffffff'];
+    const colors = ['#000000', '#ffffff', '#666666', '#aaaaaa'];
 
     for (let i = 0; i < 60; i++) {
       particles.push({
@@ -855,12 +1265,11 @@ window.LESSON_CONFIG = {
     let frame = 0;
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
+      particles.forEach(function(p) {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.35; // gravity
+        p.vy += 0.35;
         p.rotation += p.vr;
-
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate((p.rotation * Math.PI) / 180);
@@ -868,13 +1277,9 @@ window.LESSON_CONFIG = {
         ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
         ctx.restore();
       });
-
       frame++;
-      if (frame < 120) {
-        requestAnimationFrame(animate);
-      } else {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
+      if (frame < 120) requestAnimationFrame(animate);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
     requestAnimationFrame(animate);
   }
@@ -885,42 +1290,35 @@ window.LESSON_CONFIG = {
     virtualInput.focus();
   }
 
-  // Event Listeners
   focusPrompt.addEventListener('click', focusInput);
   document.getElementById('lessonArenaContainer').addEventListener('click', focusInput);
 
-  window.addEventListener('keydown', (e) => {
-    // Ignore function keys / tabs / shortcuts
+  window.addEventListener('keydown', function(e) {
     if (e.ctrlKey || e.altKey || e.metaKey) return;
     if (e.key === 'Tab') { e.preventDefault(); return; }
-
     focusPrompt.style.opacity = '0';
     focusPrompt.style.pointerEvents = 'none';
-
     if (e.key.length === 1) {
       e.preventDefault();
       handleInputChar(e.key);
-    }
+    } 
+
   });
 
-  soundBtn.addEventListener('click', () => {
+  soundBtn.addEventListener('click', function() {
     soundEnabled = !soundEnabled;
-    soundIcon.className = soundEnabled ? 'bi bi-volume-up-fill fs-6' : 'bi bi-volume-mute-fill fs-6 text-secondary';
+    soundIcon.className = soundEnabled ? 'bi bi-volume-up-fill' : 'bi bi-volume-mute-fill';
+    soundIcon.style.opacity = soundEnabled ? '1' : '0.5';
   });
 
-  kbToggleBtn.addEventListener('click', () => {
-    if (visualKbContainer.style.display === 'none') {
-      visualKbContainer.style.display = 'block';
-    } else {
-      visualKbContainer.style.display = 'none';
-    }
+  kbToggleBtn.addEventListener('click', function() {
+    visualKbContainer.style.display = (visualKbContainer.style.display === 'none') ? 'block' : 'none';
   });
 
-  document.getElementById('modalRetryBtn').addEventListener('click', () => {
+  document.getElementById('modalRetryBtn').addEventListener('click', function() {
     location.reload();
   });
 
-  // Start with Step 0
   loadStep(0);
 })();
 </script>
