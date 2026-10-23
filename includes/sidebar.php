@@ -26,6 +26,11 @@ $isAdminSection = ($currentDir === 'admin');
 
   <div class="sidebar-menu">
     <div class="nav-section-title">Training & Speed</div>
+    <a href="<?= BASE_URL ?>/lessons.php" class="sidebar-link <?= ($currentPage === 'lessons.php' || $currentPage === 'lesson-player.php') ? 'active' : '' ?>">
+      <i class="bi bi-mortarboard-fill" style="color: var(--first-color);"></i>
+      <span>Typing Lessons</span>
+      <span class="badge ms-auto" style="font-size: 0.62rem; font-weight: 800; background: var(--first-color); color: #fff; padding: 2px 6px; border-radius: 4px;">NEW</span>
+    </a>
     <a href="<?= BASE_URL ?>/practice.php?mode=passage" class="sidebar-link <?= ($currentPage === 'practice.php' && (!isset($_GET['mode']) || $_GET['mode'] === 'passage')) ? 'active' : '' ?>">
       <i class="bi bi-keyboard-fill"></i>
       <span>Passage Practice</span>

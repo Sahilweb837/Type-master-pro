@@ -86,7 +86,7 @@ include __DIR__ . '/includes/header.php';
           </div>
         <?php endif; ?>
 
-        <form method="POST" action="<?= BASE_URL ?>/login.php?redirect=<?= urlencode($redirect) ?>">
+        <form method="POST" action="login.php?redirect=<?= urlencode($redirect) ?>">
           <?= csrf_field() ?>
 
           <div class="mb-3">

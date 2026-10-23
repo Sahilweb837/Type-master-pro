@@ -98,6 +98,23 @@ CREATE TABLE `typing_results` (
     REFERENCES `typing_passages` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Lesson Progress Tracking (Typing.com Curriculum)
+CREATE TABLE IF NOT EXISTS `user_lesson_progress` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT UNSIGNED NOT NULL,
+  `lesson_id` VARCHAR(50) NOT NULL,
+  `stage` ENUM('beginner', 'intermediate', 'advanced') NOT NULL DEFAULT 'beginner',
+  `stars` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `highest_wpm` DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+  `highest_accuracy` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  `status` ENUM('completed', 'in_progress', 'unlocked') NOT NULL DEFAULT 'completed',
+  `completed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `uniq_user_lesson` (`user_id`, `lesson_id`),
+  INDEX `idx_user_stage` (`user_id`, `stage`),
+  CONSTRAINT `fk_schema_lesson_user` FOREIGN KEY (`user_id`) 
+    REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Admin & Demo Seed
 INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `full_name`, `role`) VALUES
 (1, 'admin', 'admin@typemaster.pro', '$2y$10$K7UcCDyvlBrG3mBGWXBXQuEw/KWL/SGfwUv7bdJMRkWZrUOzminr6', 'Master Administrator', 'admin'),

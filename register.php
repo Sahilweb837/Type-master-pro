@@ -129,7 +129,7 @@ include __DIR__ . '/includes/header.php';
           </div>
         <?php endif; ?>
 
-        <form method="POST" action="<?= BASE_URL ?>/register.php">
+        <form method="POST" action="register.php">
           <?= csrf_field() ?>
 
           <div class="row g-3 mb-3">

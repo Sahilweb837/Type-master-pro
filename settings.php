@@ -104,7 +104,7 @@ include __DIR__ . '/includes/header.php';
     <div class="alert alert-danger mb-4"><?= e($errorMsg) ?></div>
   <?php endif; ?>
 
-  <form method="POST" action="<?= BASE_URL ?>/settings.php">
+  <form method="POST" action="settings.php">
     <?= csrf_field() ?>
 
     <div class="row g-4">

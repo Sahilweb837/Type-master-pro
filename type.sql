@@ -116,6 +116,26 @@ CREATE TABLE `typing_results` (
     REFERENCES `typing_passages` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ---------------------------------------------------------------------
+-- 5. Table: user_lesson_progress
+-- Stores completed typing lessons, stars earned, best WPM, and accuracy
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `user_lesson_progress` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT UNSIGNED NOT NULL,
+  `lesson_id` VARCHAR(50) NOT NULL,
+  `stage` ENUM('beginner', 'intermediate', 'advanced') NOT NULL DEFAULT 'beginner',
+  `stars` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `highest_wpm` DECIMAL(6,2) NOT NULL DEFAULT 0.00,
+  `highest_accuracy` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  `status` ENUM('completed', 'in_progress', 'unlocked') NOT NULL DEFAULT 'completed',
+  `completed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `uniq_user_lesson` (`user_id`, `lesson_id`),
+  INDEX `idx_user_stage` (`user_id`, `stage`),
+  CONSTRAINT `fk_lesson_user` FOREIGN KEY (`user_id`) 
+    REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- =====================================================================
 -- SEED DATA
 -- Default administrator account and rich practice passages

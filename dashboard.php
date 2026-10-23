@@ -183,7 +183,11 @@ include __DIR__ . '/includes/header.php';
           </p>
 
           <div class="d-flex flex-wrap align-items-center gap-2">
-            <a href="<?= BASE_URL ?>/practice.php" class="btn soft-btn-primary px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
+            <a href="<?= BASE_URL ?>/lessons.php" class="btn btn-primary px-3 py-2 d-inline-flex align-items-center gap-2 shadow-sm" style="background: var(--first-color); border: none; font-weight: 700;">
+              <i class="bi bi-mortarboard-fill"></i>
+              <span>Typing Lessons</span>
+            </a>
+            <a href="<?= BASE_URL ?>/practice.php" class="btn soft-btn-primary px-3 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
               <i class="bi bi-play-circle-fill fs-5"></i>
               <span>Start 60s Speed Test</span>
             </a>

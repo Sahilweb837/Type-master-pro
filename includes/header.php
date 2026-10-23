@@ -128,6 +128,9 @@ if (!$pdoCheck):
       } elseif (strpos($pageTitle, 'Statistics') !== false || strpos($pageTitle, 'Analytics') !== false) {
           $pageIcon = 'bi-graph-up-arrow';
           $pageBadgeTitle = 'Analytics';
+      } elseif (strpos($pageTitle, 'Lesson') !== false) {
+          $pageIcon = 'bi-mortarboard-fill';
+          $pageBadgeTitle = 'Typing Lessons';
       } elseif (strpos($pageTitle, 'Admin') !== false) {
           $pageIcon = 'bi-shield-lock-fill';
           $pageBadgeTitle = 'Admin Portal';
@@ -159,6 +162,12 @@ if (!$pdoCheck):
       </div>
 
       <div class="d-flex align-items-center gap-2 gap-md-2">
+        <!-- Quick Action: Lessons -->
+        <a href="<?= BASE_URL ?>/lessons.php" class="btn btn-sm btn-control d-none d-sm-inline-flex align-items-center gap-1.5 px-3 py-1.5" title="Typing.com Lessons Curriculum">
+          <i class="bi bi-mortarboard-fill" style="color: var(--first-color);"></i>
+          <span>Lessons</span>
+        </a>
+
         <!-- Quick Action: Practice Arena -->
         <a href="<?= BASE_URL ?>/practice.php" class="btn btn-sm soft-btn-primary d-none d-sm-inline-flex align-items-center gap-1.5 px-3 py-1.5" title="Launch Practice Drill">
           <i class="bi bi-keyboard-fill"></i>
