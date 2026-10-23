@@ -1,7 +1,7 @@
-<?php
+ <?php
 /**
  * Custom Type Master Pro
- * Deep Analytics & Statistics Page
+ * Deep Analytics & Statistics Page — B&W Redesign
  */
 
 require_once __DIR__ . '/config/app.php';
@@ -31,7 +31,6 @@ $previousAvg = 0;
 
 if ($pdo) {
     try {
-        // Chronological history for trend chart
         $stmt = $pdo->prepare("
             SELECT net_wpm, accuracy, DATE_FORMAT(created_at, '%m/%d') AS d_label 
             FROM typing_results
@@ -48,7 +47,6 @@ if ($pdo) {
             $accuracyHistory[] = (float)$r['accuracy'];
         }
 
-        // Difficulty breakdown
         $diffStmt = $pdo->prepare("
             SELECT difficulty, AVG(net_wpm) AS avg_wpm, MAX(net_wpm) AS max_wpm, COUNT(*) AS cnt 
             FROM typing_results
@@ -67,7 +65,6 @@ if ($pdo) {
             }
         }
 
-        // Keystroke totals
         $keyStmt = $pdo->prepare("
             SELECT 
                 COALESCE(SUM(correct_keystrokes), 0) AS total_correct,
@@ -84,7 +81,6 @@ if ($pdo) {
             $totalBackspaces = (int)$keyRow['total_backspaces'];
         }
 
-        // Comparison: Last 5 vs Previous 5
         $compStmt = $pdo->prepare("
             SELECT net_wpm FROM typing_results 
             WHERE user_id = :uid 
@@ -110,138 +106,475 @@ if ($pdo) {
 }
 
 $speedGrowth = ($previousAvg > 0) ? round((($recentAvg - $previousAvg) / $previousAvg) * 100, 1) : 0;
+$totalSessions = count($wpmHistory);
+$totalKeystrokes = $totalCorrectKeys + $totalErrorKeys;
+$accuracyRate = $totalKeystrokes > 0 ? round(($totalCorrectKeys / $totalKeystrokes) * 100, 1) : 0;
 
 $pageTitle = 'Speed & Accuracy Analytics';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<div class="container-fluid px-md-4 py-3">
+<style>
+/* ============================================================
+   B&W ANALYTICS PAGE — scoped, non-destructive
+   ============================================================ */
+:root {
+    --bw-bg:        #ffffff;
+    --bw-surface:   #ffffff;
+    --bw-surface-2: #f7f7f7;
+    --bw-border:    #e5e5e5;
+    --bw-border-2:  #d4d4d4;
+    --bw-ink:       #0a0a0a;
+    --bw-ink-2:     #1f1f1f;
+    --bw-muted:     #6b6b6b;
+    --bw-muted-2:   #8f8f8f;
+    --bw-radius:    14px;
+    --bw-radius-sm: 10px;
+    --bw-shadow:    0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.05);
+    --bw-font:      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --bw-mono:      ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
 
-  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-    <div>
-      <h2 class="fw-bold text-light mb-1"><i class="bi bi-graph-up text-info me-2"></i>Performance Statistics</h2>
-      <p class="text-secondary small mb-0">Detailed statistical overview of your typing speed, accuracy patterns, and keystrokes.</p>
-    </div>
-    <a href="<?= BASE_URL ?>/practice.php" class="btn btn-primary btn-sm fw-bold">
-      <i class="bi bi-play-circle-fill me-1"></i> Start Practice Session
-    </a>
-  </div>
+.bw-page {
+    background: var(--bw-bg);
+    color: var(--bw-ink);
+    font-family: var(--bw-font);
+    min-height: 100vh;
+    padding: 2rem 0 3rem;
+}
 
-  <!-- Comparison & Velocity Card -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-4">
-      <div class="glass-card p-3 h-100">
-        <div class="text-secondary small fw-bold mb-1">Recent 5 Sessions Avg</div>
-        <div class="fs-2 fw-bold text-info font-monospace"><?= $recentAvg ?> WPM</div>
-        <div class="text-muted small">Average of your latest 5 completed tests</div>
+/* --- Page header --- */
+.bw-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid var(--bw-border);
+}
+.bw-head h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.25rem;
+    color: var(--bw-ink);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+.bw-head h1 i {
+    font-size: 1.5rem;
+    color: var(--bw-ink);
+}
+.bw-head p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--bw-muted);
+    max-width: 560px;
+    line-height: 1.5;
+}
+
+/* --- Buttons --- */
+.bw-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.15rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    border-radius: var(--bw-radius-sm);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1.5px solid var(--bw-ink);
+    cursor: pointer;
+    white-space: nowrap;
+}
+.bw-btn-dark {
+    background: var(--bw-ink);
+    color: #fff;
+}
+.bw-btn-dark:hover {
+    background: #fff;
+    color: var(--bw-ink);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+.bw-btn-light {
+    background: #fff;
+    color: var(--bw-ink);
+}
+.bw-btn-light:hover {
+    background: var(--bw-ink);
+    color: #fff;
+}
+
+/* --- Cards --- */
+.bw-card {
+    background: var(--bw-surface);
+    border: 1px solid var(--bw-border);
+    border-radius: var(--bw-radius);
+    padding: 1.5rem;
+    height: 100%;
+    box-shadow: var(--bw-shadow);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.bw-card:hover {
+    border-color: var(--bw-border-2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.07);
+}
+.bw-card-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--bw-ink);
+    margin: 0 0 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: -0.01em;
+}
+.bw-card-title i {
+    color: var(--bw-ink);
+    font-size: 1rem;
+}
+.bw-card-sub {
+    font-size: 0.78rem;
+    color: var(--bw-muted);
+    margin: 0 0 1.15rem;
+    line-height: 1.5;
+}
+
+/* --- KPI / stat cards --- */
+.bw-kpi-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--bw-muted);
+    margin-bottom: 0.5rem;
+}
+.bw-kpi-value {
+    font-family: var(--bw-mono);
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--bw-ink);
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+}
+.bw-kpi-value small {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bw-muted);
+    letter-spacing: 0;
+}
+.bw-kpi-foot {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    color: var(--bw-muted-2);
+    line-height: 1.4;
+}
+
+/* trend pill */
+.bw-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--bw-border);
+    background: var(--bw-surface-2);
+    color: var(--bw-ink);
+}
+.bw-trend.up   { background: #0a0a0a; color: #fff; border-color: #0a0a0a; }
+.bw-trend.down { background: #fff; color: #0a0a0a; border-color: #0a0a0a; }
+
+/* --- Chart wrappers --- */
+.bw-chart {
+    position: relative;
+    width: 100%;
+}
+.bw-chart-sm { height: 240px; }
+.bw-chart-md { height: 280px; }
+.bw-chart-lg { height: 320px; }
+
+/* --- Empty state --- */
+.bw-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--bw-muted);
+}
+.bw-empty i {
+    font-size: 2.5rem;
+    color: var(--bw-border-2);
+    display: block;
+    margin-bottom: 0.75rem;
+}
+.bw-empty p {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+/* --- Keystroke legend --- */
+.bw-legend {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+    font-size: 0.78rem;
+    color: var(--bw-muted);
+}
+.bw-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.bw-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    border: 1px solid var(--bw-border-2);
+}
+.bw-legend-dot.k-correct { background: #0a0a0a; border-color: #0a0a0a; }
+.bw-legend-dot.k-error   { background: #fff; border-color: #0a0a0a; }
+.bw-legend-dot.k-back    { background: #a3a3a3; border-color: #a3a3a3; }
+
+.bw-total-keys {
+    text-align: center;
+    margin-top: 0.85rem;
+    font-size: 0.8rem;
+    color: var(--bw-muted);
+}
+.bw-total-keys strong {
+    color: var(--bw-ink);
+    font-family: var(--bw-mono);
+}
+
+/* --- Section heading --- */
+.bw-section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bw-muted);
+    margin: 0.5rem 0 1rem;
+}
+.bw-section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--bw-border);
+}
+
+/* --- Responsive tweaks --- */
+@media (max-width: 767px) {
+    .bw-page { padding: 1.25rem 0 2rem; }
+    .bw-head h1 { font-size: 1.4rem; }
+    .bw-kpi-value { font-size: 1.85rem; }
+    .bw-card { padding: 1.15rem; }
+    .bw-chart-lg { height: 260px; }
+    .bw-chart-md { height: 240px; }
+}
+</style>
+
+<div class="bw-page">
+  <div class="container-fluid px-md-4">
+
+    <!-- ============ PAGE HEADER ============ -->
+    <div class="bw-head">
+      <div>
+        <h1><i class="bi bi-graph-up"></i> Performance Statistics</h1>
+        <p>Detailed statistical overview of your typing speed, accuracy patterns, and keystroke efficiency.</p>
       </div>
+      <a href="<?= BASE_URL ?>/practice.php" class="bw-btn bw-btn-dark">
+        <i class="bi bi-play-circle-fill"></i> Start Practice Session
+      </a>
     </div>
-    <div class="col-md-4">
-      <div class="glass-card p-3 h-100">
-        <div class="text-secondary small fw-bold mb-1">Previous 5 Sessions Avg</div>
-        <div class="fs-2 fw-bold text-secondary font-monospace"><?= $previousAvg ?> WPM</div>
-        <div class="text-muted small">Baseline comparison</div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="glass-card p-3 h-100">
-        <div class="text-secondary small fw-bold mb-1">Speed Growth Velocity</div>
-        <div class="fs-2 fw-bold font-monospace <?= ($speedGrowth >= 0) ? 'text-success' : 'text-danger' ?>">
-          <?= ($speedGrowth >= 0 ? '+' : '') . $speedGrowth ?>%
+
+    <!-- ============ KPI ROW ============ -->
+    <div class="bw-section-label">Session Comparison</div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="bw-card">
+          <div class="bw-kpi-label">Recent 5 Sessions Avg</div>
+          <div class="bw-kpi-value">
+            <?= number_format($recentAvg, 1) ?><small>WPM</small>
+          </div>
+          <div class="bw-kpi-foot">Average of your latest 5 completed tests</div>
         </div>
-        <div class="text-muted small">Trend change over recent runs</div>
       </div>
-    </div>
-  </div>
 
-  <!-- Chart Grids -->
-  <div class="row g-4 mb-4">
-    <!-- WPM Trend Chart -->
-    <div class="col-lg-8">
-      <div class="glass-card p-4 h-100">
-        <h5 class="fw-bold text-light mb-1"><i class="bi bi-activity text-info me-2"></i>Typing Speed (WPM) Trajectory</h5>
-        <p class="text-secondary small mb-3">Chronological progression of Net WPM across recent sessions</p>
-
-        <?php if (!empty($wpmHistory)): ?>
-          <div style="height: 300px; position: relative;">
-            <canvas id="wpmProgressChart"></canvas>
+      <div class="col-md-4">
+        <div class="bw-card">
+          <div class="bw-kpi-label">Previous 5 Sessions Avg</div>
+          <div class="bw-kpi-value">
+            <?= number_format($previousAvg, 1) ?><small>WPM</small>
           </div>
-        <?php else: ?>
-          <div class="text-center py-5 text-muted">
-            <i class="bi bi-graph-up display-3 d-block mb-3 opacity-25"></i>
-            <p>Not enough data to graph yet. Complete more tests!</p>
-          </div>
-        <?php endif; ?>
+          <div class="bw-kpi-foot">Baseline comparison from older runs</div>
+        </div>
       </div>
-    </div>
 
-    <!-- Keystroke Breakdown Doughnut -->
-    <div class="col-lg-4">
-      <div class="glass-card p-4 h-100">
-        <h5 class="fw-bold text-light mb-1"><i class="bi bi-pie-chart-fill text-warning me-2"></i>Keystroke Distribution</h5>
-        <p class="text-secondary small mb-3">Ratio of correct vs error vs backspace inputs</p>
-
-        <?php if ($totalCorrectKeys > 0 || $totalErrorKeys > 0): ?>
-          <div style="height: 240px; position: relative;">
-            <canvas id="keystrokesChart"></canvas>
+      <div class="col-md-4">
+        <div class="bw-card">
+          <div class="bw-kpi-label">Speed Growth Velocity</div>
+          <div class="bw-kpi-value">
+            <?= ($speedGrowth >= 0 ? '+' : '') . number_format($speedGrowth, 1) ?><small>%</small>
           </div>
-          <div class="mt-3 text-center small text-secondary">
-            Total Keystrokes: <strong class="text-light"><?= number_format($totalCorrectKeys + $totalErrorKeys) ?></strong>
+          <div class="bw-kpi-foot">
+            <span class="bw-trend <?= $speedGrowth >= 0 ? 'up' : 'down' ?>">
+              <i class="bi bi-arrow-<?= $speedGrowth >= 0 ? 'up' : 'down' ?>-right"></i>
+              <?= $speedGrowth >= 0 ? 'Improving' : 'Declining' ?>
+            </span>
+            <span class="ms-1">Trend change over recent runs</span>
           </div>
-        <?php else: ?>
-          <div class="text-center py-5 text-muted">
-            <p>No keystrokes recorded yet.</p>
-          </div>
-        <?php endif; ?>
-      </div>
-    </div>
-  </div>
-
-  <!-- Difficulty Comparison & Accuracy Trends -->
-  <div class="row g-4 mb-4">
-    <!-- Difficulty Performance Bar Chart -->
-    <div class="col-lg-6">
-      <div class="glass-card p-4 h-100">
-        <h5 class="fw-bold text-light mb-1"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Speed by Difficulty</h5>
-        <p class="text-secondary small mb-3">Average vs Personal Best WPM for each difficulty level</p>
-
-        <div style="height: 260px; position: relative;">
-          <canvas id="difficultyChart"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- Accuracy Trend Chart -->
-    <div class="col-lg-6">
-      <div class="glass-card p-4 h-100">
-        <h5 class="fw-bold text-light mb-1"><i class="bi bi-bullseye text-success me-2"></i>Accuracy Trend (%)</h5>
-        <p class="text-secondary small mb-3">Maintaining accuracy >95% is key to developing high typing flow</p>
+    <!-- ============ CHARTS: WPM + KEYSTROKES ============ -->
+    <div class="bw-section-label">Progress Charts</div>
 
-        <?php if (!empty($accuracyHistory)): ?>
-          <div style="height: 260px; position: relative;">
-            <canvas id="accuracyTrendChart"></canvas>
-          </div>
-        <?php else: ?>
-          <div class="text-center py-5 text-muted">
-            <p>No accuracy data available yet.</p>
-          </div>
-        <?php endif; ?>
+    <div class="row g-4 mb-4">
+      <!-- WPM Trend -->
+      <div class="col-lg-8">
+        <div class="bw-card">
+          <h5 class="bw-card-title"><i class="bi bi-activity"></i> Typing Speed (WPM) Trajectory</h5>
+          <p class="bw-card-sub">Chronological progression of Net WPM across your recent sessions.</p>
+
+          <?php if (!empty($wpmHistory)): ?>
+            <div class="bw-chart bw-chart-lg">
+              <canvas id="wpmProgressChart"></canvas>
+            </div>
+          <?php else: ?>
+            <div class="bw-empty">
+              <i class="bi bi-graph-up"></i>
+              <p>Not enough data to graph yet. Complete more tests!</p>
+            </div>
+          <?php endif; ?>
+        </div>
+      </div>
+
+      <!-- Keystroke Breakdown -->
+      <div class="col-lg-4">
+        <div class="bw-card">
+          <h5 class="bw-card-title"><i class="bi bi-pie-chart-fill"></i> Keystroke Distribution</h5>
+          <p class="bw-card-sub">Ratio of correct vs error vs backspace inputs.</p>
+
+          <?php if ($totalCorrectKeys > 0 || $totalErrorKeys > 0): ?>
+            <div class="bw-chart bw-chart-sm">
+              <canvas id="keystrokesChart"></canvas>
+            </div>
+
+            <div class="bw-legend">
+              <span class="bw-legend-item"><span class="bw-legend-dot k-correct"></span> Correct</span>
+              <span class="bw-legend-item"><span class="bw-legend-dot k-error"></span> Errors</span>
+              <span class="bw-legend-item"><span class="bw-legend-dot k-back"></span> Backspaces</span>
+            </div>
+
+            <div class="bw-total-keys">
+              Total Keystrokes: <strong><?= number_format($totalKeystrokes) ?></strong>
+            </div>
+          <?php else: ?>
+            <div class="bw-empty">
+              <i class="bi bi-keyboard"></i>
+              <p>No keystrokes recorded yet.</p>
+            </div>
+          <?php endif; ?>
+        </div>
       </div>
     </div>
-  </div>
 
+    <!-- ============ CHARTS: DIFFICULTY + ACCURACY ============ -->
+    <div class="bw-section-label">Skill Breakdown</div>
+
+    <div class="row g-4 mb-2">
+      <!-- Difficulty Performance -->
+      <div class="col-lg-6">
+        <div class="bw-card">
+          <h5 class="bw-card-title"><i class="bi bi-bar-chart-fill"></i> Speed by Difficulty</h5>
+          <p class="bw-card-sub">Average vs personal best WPM for each difficulty level.</p>
+
+          <div class="bw-chart bw-chart-md">
+            <canvas id="difficultyChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accuracy Trend -->
+      <div class="col-lg-6">
+        <div class="bw-card">
+          <h5 class="bw-card-title"><i class="bi bi-bullseye"></i> Accuracy Trend (%)</h5>
+          <p class="bw-card-sub">Maintaining accuracy above 95% is key to developing high typing flow.</p>
+
+          <?php if (!empty($accuracyHistory)): ?>
+            <div class="bw-chart bw-chart-md">
+              <canvas id="accuracyTrendChart"></canvas>
+            </div>
+          <?php else: ?>
+            <div class="bw-empty">
+              <i class="bi bi-bullseye"></i>
+              <p>No accuracy data available yet.</p>
+            </div>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
-<!-- Render Chart.js Analytics -->
+<!-- ============================================================
+     CHART.JS — B&W styled
+     ============================================================ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const labels = <?= json_encode($labels) ?>;
+  const labels  = <?= json_encode($labels) ?>;
   const wpmData = <?= json_encode($wpmHistory) ?>;
   const accData = <?= json_encode($accuracyHistory) ?>;
 
-  // 1. WPM Progress Chart
+  // Shared B&W chart defaults
+  const gridColor  = 'rgba(0,0,0,0.06)';
+  const tickColor  = '#6b6b6b';
+  const fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+  Chart.defaults.font.family = fontFamily;
+  Chart.defaults.font.size   = 11;
+  Chart.defaults.color       = tickColor;
+
+  const baseScales = {
+    x: {
+      grid:  { color: gridColor, drawTicks: false },
+      ticks: { color: tickColor, padding: 8 },
+      border: { display: false }
+    },
+    y: {
+      beginAtZero: true,
+      grid:  { color: gridColor, drawTicks: false },
+      ticks: { color: tickColor, padding: 8 },
+      border: { display: false }
+    }
+  };
+
+  // 1. WPM Progress Chart — solid black line, subtle fill
   const wpmCtx = document.getElementById('wpmProgressChart');
   if (wpmCtx && wpmData.length > 0) {
+    const ctx = wpmCtx.getContext('2d');
+    const grad = ctx.createLinearGradient(0, 0, 0, 320);
+    grad.addColorStop(0, 'rgba(10,10,10,0.14)');
+    grad.addColorStop(1, 'rgba(10,10,10,0.00)');
+
     new Chart(wpmCtx, {
       type: 'line',
       data: {
@@ -249,27 +582,39 @@ document.addEventListener('DOMContentLoaded', () => {
         datasets: [{
           label: 'Net WPM',
           data: wpmData,
-          borderColor: '#38bdf8',
-          backgroundColor: 'rgba(56, 189, 248, 0.1)',
+          borderColor: '#0a0a0a',
+          backgroundColor: grad,
           fill: true,
           tension: 0.35,
           borderWidth: 2.5,
-          pointRadius: 4,
-          pointBackgroundColor: '#38bdf8'
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          pointBackgroundColor: '#0a0a0a',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 1.5
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        scales: {
-          x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b' } },
-          y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b' } }
-        }
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0a0a0a',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            padding: 10,
+            cornerRadius: 6,
+            displayColors: false
+          }
+        },
+        scales: baseScales,
+        interaction: { intersect: false, mode: 'index' }
       }
     });
   }
 
-  // 2. Keystrokes Doughnut
+  // 2. Keystrokes Doughnut — black / white / gray
   const keyCtx = document.getElementById('keystrokesChart');
   if (keyCtx) {
     new Chart(keyCtx, {
@@ -278,21 +623,31 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: ['Correct', 'Errors', 'Backspaces'],
         datasets: [{
           data: [<?= $totalCorrectKeys ?>, <?= $totalErrorKeys ?>, <?= $totalBackspaces ?>],
-          backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
-          borderWidth: 0
+          backgroundColor: ['#0a0a0a', '#ffffff', '#a3a3a3'],
+          borderColor: ['#0a0a0a', '#0a0a0a', '#a3a3a3'],
+          borderWidth: 2,
+          hoverOffset: 6
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: '68%',
         plugins: {
-          legend: { position: 'bottom', labels: { color: '#94a3b8' } }
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0a0a0a',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            padding: 10,
+            cornerRadius: 6
+          }
         }
       }
     });
   }
 
-  // 3. Difficulty Bar Chart
+  // 3. Difficulty Bar Chart — solid black vs outlined
   const diffCtx = document.getElementById('difficultyChart');
   if (diffCtx) {
     new Chart(diffCtx, {
@@ -307,7 +662,11 @@ document.addEventListener('DOMContentLoaded', () => {
               <?= $difficultyStats['intermediate']['avg'] ?>,
               <?= $difficultyStats['advanced']['avg'] ?>
             ],
-            backgroundColor: '#38bdf8'
+            backgroundColor: '#0a0a0a',
+            borderRadius: 6,
+            borderSkipped: false,
+            barPercentage: 0.7,
+            categoryPercentage: 0.6
           },
           {
             label: 'Max WPM',
@@ -316,27 +675,51 @@ document.addEventListener('DOMContentLoaded', () => {
               <?= $difficultyStats['intermediate']['max'] ?>,
               <?= $difficultyStats['advanced']['max'] ?>
             ],
-            backgroundColor: '#f43f5e'
+            backgroundColor: '#ffffff',
+            borderColor: '#0a0a0a',
+            borderWidth: 1.5,
+            borderRadius: 6,
+            borderSkipped: false,
+            barPercentage: 0.7,
+            categoryPercentage: 0.6
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        scales: {
-          x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b' } },
-          y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b' } }
-        },
         plugins: {
-          legend: { labels: { color: '#94a3b8' } }
-        }
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: tickColor,
+              boxWidth: 10,
+              boxHeight: 10,
+              padding: 14,
+              font: { size: 11, weight: '600' }
+            }
+          },
+          tooltip: {
+            backgroundColor: '#0a0a0a',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            padding: 10,
+            cornerRadius: 6
+          }
+        },
+        scales: baseScales
       }
     });
   }
 
-  // 4. Accuracy Trend Chart
+  // 4. Accuracy Trend Chart — solid black line
   const accCtx = document.getElementById('accuracyTrendChart');
   if (accCtx && accData.length > 0) {
+    const ctx = accCtx.getContext('2d');
+    const grad = ctx.createLinearGradient(0, 0, 0, 280);
+    grad.addColorStop(0, 'rgba(10,10,10,0.12)');
+    grad.addColorStop(1, 'rgba(10,10,10,0.00)');
+
     new Chart(accCtx, {
       type: 'line',
       data: {
@@ -344,22 +727,43 @@ document.addEventListener('DOMContentLoaded', () => {
         datasets: [{
           label: 'Accuracy %',
           data: accData,
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderColor: '#0a0a0a',
+          backgroundColor: grad,
           fill: true,
           tension: 0.35,
           borderWidth: 2,
-          pointRadius: 3,
-          pointBackgroundColor: '#10b981'
+          pointRadius: 2.5,
+          pointHoverRadius: 5,
+          pointBackgroundColor: '#0a0a0a',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 1.5
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0a0a0a',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            padding: 10,
+            cornerRadius: 6,
+            displayColors: false
+          }
+        },
         scales: {
-          x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b' } },
-          y: { min: 60, max: 100, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b' } }
-        }
+          x: baseScales.x,
+          y: {
+            min: 60,
+            max: 100,
+            grid:  { color: gridColor, drawTicks: false },
+            ticks: { color: tickColor, padding: 8, callback: v => v + '%' },
+            border: { display: false }
+          }
+        },
+        interaction: { intersect: false, mode: 'index' }
       }
     });
   }
