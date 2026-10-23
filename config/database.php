@@ -1,57 +1,175 @@
-    <?php
-    /**
-     * Custom Type Master Pro
-     * Database Connection Configuration (PDO)
-     */
+<?php
+/**
+ * Custom Type Master Pro
+ * Database Connection Configuration (PDO)
+ * Supports: .env file, Environment Variables, Cloud Database URLs, Dual-Host (localhost vs 127.0.0.1) & Socket Auto-Detection
+ */
 
-    define('DB_HOST', '127.0.0.1');
-    define('DB_PORT', '3306');
-    define('DB_NAME', 'jgryfuqubz');
-    define('DB_USER', 'jgryfuqubz');
-    define('DB_PASS', 'jgryfuqubzxD3F6P4ZzS');
-    define('DB_CHARSET', 'utf8mb4');
-
-    /**
-     * Returns a singleton PDO database connection instance.
-     *
-     * @return PDO|null
-     */
-    function getDBConnection(): ?PDO {
-        static $pdo = null;
-
-        if ($pdo === null) {
-            $options = [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false,
-                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . DB_CHARSET
-            ];
-
-            // 1. Primary Attempt with configured credentials
-            try {
-                $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=%s', DB_HOST, DB_PORT, DB_NAME, DB_CHARSET);
-                $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-                return $pdo;
-            } catch (PDOException $e) {
-                error_log('Primary DB Connection failed (' . DB_USER . '@' . DB_HOST . '): ' . $e->getMessage());
-            }
-
-            // 2. Secondary Attempt: Try localhost fallback if running in local environment
-            try {
-                $dsnFallback = sprintf('mysql:host=127.0.0.1;port=%s;dbname=%s;charset=%s', DB_PORT, DB_NAME, DB_CHARSET);
-                $pdo = new PDO($dsnFallback, 'root', '', $options);
-                return $pdo;
-            } catch (PDOException $e2) {
-                try {
-                    $dsnOld = sprintf('mysql:host=127.0.0.1;port=%s;dbname=custom_type_master_pro;charset=%s', DB_PORT, DB_CHARSET);
-                    $pdo = new PDO($dsnOld, 'root', '', $options);
-                    return $pdo;
-                } catch (PDOException $e3) {
-                    error_log('Database Connection Final Error: ' . $e3->getMessage());
-                    return null;
+// 1. Optional lightweight .env file loader (zero external dependencies)
+(function() {
+    $envFile = __DIR__ . '/../.env';
+    if (@file_exists($envFile) && @is_readable($envFile)) {
+        $lines = @file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines !== false) {
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if ($line === '' || $line[0] === '#') {
+                    continue;
+                }
+                if (strpos($line, '=') !== false) {
+                    list($key, $val) = explode('=', $line, 2);
+                    $key = trim($key);
+                    $val = trim($val);
+                    $len = strlen($val);
+                    if ($len >= 2) {
+                        if (($val[0] === '"' && $val[$len - 1] === '"') || ($val[0] === "'" && $val[$len - 1] === "'")) {
+                            $val = substr($val, 1, -1);
+                        }
+                    }
+                    if (!isset($_SERVER[$key]) && !isset($_ENV[$key])) {
+                        putenv("{$key}={$val}");
+                        $_ENV[$key] = $val;
+                        $_SERVER[$key] = $val;
+                    }
                 }
             }
         }
+    }
+})();
 
+// 2. Parse Cloud Database URLs (Render, Railway, Heroku, Supabase, CleverCloud, etc.)
+$cloudDbUrl = getenv('DATABASE_URL') ?: (getenv('MYSQL_URL') ?: (getenv('JAWSDB_URL') ?: getenv('CLEARDB_DATABASE_URL')));
+$parsedUrl = [];
+if ($cloudDbUrl) {
+    $parts = parse_url($cloudDbUrl);
+    if (!empty($parts['host'])) {
+        $parsedUrl['host'] = $parts['host'];
+        $parsedUrl['port'] = $parts['port'] ?? 3306;
+        $parsedUrl['user'] = $parts['user'] ?? '';
+        $parsedUrl['pass'] = $parts['pass'] ?? '';
+        $parsedUrl['name'] = isset($parts['path']) ? ltrim($parts['path'], '/') : '';
+    }
+}
+
+// 3. Resolve Database Credentials (Env var > Cloud URL > Defaults)
+// Note: On Linux / cPanel live servers, 'localhost' is standard as it connects via UNIX socket.
+$dbHost = getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? ($_SERVER['DB_HOST'] ?? ($parsedUrl['host'] ?? 'localhost')));
+$dbPort = getenv('DB_PORT') ?: ($_ENV['DB_PORT'] ?? ($_SERVER['DB_PORT'] ?? ($parsedUrl['port'] ?? '3306')));
+$dbName = getenv('DB_NAME') ?: ($_ENV['DB_NAME'] ?? ($_SERVER['DB_NAME'] ?? ($parsedUrl['name'] ?? 'jgryfuqubz')));
+$dbUser = getenv('DB_USER') ?: ($_ENV['DB_USER'] ?? ($_SERVER['DB_USER'] ?? ($parsedUrl['user'] ?? 'jgryfuqubz')));
+$dbPass = getenv('DB_PASS') ?: ($_ENV['DB_PASS'] ?? ($_SERVER['DB_PASS'] ?? ($parsedUrl['pass'] ?? 'jgryfuqubzxD3F6P4ZzS')));
+$dbCharset = getenv('DB_CHARSET') ?: ($_ENV['DB_CHARSET'] ?? ($_SERVER['DB_CHARSET'] ?? 'utf8mb4'));
+
+if (!defined('DB_HOST')) define('DB_HOST', $dbHost);
+if (!defined('DB_PORT')) define('DB_PORT', $dbPort);
+if (!defined('DB_NAME')) define('DB_NAME', $dbName);
+if (!defined('DB_USER')) define('DB_USER', $dbUser);
+if (!defined('DB_PASS')) define('DB_PASS', $dbPass);
+if (!defined('DB_CHARSET')) define('DB_CHARSET', $dbCharset);
+
+/**
+ * Returns the last technical database connection error message for diagnostics.
+ *
+ * @return string
+ */
+function getDBLastError(): string {
+    global $g_dbLastError;
+    return $g_dbLastError ?? '';
+}
+
+/**
+ * Returns a singleton PDO database connection instance.
+ * Automatically tries primary credentials, dual-host (localhost vs 127.0.0.1),
+ * UNIX domain sockets, and local dev fallbacks.
+ *
+ * @return PDO|null
+ */
+function getDBConnection(): ?PDO {
+    static $pdo = null;
+    global $g_dbLastError;
+
+    if ($pdo !== null) {
         return $pdo;
     }
+
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . DB_CHARSET,
+        PDO::ATTR_TIMEOUT            => 5
+    ];
+
+    $attempts = [];
+
+    // Attempt 1: Configured host and credentials
+    $attempts[] = [
+        'dsn'  => sprintf('mysql:host=%s;port=%s;dbname=%s;charset=%s', DB_HOST, DB_PORT, DB_NAME, DB_CHARSET),
+        'user' => DB_USER,
+        'pass' => DB_PASS,
+        'desc' => 'Configured host (' . DB_USER . '@' . DB_HOST . ':' . DB_PORT . ')'
+    ];
+
+    // Attempt 2: Dual-host resolution (If configured was localhost, try 127.0.0.1; if 127.0.0.1, try localhost)
+    if (DB_HOST === 'localhost') {
+        $attempts[] = [
+            'dsn'  => sprintf('mysql:host=127.0.0.1;port=%s;dbname=%s;charset=%s', DB_PORT, DB_NAME, DB_CHARSET),
+            'user' => DB_USER,
+            'pass' => DB_PASS,
+            'desc' => 'Dual-host fallback (127.0.0.1 TCP)'
+        ];
+    } elseif (DB_HOST === '127.0.0.1') {
+        $attempts[] = [
+            'dsn'  => sprintf('mysql:host=localhost;port=%s;dbname=%s;charset=%s', DB_PORT, DB_NAME, DB_CHARSET),
+            'user' => DB_USER,
+            'pass' => DB_PASS,
+            'desc' => 'Dual-host fallback (localhost Socket)'
+        ];
+    }
+
+    // Attempt 3: Known Linux / cPanel UNIX Sockets (for live servers where TCP networking is skipped)
+    $knownSockets = [
+        '/var/run/mysqld/mysqld.sock',
+        '/tmp/mysql.sock',
+        '/var/lib/mysql/mysql.sock',
+        '/run/mysqld/mysqld.sock'
+    ];
+    foreach ($knownSockets as $sock) {
+        if (@file_exists($sock)) {
+            $attempts[] = [
+                'dsn'  => sprintf('mysql:unix_socket=%s;dbname=%s;charset=%s', $sock, DB_NAME, DB_CHARSET),
+                'user' => DB_USER,
+                'pass' => DB_PASS,
+                'desc' => 'Linux UNIX Socket (' . $sock . ')'
+            ];
+            break;
+        }
+    }
+
+    // Attempt 4: Local development fallback (XAMPP / WAMP root with empty password)
+    $localDatabases = [DB_NAME, 'custom_type_master_pro', 'type_master'];
+    foreach (array_unique($localDatabases) as $fallbackDb) {
+        $attempts[] = [
+            'dsn'  => sprintf('mysql:host=127.0.0.1;port=%s;dbname=%s;charset=%s', DB_PORT, $fallbackDb, DB_CHARSET),
+            'user' => 'root',
+            'pass' => '',
+            'desc' => "Local dev fallback (root@127.0.0.1 / db={$fallbackDb})"
+        ];
+    }
+
+    // Execute connection attempts in sequence
+    $errors = [];
+    foreach ($attempts as $attempt) {
+        try {
+            $pdo = new PDO($attempt['dsn'], $attempt['user'], $attempt['pass'], $options);
+            return $pdo;
+        } catch (PDOException $e) {
+            $errors[] = $attempt['desc'] . ': ' . $e->getMessage();
+        }
+    }
+
+    $g_dbLastError = !empty($errors) ? end($errors) : 'Unknown database connection error';
+    error_log('[TypeMaster DB Connection Error] ' . implode(' | ', $errors));
+
+    return null;
+}
