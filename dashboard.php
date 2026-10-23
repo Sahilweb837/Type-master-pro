@@ -461,6 +461,27 @@ include __DIR__ . '/includes/header.php';
           </div>
         </div>
       </div>
+    <!-- Arcade Games Banner -->
+    <div class="glass-card p-4 mb-4 position-relative overflow-hidden" style="background: radial-gradient(circle at top right, rgba(255, 77, 0, 0.12) 0%, transparent 60%), radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.12) 0%, transparent 60%), var(--bg-card); border: 1px solid var(--border-color);">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+          <div class="d-inline-flex align-items-center gap-1.5 px-2.5 py-0.5 rounded-pill mb-2 small fw-bold" style="background: rgba(255, 77, 0, 0.15); color: #ff4d00; border: 1px solid rgba(255, 77, 0, 0.3); font-size: 0.72rem;">
+            <i class="bi bi-controller"></i> ARCADE TYPING ZONE &bull; 5 FULL GAMES
+          </div>
+          <h5 class="fw-bold text-light mb-1">Typing Arcade Arena</h5>
+          <p class="text-secondary small mb-0" style="max-width: 650px;">
+            Sharpen subconscious muscle memory and reaction speed! Play <strong>Keyboard Ninja</strong>, <strong>Space Word Defender</strong>, <strong>Cyber Grand Prix</strong>, <strong>Type-a-Balloon</strong>, and <strong>Meteor Matrix Defense</strong>.
+          </p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <a href="<?= BASE_URL ?>/game-ninja.php" class="btn btn-sm soft-btn-primary fw-bold d-inline-flex align-items-center gap-1">
+            <i class="bi bi-slash-circle-fill"></i> Play Ninja
+          </a>
+          <a href="<?= BASE_URL ?>/games.php" class="btn btn-sm btn-outline-secondary fw-bold d-inline-flex align-items-center gap-1">
+            <i class="bi bi-grid-fill"></i> View All 5 Games
+          </a>
+        </div>
+      </div>
     </div>
 
     <!-- Quick Practice Passage Drills Deck -->

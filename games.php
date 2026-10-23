@@ -2,7 +2,12 @@
 /**
  * Custom Type Master Pro
  * Arcade Games Hub
- * Central portal for Keyboard Ninja, Space Defender, and typing challenges
+ * Central portal for 5 arcade typing games:
+ * 1. Keyboard Ninja
+ * 2. Space Word Defender
+ * 3. Cyber Grand Prix
+ * 4. Type-a-Balloon
+ * 5. Meteor Matrix Defense
  */
 
 require_once __DIR__ . '/config/app.php';
@@ -12,15 +17,27 @@ require_once __DIR__ . '/includes/games_data.php';
 $currentUser = current_user();
 $userId = $currentUser ? (int)$currentUser['id'] : 0;
 
-$ninjaHighScore = get_user_game_high_score($userId, 'ninja');
-$spaceHighScore = get_user_game_high_score($userId, 'space');
+// High scores for all 5 games
+$highScores = [
+    'ninja'   => get_user_game_high_score($userId, 'ninja'),
+    'space'   => get_user_game_high_score($userId, 'space'),
+    'racer'   => get_user_game_high_score($userId, 'racer'),
+    'balloon' => get_user_game_high_score($userId, 'balloon'),
+    'meteor'  => get_user_game_high_score($userId, 'meteor')
+];
 
-$ninjaLeaderboard = get_game_leaderboard('ninja', 6);
-$spaceLeaderboard = get_game_leaderboard('space', 6);
+// Leaderboards for all 5 games
+$leaderboards = [
+    'ninja'   => get_game_leaderboard('ninja', 6),
+    'space'   => get_game_leaderboard('space', 6),
+    'racer'   => get_game_leaderboard('racer', 6),
+    'balloon' => get_game_leaderboard('balloon', 6),
+    'meteor'  => get_game_leaderboard('meteor', 6)
+];
 
 $allGames = get_all_games();
 
-$pageTitle = 'Arcade Games Hub — Typing.com Inspired';
+$pageTitle = 'Arcade Games Hub — 5 Typing Arcade Challenges';
 $pageBadgeTitle = 'Arcade Games';
 $pageIcon = 'bi-controller';
 
@@ -45,7 +62,7 @@ include __DIR__ . '/includes/header.php';
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 16px;
-  padding: 28px;
+  padding: 24px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -61,45 +78,44 @@ include __DIR__ . '/includes/header.php';
 }
 
 .card-hero-icon {
-  width: 58px;
-  height: 58px;
-  border-radius: 14px;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem;
-  margin-bottom: 20px;
+  font-size: 1.6rem;
+  margin-bottom: 16px;
 }
 
 .card-tag-pill {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   padding: 4px 10px;
   border-radius: 20px;
   display: inline-block;
-  margin-bottom: 12px;
 }
 
 .feature-pill-badge {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .score-stat-box {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: 10px;
-  padding: 10px 14px;
+  padding: 9px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -130,73 +146,91 @@ include __DIR__ . '/includes/header.php';
     <div class="row align-items-center g-4">
       <div class="col-lg-8">
         <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill" style="background: rgba(255, 77, 0, 0.12); border: 1px solid rgba(255, 77, 0, 0.3); color: #ff4d00; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em;">
-          <i class="bi bi-controller"></i> ARCADE TYPING ZONE
+          <i class="bi bi-controller"></i> ARCADE TYPING ZONE &bull; 5 FULL GAMES
         </div>
         <h1 class="fw-bold mb-2" style="font-size: 2.2rem; letter-spacing: -0.03em; color: var(--text-primary);">
           Typing Arcade Arena
         </h1>
         <p class="text-secondary mb-3" style="max-width: 680px; font-size: 0.98rem; line-height: 1.6;">
-          Transform repetitive finger drills into thrilling arcade reflex tests. Inspired by games like <em>Keyboard Ninja</em> and space defense typing, train your subconscious muscle memory while having fun!
+          Level up your typing speed, peripheral perception, and muscle memory through 5 gamified retro arcade challenges. Slash flying fruit with katanas, fire orbital defense lasers, burn highway asphalt at 180 MPH, pop rising sky balloons, and neutralize falling meteors!
         </p>
 
         <div class="d-flex align-items-center gap-2 flex-wrap">
-          <a href="<?= BASE_URL ?>/game-ninja.php" class="soft-btn soft-btn-primary px-4 py-2 fw-bold d-inline-flex align-items-center gap-2">
-            <i class="bi bi-slash-circle-fill"></i> Play Keyboard Ninja
+          <a href="<?= BASE_URL ?>/game-ninja.php" class="soft-btn soft-btn-primary px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5" style="font-size: 0.85rem;">
+            <i class="bi bi-slash-circle-fill"></i> Keyboard Ninja
           </a>
-          <a href="<?= BASE_URL ?>/game-space.php" class="soft-btn px-4 py-2 fw-bold d-inline-flex align-items-center gap-2">
-            <i class="bi bi-rocket-takeoff-fill" style="color: #38bdf8;"></i> Space Word Defender
+          <a href="<?= BASE_URL ?>/game-space.php" class="soft-btn px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5" style="font-size: 0.85rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">
+            <i class="bi bi-rocket-takeoff-fill"></i> Space Defender
           </a>
-          <a href="<?= BASE_URL ?>/lessons.php" class="btn btn-sm btn-control px-3 py-2">
-            <i class="bi bi-mortarboard me-1"></i> Structured Lessons
+          <a href="<?= BASE_URL ?>/game-racer.php" class="soft-btn px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5" style="font-size: 0.85rem; background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">
+            <i class="bi bi-speedometer2"></i> Cyber Racer
+          </a>
+          <a href="<?= BASE_URL ?>/game-balloon.php" class="soft-btn px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5" style="font-size: 0.85rem; background: rgba(236, 72, 153, 0.15); color: #ec4899; border: 1px solid rgba(236, 72, 153, 0.3);">
+            <i class="bi bi-balloon-fill"></i> Balloon Pop
+          </a>
+          <a href="<?= BASE_URL ?>/game-meteor.php" class="soft-btn px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5" style="font-size: 0.85rem; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">
+            <i class="bi bi-fire"></i> Meteor Defense
           </a>
         </div>
       </div>
 
-      <!-- Quick Player Stats -->
+      <!-- Quick Player Stats Overview -->
       <div class="col-lg-4">
-        <div class="soft-card p-3 p-md-4">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <span class="small text-secondary fw-bold text-uppercase" style="letter-spacing: 0.06em;">Your Personal Bests</span>
-            <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.7rem;">Synced</span>
+        <div class="soft-card p-3">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="small text-secondary fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.06em;">Your Personal Records</span>
+            <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.65rem;">Cloud Synced</span>
           </div>
 
-          <div class="score-stat-box mb-2">
+          <div class="score-stat-box mb-1.5">
             <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-slash-circle-fill text-danger fs-5"></i>
-              <div>
-                <div class="fw-bold small" style="color: var(--text-primary);">Keyboard Ninja</div>
-                <div class="text-muted" style="font-size: 0.7rem;">Streak: <?= $ninjaHighScore['highest_streak'] ?> hits</div>
-              </div>
+              <i class="bi bi-slash-circle-fill text-danger fs-6"></i>
+              <span class="small fw-bold" style="color: var(--text-primary);">Ninja</span>
             </div>
-            <div class="text-end">
-              <span class="fw-bold font-monospace text-success fs-5"><?= number_format($ninjaHighScore['score']) ?></span>
-              <div class="text-muted" style="font-size: 0.65rem;">POINTS</div>
+            <span class="fw-bold font-monospace text-success small"><?= number_format($highScores['ninja']['score']) ?> pts</span>
+          </div>
+
+          <div class="score-stat-box mb-1.5">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-rocket-takeoff-fill text-info fs-6"></i>
+              <span class="small fw-bold" style="color: var(--text-primary);">Space Defender</span>
             </div>
+            <span class="fw-bold font-monospace text-info small"><?= number_format($highScores['space']['score']) ?> pts</span>
+          </div>
+
+          <div class="score-stat-box mb-1.5">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-speedometer2 text-warning fs-6"></i>
+              <span class="small fw-bold" style="color: var(--text-primary);">Grand Prix</span>
+            </div>
+            <span class="fw-bold font-monospace text-warning small"><?= number_format($highScores['racer']['score']) ?> pts</span>
+          </div>
+
+          <div class="score-stat-box mb-1.5">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-balloon-fill text-pink fs-6" style="color: #ec4899;"></i>
+              <span class="small fw-bold" style="color: var(--text-primary);">Balloon Pop</span>
+            </div>
+            <span class="fw-bold font-monospace text-pink small" style="color: #ec4899;"><?= number_format($highScores['balloon']['score']) ?> pts</span>
           </div>
 
           <div class="score-stat-box">
             <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-rocket-takeoff-fill text-info fs-5"></i>
-              <div>
-                <div class="fw-bold small" style="color: var(--text-primary);">Space Defender</div>
-                <div class="text-muted" style="font-size: 0.7rem;">Streak: <?= $spaceHighScore['highest_streak'] ?> hits</div>
-              </div>
+              <i class="bi bi-fire text-success fs-6"></i>
+              <span class="small fw-bold" style="color: var(--text-primary);">Meteor Defense</span>
             </div>
-            <div class="text-end">
-              <span class="fw-bold font-monospace text-info fs-5"><?= number_format($spaceHighScore['score']) ?></span>
-              <div class="text-muted" style="font-size: 0.65rem;">POINTS</div>
-            </div>
+            <span class="fw-bold font-monospace text-success small"><?= number_format($highScores['meteor']['score']) ?> pts</span>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Game Cards Section -->
+  <!-- All 5 Games Showcase Grid -->
   <div class="row g-4 mb-5">
     
     <!-- Game 1: Keyboard Ninja -->
-    <div class="col-lg-6">
+    <div class="col-lg-4 col-md-6">
       <div class="arcade-game-card">
         <div class="d-flex align-items-center justify-content-between mb-2">
           <div class="card-hero-icon" style="background: rgba(255, 77, 0, 0.12); color: #ff4d00;">
@@ -207,38 +241,24 @@ include __DIR__ . '/includes/header.php';
           </span>
         </div>
 
-        <h3 class="fw-bold mb-2" style="color: var(--text-primary); font-size: 1.45rem;">Keyboard Ninja</h3>
-        <p class="text-secondary small mb-3" style="line-height: 1.6;">
-          Slash flying fruit targets mid-air with sharp katana strikes. Isolate specific keyboard rows (Home Row, Top Row, Bottom Row, Numbers) or test full alphabet reflexes while dodging explosive ninja bombs!
+        <h4 class="fw-bold mb-1" style="color: var(--text-primary);">Keyboard Ninja</h4>
+        <p class="text-secondary small mb-3" style="line-height: 1.5; min-height: 54px;">
+          Slash flying fruit with katana strikes. Isolate Home Row, Top Row, or Numbers while dodging explosive bombs!
         </p>
 
-        <!-- Feature Pills -->
-        <div class="d-flex flex-wrap gap-2 mb-4">
-          <span class="feature-pill-badge"><i class="bi bi-check2 text-danger"></i> Fruit Slicing Physics</span>
-          <span class="feature-pill-badge"><i class="bi bi-check2 text-danger"></i> Sword Sound FX</span>
-          <span class="feature-pill-badge"><i class="bi bi-check2 text-danger"></i> Combo Multipliers</span>
-          <span class="feature-pill-badge"><i class="bi bi-check2 text-danger"></i> Row Isolation Modes</span>
+        <div class="d-flex flex-wrap gap-1.5 mb-3">
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-danger"></i> Fruit Slicing</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-danger"></i> Row Isolation</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-danger"></i> Katana SFX</span>
         </div>
 
-        <!-- Mode Select Preview -->
-        <div class="p-3 rounded-3 mb-4" style="background: var(--bg-primary); border: 1px solid var(--border-color);">
-          <div class="small fw-bold text-muted mb-2 text-uppercase" style="font-size: 0.68rem; letter-spacing: 0.05em;">Keyboard Practice Rows:</div>
-          <div class="d-flex flex-wrap gap-1.5">
-            <span class="badge bg-secondary-subtle text-secondary">Home Row (ASDF JKL;)</span>
-            <span class="badge bg-secondary-subtle text-secondary">Top Row (QWERTY)</span>
-            <span class="badge bg-secondary-subtle text-secondary">Bottom Row (ZXCVBNM)</span>
-            <span class="badge bg-secondary-subtle text-secondary">Numbers (1234567890)</span>
-            <span class="badge bg-secondary-subtle text-secondary">All Letters</span>
-          </div>
-        </div>
-
-        <div class="mt-auto d-flex align-items-center justify-content-between pt-2">
+        <div class="mt-auto d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: var(--border-color) !important;">
           <div>
-            <div class="text-muted" style="font-size: 0.7rem;">PERSONAL BEST</div>
-            <div class="fw-bold font-monospace text-success fs-5"><?= number_format($ninjaHighScore['score']) ?> pts</div>
+            <div class="text-muted" style="font-size: 0.68rem;">BEST SCORE</div>
+            <div class="fw-bold font-monospace text-success small"><?= number_format($highScores['ninja']['score']) ?> pts</div>
           </div>
-          <a href="<?= BASE_URL ?>/game-ninja.php" class="soft-btn soft-btn-primary px-4 py-2.5 fw-bold d-inline-flex align-items-center gap-2">
-            <span>Play Ninja</span>
+          <a href="<?= BASE_URL ?>/game-ninja.php" class="soft-btn soft-btn-primary px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1" style="font-size: 0.85rem;">
+            <span>Play</span>
             <i class="bi bi-arrow-right"></i>
           </a>
         </div>
@@ -246,7 +266,7 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <!-- Game 2: Space Word Defender -->
-    <div class="col-lg-6">
+    <div class="col-lg-4 col-md-6">
       <div class="arcade-game-card">
         <div class="d-flex align-items-center justify-content-between mb-2">
           <div class="card-hero-icon" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8;">
@@ -257,39 +277,132 @@ include __DIR__ . '/includes/header.php';
           </span>
         </div>
 
-        <h3 class="fw-bold mb-2" style="color: var(--text-primary); font-size: 1.45rem;">Space Word Defender</h3>
-        <p class="text-secondary small mb-3" style="line-height: 1.6;">
-          Defend your orbital planetary base from invading alien warships. Type complete vocabulary words to swivel high-frequency laser cannons and obliterate targets before they breach your energy shields!
+        <h4 class="fw-bold mb-1" style="color: var(--text-primary);">Space Word Defender</h4>
+        <p class="text-secondary small mb-3" style="line-height: 1.5; min-height: 54px;">
+          Defend orbital command from descending alien warships. Type complete words to fire laser cannons!
         </p>
 
-        <!-- Feature Pills -->
-        <div class="d-flex flex-wrap gap-2 mb-4">
-          <span class="feature-pill-badge"><i class="bi bi-check2 text-info"></i> Laser Particle Beams</span>
-          <span class="feature-pill-badge"><i class="bi bi-check2 text-info"></i> Planetary Shield HP</span>
-          <span class="feature-pill-badge"><i class="bi bi-check2 text-info"></i> Progressive Alien Waves</span>
-          <span class="feature-pill-badge"><i class="bi bi-check2 text-info"></i> Code &amp; Vocab Banks</span>
+        <div class="d-flex flex-wrap gap-1.5 mb-3">
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-info"></i> Laser Beams</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-info"></i> Target Lock</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-info"></i> Shield HP</span>
         </div>
 
-        <!-- Mode Select Preview -->
-        <div class="p-3 rounded-3 mb-4" style="background: var(--bg-primary); border: 1px solid var(--border-color);">
-          <div class="small fw-bold text-muted mb-2 text-uppercase" style="font-size: 0.68rem; letter-spacing: 0.05em;">Word Banks &amp; Difficulties:</div>
-          <div class="d-flex flex-wrap gap-1.5">
-            <span class="badge bg-secondary-subtle text-secondary">Core Vocabulary</span>
-            <span class="badge bg-secondary-subtle text-secondary">Speed Short Words</span>
-            <span class="badge bg-secondary-subtle text-secondary">Tech &amp; Code Syntax</span>
-            <span class="badge bg-secondary-subtle text-secondary">Cadet</span>
-            <span class="badge bg-secondary-subtle text-secondary">Commander</span>
-            <span class="badge bg-secondary-subtle text-secondary">Elite</span>
-          </div>
-        </div>
-
-        <div class="mt-auto d-flex align-items-center justify-content-between pt-2">
+        <div class="mt-auto d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: var(--border-color) !important;">
           <div>
-            <div class="text-muted" style="font-size: 0.7rem;">PERSONAL BEST</div>
-            <div class="fw-bold font-monospace text-info fs-5"><?= number_format($spaceHighScore['score']) ?> pts</div>
+            <div class="text-muted" style="font-size: 0.68rem;">BEST SCORE</div>
+            <div class="fw-bold font-monospace text-info small"><?= number_format($highScores['space']['score']) ?> pts</div>
           </div>
-          <a href="<?= BASE_URL ?>/game-space.php" class="soft-btn px-4 py-2.5 fw-bold d-inline-flex align-items-center gap-2" style="background: #38bdf8; color: #000;">
-            <span>Deploy Defender</span>
+          <a href="<?= BASE_URL ?>/game-space.php" class="soft-btn px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1" style="background: #38bdf8; color: #000; font-size: 0.85rem;">
+            <span>Play</span>
+            <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game 3: Cyber Grand Prix -->
+    <div class="col-lg-4 col-md-6">
+      <div class="arcade-game-card">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="card-hero-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+            <i class="bi bi-speedometer2"></i>
+          </div>
+          <span class="card-tag-pill" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">
+            ★ Speed Racer
+          </span>
+        </div>
+
+        <h4 class="fw-bold mb-1" style="color: var(--text-primary);">Cyber Grand Prix</h4>
+        <p class="text-secondary small mb-3" style="line-height: 1.5; min-height: 54px;">
+          Accelerate your supercar past 150 MPH! Type words to ignite nitro exhaust flames and overtake rivals from P25 to P1.
+        </p>
+
+        <div class="d-flex flex-wrap gap-1.5 mb-3">
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-warning"></i> Nitro Boost</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-warning"></i> Overtake Physics</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-warning"></i> Engine Rev SFX</span>
+        </div>
+
+        <div class="mt-auto d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: var(--border-color) !important;">
+          <div>
+            <div class="text-muted" style="font-size: 0.68rem;">BEST SCORE</div>
+            <div class="fw-bold font-monospace text-warning small"><?= number_format($highScores['racer']['score']) ?> pts</div>
+          </div>
+          <a href="<?= BASE_URL ?>/game-racer.php" class="soft-btn px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1" style="background: #f59e0b; color: #000; font-size: 0.85rem;">
+            <span>Play</span>
+            <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game 4: Type-a-Balloon -->
+    <div class="col-lg-6 col-md-6">
+      <div class="arcade-game-card">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="card-hero-icon" style="background: rgba(236, 72, 153, 0.12); color: #ec4899;">
+            <i class="bi bi-balloon-fill"></i>
+          </div>
+          <span class="card-tag-pill" style="background: rgba(236, 72, 153, 0.15); color: #ec4899; border: 1px solid rgba(236, 72, 153, 0.3);">
+            ★ Typing.com Classic
+          </span>
+        </div>
+
+        <h4 class="fw-bold mb-1" style="color: var(--text-primary);">Type-a-Balloon</h4>
+        <p class="text-secondary small mb-3" style="line-height: 1.5; min-height: 54px;">
+          Float into the clouds! Pop colorful helium balloons with sharp darts before they drift into the stratosphere. Perfect for finger accuracy and letter recognition.
+        </p>
+
+        <div class="d-flex flex-wrap gap-1.5 mb-3">
+          <span class="feature-pill-badge"><i class="bi bi-check2" style="color: #ec4899;"></i> Confetti Bursts</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2" style="color: #ec4899;"></i> Gold 3X Balloons</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2" style="color: #ec4899;"></i> Storm Hazards</span>
+        </div>
+
+        <div class="mt-auto d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: var(--border-color) !important;">
+          <div>
+            <div class="text-muted" style="font-size: 0.68rem;">BEST SCORE</div>
+            <div class="fw-bold font-monospace text-pink small" style="color: #ec4899;"><?= number_format($highScores['balloon']['score']) ?> pts</div>
+          </div>
+          <a href="<?= BASE_URL ?>/game-balloon.php" class="soft-btn px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1" style="background: #ec4899; color: #fff; font-size: 0.85rem;">
+            <span>Play</span>
+            <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game 5: Meteor Matrix Defense -->
+    <div class="col-lg-6 col-md-12">
+      <div class="arcade-game-card">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="card-hero-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+            <i class="bi bi-fire"></i>
+          </div>
+          <span class="card-tag-pill" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">
+            ★ Planetary Railgun
+          </span>
+        </div>
+
+        <h4 class="fw-bold mb-1" style="color: var(--text-primary);">Meteor Matrix Defense</h4>
+        <p class="text-secondary small mb-3" style="line-height: 1.5; min-height: 54px;">
+          Fiery meteors are hurtling toward the metropolitan city grid. Fire ground railgun plasma rounds and detonate blue EMP shockwaves to save the grid!
+        </p>
+
+        <div class="d-flex flex-wrap gap-1.5 mb-3">
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-success"></i> Railgun Rounds</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-success"></i> EMP Shockwaves</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2 text-success"></i> Fire Trail FX</span>
+        </div>
+
+        <div class="mt-auto d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: var(--border-color) !important;">
+          <div>
+            <div class="text-muted" style="font-size: 0.68rem;">BEST SCORE</div>
+            <div class="fw-bold font-monospace text-success small"><?= number_format($highScores['meteor']['score']) ?> pts</div>
+          </div>
+          <a href="<?= BASE_URL ?>/game-meteor.php" class="soft-btn px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1" style="background: #10b981; color: #000; font-size: 0.85rem;">
+            <span>Play</span>
             <i class="bi bi-arrow-right"></i>
           </a>
         </div>
@@ -298,23 +411,38 @@ include __DIR__ . '/includes/header.php';
 
   </div>
 
-  <!-- Arcade Leaderboards Section -->
+  <!-- Arcade Hall of Fame Leaderboards (5 Tabs) -->
   <div class="soft-card p-4 mb-5">
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
       <div>
         <h4 class="fw-bold mb-1" style="color: var(--text-primary);"><i class="bi bi-trophy-fill text-warning me-2"></i> Arcade Hall of Fame</h4>
-        <p class="text-secondary small mb-0">Top high scores achieved across all registered typists.</p>
+        <p class="text-secondary small mb-0">High scores recorded across all 5 arcade challenges.</p>
       </div>
 
       <ul class="nav nav-pills" id="arcadeTabs" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active py-1.5 px-3 small fw-bold" id="tab-ninja-btn" data-bs-toggle="pill" data-bs-target="#tab-ninja" type="button" role="tab">
-            <i class="bi bi-slash-circle-fill text-danger me-1"></i> Keyboard Ninja
+            <i class="bi bi-slash-circle-fill text-danger me-1"></i> Ninja
           </button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link py-1.5 px-3 small fw-bold" id="tab-space-btn" data-bs-toggle="pill" data-bs-target="#tab-space" type="button" role="tab">
-            <i class="bi bi-rocket-takeoff-fill text-info me-1"></i> Space Defender
+            <i class="bi bi-rocket-takeoff-fill text-info me-1"></i> Space
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link py-1.5 px-3 small fw-bold" id="tab-racer-btn" data-bs-toggle="pill" data-bs-target="#tab-racer" type="button" role="tab">
+            <i class="bi bi-speedometer2 text-warning me-1"></i> Racer
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link py-1.5 px-3 small fw-bold" id="tab-balloon-btn" data-bs-toggle="pill" data-bs-target="#tab-balloon" type="button" role="tab">
+            <i class="bi bi-balloon-fill text-pink me-1" style="color: #ec4899;"></i> Balloon
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link py-1.5 px-3 small fw-bold" id="tab-meteor-btn" data-bs-toggle="pill" data-bs-target="#tab-meteor" type="button" role="tab">
+            <i class="bi bi-fire text-success me-1"></i> Meteor
           </button>
         </li>
       </ul>
@@ -322,177 +450,76 @@ include __DIR__ . '/includes/header.php';
 
     <div class="tab-content" id="arcadeTabsContent">
       
-      <!-- Tab 1: Ninja Leaderboard -->
-      <div class="tab-pane fade show active" id="tab-ninja" role="tabpanel">
-        <?php if (empty($ninjaLeaderboard)): ?>
-          <div class="text-center py-4 text-muted">
-            <i class="bi bi-slash-circle fs-3 mb-2 d-block"></i>
-            <p class="mb-2">No scores recorded yet for Keyboard Ninja.</p>
-            <a href="<?= BASE_URL ?>/game-ninja.php" class="btn btn-sm soft-btn-primary">Be the First Champion</a>
-          </div>
-        <?php else: ?>
-          <div class="table-responsive">
-            <table class="table leaderboard-table align-middle mb-0">
-              <thead>
-                <tr>
-                  <th style="width: 60px;">Rank</th>
-                  <th>Typist</th>
-                  <th class="text-end">High Score</th>
-                  <th class="text-end">Best Streak</th>
-                  <th class="text-end">Accuracy</th>
-                  <th class="text-end">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php foreach ($ninjaLeaderboard as $idx => $entry): ?>
+      <?php foreach (['ninja', 'space', 'racer', 'balloon', 'meteor'] as $slug): 
+        $entries = $leaderboards[$slug] ?? [];
+        $activeClass = ($slug === 'ninja') ? 'show active' : '';
+      ?>
+        <div class="tab-pane fade <?= $activeClass ?>" id="tab-<?= $slug ?>" role="tabpanel">
+          <?php if (empty($entries)): ?>
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-controller fs-3 mb-2 d-block"></i>
+              <p class="mb-2">No scores recorded yet for this arcade challenge.</p>
+              <a href="<?= BASE_URL ?>/game-<?= $slug ?>.php" class="btn btn-sm soft-btn-primary">Be the First Champion</a>
+            </div>
+          <?php else: ?>
+            <div class="table-responsive">
+              <table class="table leaderboard-table align-middle mb-0">
+                <thead>
                   <tr>
-                    <td>
-                      <?php if ($idx === 0): ?>
-                        <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-trophy-fill"></i> 1st</span>
-                      <?php elseif ($idx === 1): ?>
-                        <span class="badge bg-secondary text-light px-2 py-1">2nd</span>
-                      <?php elseif ($idx === 2): ?>
-                        <span class="badge bg-dark border text-light px-2 py-1">3rd</span>
-                      <?php else: ?>
-                        <span class="text-muted fw-bold ps-2">#<?= $idx + 1 ?></span>
-                      <?php endif; ?>
-                    </td>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <div class="user-avatar shadow-sm" style="width: 30px; height: 30px; font-size: 0.75rem;">
-                          <?= strtoupper(substr($entry['username'], 0, 1)) ?>
-                        </div>
-                        <div>
-                          <div class="fw-bold" style="color: var(--text-primary);"><?= e($entry['full_name'] ?: $entry['username']) ?></div>
-                          <div class="text-muted" style="font-size: 0.7rem;">@<?= e($entry['username']) ?></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="text-end font-monospace fw-bold text-success fs-6">
-                      <?= number_format($entry['score']) ?>
-                    </td>
-                    <td class="text-end font-monospace text-warning">
-                      <?= $entry['highest_streak'] ?> hits
-                    </td>
-                    <td class="text-end font-monospace">
-                      <?= number_format($entry['accuracy'], 1) ?>%
-                    </td>
-                    <td class="text-end text-muted small">
-                      <?= date('M j, Y', strtotime($entry['played_at'])) ?>
-                    </td>
+                    <th style="width: 60px;">Rank</th>
+                    <th>Typist</th>
+                    <th class="text-end">Score</th>
+                    <th class="text-end">Best Streak</th>
+                    <th class="text-end">Accuracy</th>
+                    <th class="text-end">Date</th>
                   </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
-        <?php endif; ?>
-      </div>
-
-      <!-- Tab 2: Space Defender Leaderboard -->
-      <div class="tab-pane fade" id="tab-space" role="tabpanel">
-        <?php if (empty($spaceLeaderboard)): ?>
-          <div class="text-center py-4 text-muted">
-            <i class="bi bi-rocket-takeoff fs-3 mb-2 d-block"></i>
-            <p class="mb-2">No scores recorded yet for Space Word Defender.</p>
-            <a href="<?= BASE_URL ?>/game-space.php" class="btn btn-sm btn-info text-dark fw-bold">Defend the Base First</a>
-          </div>
-        <?php else: ?>
-          <div class="table-responsive">
-            <table class="table leaderboard-table align-middle mb-0">
-              <thead>
-                <tr>
-                  <th style="width: 60px;">Rank</th>
-                  <th>Typist</th>
-                  <th class="text-end">High Score</th>
-                  <th class="text-end">Best Streak</th>
-                  <th class="text-end">Accuracy</th>
-                  <th class="text-end">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php foreach ($spaceLeaderboard as $idx => $entry): ?>
-                  <tr>
-                    <td>
-                      <?php if ($idx === 0): ?>
-                        <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-trophy-fill"></i> 1st</span>
-                      <?php elseif ($idx === 1): ?>
-                        <span class="badge bg-secondary text-light px-2 py-1">2nd</span>
-                      <?php elseif ($idx === 2): ?>
-                        <span class="badge bg-dark border text-light px-2 py-1">3rd</span>
-                      <?php else: ?>
-                        <span class="text-muted fw-bold ps-2">#<?= $idx + 1 ?></span>
-                      <?php endif; ?>
-                    </td>
-                    <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <div class="user-avatar shadow-sm" style="width: 30px; height: 30px; font-size: 0.75rem;">
-                          <?= strtoupper(substr($entry['username'], 0, 1)) ?>
+                </thead>
+                <tbody>
+                  <?php foreach ($entries as $idx => $entry): ?>
+                    <tr>
+                      <td>
+                        <?php if ($idx === 0): ?>
+                          <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-trophy-fill"></i> 1st</span>
+                        <?php elseif ($idx === 1): ?>
+                          <span class="badge bg-secondary text-light px-2 py-1">2nd</span>
+                        <?php elseif ($idx === 2): ?>
+                          <span class="badge bg-dark border text-light px-2 py-1">3rd</span>
+                        <?php else: ?>
+                          <span class="text-muted fw-bold ps-2">#<?= $idx + 1 ?></span>
+                        <?php endif; ?>
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="user-avatar shadow-sm" style="width: 30px; height: 30px; font-size: 0.75rem;">
+                            <?= strtoupper(substr($entry['username'], 0, 1)) ?>
+                          </div>
+                          <div>
+                            <div class="fw-bold" style="color: var(--text-primary);"><?= e($entry['full_name'] ?: $entry['username']) ?></div>
+                            <div class="text-muted" style="font-size: 0.7rem;">@<?= e($entry['username']) ?></div>
+                          </div>
                         </div>
-                        <div>
-                          <div class="fw-bold" style="color: var(--text-primary);"><?= e($entry['full_name'] ?: $entry['username']) ?></div>
-                          <div class="text-muted" style="font-size: 0.7rem;">@<?= e($entry['username']) ?></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="text-end font-monospace fw-bold text-info fs-6">
-                      <?= number_format($entry['score']) ?>
-                    </td>
-                    <td class="text-end font-monospace text-warning">
-                      <?= $entry['highest_streak'] ?> hits
-                    </td>
-                    <td class="text-end font-monospace">
-                      <?= number_format($entry['accuracy'], 1) ?>%
-                    </td>
-                    <td class="text-end text-muted small">
-                      <?= date('M j, Y', strtotime($entry['played_at'])) ?>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
-        <?php endif; ?>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Educational & Muscle Memory Intel -->
-  <div class="row g-4">
-    <div class="col-md-4">
-      <div class="soft-card p-4 h-100">
-        <div class="d-inline-flex p-2.5 rounded-3 mb-3" style="background: rgba(255, 77, 0, 0.12); color: #ff4d00; font-size: 1.3rem;">
-          <i class="bi bi-lightning-charge-fill"></i>
+                      </td>
+                      <td class="text-end font-monospace fw-bold text-success fs-6">
+                        <?= number_format($entry['score']) ?>
+                      </td>
+                      <td class="text-end font-monospace text-warning">
+                        <?= $entry['highest_streak'] ?> hits
+                      </td>
+                      <td class="text-end font-monospace">
+                        <?= number_format($entry['accuracy'], 1) ?>%
+                      </td>
+                      <td class="text-end text-muted small">
+                        <?= date('M j, Y', strtotime($entry['played_at'])) ?>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+            </div>
+          <?php endif; ?>
         </div>
-        <h5 class="fw-bold mb-2" style="color: var(--text-primary);">Subconscious Reflexes</h5>
-        <p class="text-secondary small mb-0" style="line-height: 1.6;">
-          Games force rapid involuntary reactions under time pressure. Your brain bypasses conscious visual verification and triggers muscle memory in under 120 milliseconds.
-        </p>
-      </div>
-    </div>
+      <?php endforeach; ?>
 
-    <div class="col-md-4">
-      <div class="soft-card p-4 h-100">
-        <div class="d-inline-flex p-2.5 rounded-3 mb-3" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8; font-size: 1.3rem;">
-          <i class="bi bi-eye-fill"></i>
-        </div>
-        <h5 class="fw-bold mb-2" style="color: var(--text-primary);">Peripheral Vision</h5>
-        <p class="text-secondary small mb-0" style="line-height: 1.6;">
-          Tracking moving targets across canvas screens widens your visual fixation field, allowing you to read 2-3 words ahead when typing standard text documents.
-        </p>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="soft-card p-4 h-100">
-        <div class="d-inline-flex p-2.5 rounded-3 mb-3" style="background: rgba(16, 185, 129, 0.12); color: #10b981; font-size: 1.3rem;">
-          <i class="bi bi-bullseye"></i>
-        </div>
-        <h5 class="fw-bold mb-2" style="color: var(--text-primary);">Stress Inoculation</h5>
-        <p class="text-secondary small mb-0" style="line-height: 1.6;">
-          Maintaining high accuracy during bomb hazard countdowns or planetary shield alerts builds confidence and prevents accuracy collapse during high-speed typing runs.
-        </p>
-      </div>
     </div>
   </div>
 

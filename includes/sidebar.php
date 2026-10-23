@@ -31,7 +31,7 @@ $isAdminSection = ($currentDir === 'admin');
       <span>Typing Lessons</span>
       <span class="badge ms-auto" style="font-size: 0.62rem; font-weight: 800; background: var(--first-color); color: #fff; padding: 2px 6px; border-radius: 4px;">NEW</span>
     </a>
-    <a href="<?= BASE_URL ?>/games.php" class="sidebar-link <?= ($currentPage === 'games.php' || $currentPage === 'game-ninja.php' || $currentPage === 'game-space.php') ? 'active' : '' ?>">
+    <a href="<?= BASE_URL ?>/games.php" class="sidebar-link <?= in_array($currentPage, ['games.php', 'game-ninja.php', 'game-space.php', 'game-racer.php', 'game-balloon.php', 'game-meteor.php']) ? 'active' : '' ?>">
       <i class="bi bi-controller" style="color: #ff3366;"></i>
       <span>Arcade Games</span>
       <span class="badge ms-auto" style="font-size: 0.62rem; font-weight: 800; background: #ff3366; color: #fff; padding: 2px 6px; border-radius: 4px;">ARCADE</span>

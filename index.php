@@ -754,6 +754,74 @@ include __DIR__ . '/includes/header.php';
     margin: 0;
 }
 
+/* ===================== ARCADE GRID ===================== */
+.tm-arcade-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+}
+@media (max-width: 991px) {
+    .tm-arcade-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+    .tm-arcade-grid { grid-template-columns: 1fr; }
+}
+.tm-arcade-card {
+    padding: 2.25rem 1.85rem;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    background: var(--paper);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+.tm-arcade-card:hover {
+    background: var(--paper-2);
+}
+.tm-arcade-badge {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+.tm-arcade-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 1.25rem;
+    margin-bottom: 1.2rem;
+}
+.tm-arcade-card h3 {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin: 0 0 0.5rem;
+}
+.tm-arcade-card p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--muted);
+    margin: 0 0 1.25rem;
+    flex-grow: 1;
+}
+.tm-arcade-foot {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--line);
+}
+
 /* ===================== STEPS ===================== */
 .tm-steps {
     display: grid;
@@ -974,6 +1042,8 @@ include __DIR__ . '/includes/header.php';
         </a>
         <nav class="tm-topbar-nav">
           <a href="#features">Features</a>
+          <a href="#arcade">Arcade Games</a>
+          <a href="<?= BASE_URL ?>/lessons.php">Lessons</a>
           <a href="#how">How it works</a>
           <a href="<?= BASE_URL ?>/practice.php">Practice</a>
         </nav>
@@ -1145,6 +1215,100 @@ include __DIR__ . '/includes/header.php';
           <h3>Full UI Customization</h3>
           <p>Choose between Soft UI White, Signature Obsidian, Cyberpunk, and Nord Arctic. Adjust font sizing, caret styles (line, block, underline), and auditory feedback cues.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ARCADE TYPING ZONE ============ -->
+  <section class="tm-section" id="arcade" style="background: var(--paper-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);">
+    <div class="tm-wrap">
+      <div class="tm-section-head">
+        <div>
+          <div class="tm-section-label" style="color: #ff4d00;"><i class="bi bi-controller"></i> Arcade Zone</div>
+          <h2>Level up reflexes with<br><em>5 arcade typing games.</em></h2>
+        </div>
+        <div>
+          <p>Ditch monotonous drills. Master subconscious finger coordination, involuntary reflex speed, and peripheral letter recognition through 5 complete 60 FPS HTML5 Canvas games with Web Audio sound effects and cloud high-score leaderboards.</p>
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <a href="<?= BASE_URL ?>/games.php" class="tm-btn tm-btn-dark tm-btn-sm">
+              <i class="bi bi-controller"></i> Open Arcade Hub
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tm-arcade-grid">
+
+        <!-- 1. Keyboard Ninja -->
+        <div class="tm-arcade-card">
+          <span class="tm-arcade-badge" style="color: #ff4d00;">★ Most Popular</span>
+          <div class="tm-arcade-icon" style="background: rgba(255, 77, 0, 0.12); color: #ff4d00;">
+            <i class="bi bi-slash-circle-fill"></i>
+          </div>
+          <h3>Keyboard Ninja</h3>
+          <p>Slash flying fruit targets mid-air with sharp katana strikes. Isolate Home Row, Top Row, or Numbers while dodging explosive ninja bombs!</p>
+          <div class="tm-arcade-foot">
+            <span class="small font-monospace text-muted">Single-Key / Rows</span>
+            <a href="<?= BASE_URL ?>/game-ninja.php" class="tm-btn tm-btn-dark tm-btn-sm">Play Ninja &rarr;</a>
+          </div>
+        </div>
+
+        <!-- 2. Space Word Defender -->
+        <div class="tm-arcade-card">
+          <span class="tm-arcade-badge" style="color: #38bdf8;">★ Arcade Shooter</span>
+          <div class="tm-arcade-icon" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8;">
+            <i class="bi bi-rocket-takeoff-fill"></i>
+          </div>
+          <h3>Space Word Defender</h3>
+          <p>Defend your orbital planetary base from invading alien warships. Type complete words to fire laser cannons and save your energy shields!</p>
+          <div class="tm-arcade-foot">
+            <span class="small font-monospace text-muted">Word Velocity</span>
+            <a href="<?= BASE_URL ?>/game-space.php" class="tm-btn tm-btn-dark tm-btn-sm" style="background: #38bdf8; color: #000;">Play Space &rarr;</a>
+          </div>
+        </div>
+
+        <!-- 3. Cyber Grand Prix -->
+        <div class="tm-arcade-card">
+          <span class="tm-arcade-badge" style="color: #f59e0b;">★ Nitro Speed Racer</span>
+          <div class="tm-arcade-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+            <i class="bi bi-speedometer2"></i>
+          </div>
+          <h3>Cyber Grand Prix</h3>
+          <p>Accelerate your supercar past 150 MPH! Accurately type words to ignite nitro exhaust flames, shift gears, and overtake rivals on an endless neon highway.</p>
+          <div class="tm-arcade-foot">
+            <span class="small font-monospace text-muted">Highway Racing</span>
+            <a href="<?= BASE_URL ?>/game-racer.php" class="tm-btn tm-btn-dark tm-btn-sm" style="background: #f59e0b; color: #000;">Play Racer &rarr;</a>
+          </div>
+        </div>
+
+        <!-- 4. Type-a-Balloon -->
+        <div class="tm-arcade-card">
+          <span class="tm-arcade-badge" style="color: #ec4899;">★ Typing.com Classic</span>
+          <div class="tm-arcade-icon" style="background: rgba(236, 72, 153, 0.12); color: #ec4899;">
+            <i class="bi bi-balloon-fill"></i>
+          </div>
+          <h3>Type-a-Balloon</h3>
+          <p>Float into the clouds! Pop colorful rising balloons with sharp darts before they drift into the stratosphere. Perfect for finger accuracy and letter recognition.</p>
+          <div class="tm-arcade-foot">
+            <span class="small font-monospace text-muted">Sky Popping</span>
+            <a href="<?= BASE_URL ?>/game-balloon.php" class="tm-btn tm-btn-dark tm-btn-sm" style="background: #ec4899; color: #fff;">Play Balloon &rarr;</a>
+          </div>
+        </div>
+
+        <!-- 5. Meteor Matrix Defense -->
+        <div class="tm-arcade-card" style="grid-column: span 2;">
+          <span class="tm-arcade-badge" style="color: #10b981;">★ Planetary Railgun</span>
+          <div class="tm-arcade-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+            <i class="bi bi-fire"></i>
+          </div>
+          <h3>Meteor Matrix Defense</h3>
+          <p>A catastrophic meteor storm is threatening the central city grid. Fire dual railgun plasma strikes and trigger blue EMP shockwaves to vaporize meteors into cosmic dust!</p>
+          <div class="tm-arcade-foot">
+            <span class="small font-monospace text-muted">Railguns &bull; EMP Shockwaves &bull; Grid Integrity</span>
+            <a href="<?= BASE_URL ?>/game-meteor.php" class="tm-btn tm-btn-dark tm-btn-sm" style="background: #10b981; color: #000;">Play Meteor &rarr;</a>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>

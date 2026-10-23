@@ -71,6 +71,42 @@ function get_all_games(): array {
             'modes'       => ['Short Words', 'Common Vocabulary', 'Tech & Code Terms'],
             'difficulties'=> ['Cadet', 'Commander', 'Elite'],
             'features'    => ['Laser Particle Beams', 'Progressive Waves', 'Shield HP System', 'Wave Multipliers']
+        ],
+        [
+            'slug'        => 'racer',
+            'title'       => 'Cyber Grand Prix',
+            'badge'       => 'Nitro Speed Racer',
+            'icon'        => 'bi-speedometer2',
+            'color'       => '#f59e0b',
+            'description' => 'Push your typing velocity past 150 MPH! Accurately type words to ignite nitro exhaust flames, shift gears, and overtake rival cars on an endless neon highway.',
+            'url'         => 'game-racer.php',
+            'modes'       => ['Speed Sprint', 'Highway Marathon', 'Nitro Challenge'],
+            'difficulties'=> ['Amateur', 'Pro', 'Formula-1'],
+            'features'    => ['Dynamic WPM Speedometer', 'Twin Exhaust Nitro Flames', 'Rival Passing Engine', 'Engine Rev SFX']
+        ],
+        [
+            'slug'        => 'balloon',
+            'title'       => 'Type-a-Balloon',
+            'badge'       => 'Typing.com Classic',
+            'icon'        => 'bi-balloon-fill',
+            'color'       => '#ec4899',
+            'description' => 'Float into the sky! Pop colorful rising balloons with sharp darts before they drift into the stratosphere. Perfect for finger accuracy and letter recognition.',
+            'url'         => 'game-balloon.php',
+            'modes'       => ['Single Letters', 'Mixed Case', 'Speed Words'],
+            'difficulties'=> ['Gentle Breeze', 'High Altitude', 'Jet Stream'],
+            'features'    => ['Rising Balloon Physics', 'Confetti Particle Bursts', 'Golden Bonus Balloons', 'Pop Synthesizer FX']
+        ],
+        [
+            'slug'        => 'meteor',
+            'title'       => 'Meteor Matrix Defense',
+            'badge'       => 'Grid Destruction',
+            'icon'        => 'bi-fire',
+            'color'       => '#10b981',
+            'description' => 'A fiery meteor storm is threatening the central cybernetic city grid. Fire dual railguns to vaporize meteors into cosmic dust before ground impact.',
+            'url'         => 'game-meteor.php',
+            'modes'       => ['Single Characters', 'Vocabulary Rocks', 'EMP Supernovas'],
+            'difficulties'=> ['Normal', 'Veteran', 'Armageddon'],
+            'features'    => ['Burning Fire Trails', 'City Grid HP Meter', 'EMP Blast Powerups', 'Cosmic Shockwaves']
         ]
     ];
 }
