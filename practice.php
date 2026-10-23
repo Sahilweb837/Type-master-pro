@@ -263,7 +263,7 @@ include __DIR__ . '/includes/header.php';
 
         <!-- Click to focus overlay prompt -->
         <div id="typing-focus-prompt" class="typing-focus-prompt">
-          <div class="stat-icon" style="background: rgba(255, 106, 0, 0.2); color: #ff6a00;">
+          <div class="stat-icon" style="background: var(--first-color-light); color: var(--first-color); border: 1px solid var(--border-color);">
             <i class="bi bi-cursor-fill fs-3"></i>
           </div>
           <div class="fw-bold text-light fs-5">Click anywhere here or start typing</div>

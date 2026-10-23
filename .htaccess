@@ -1,0 +1,28 @@
+﻿# Custom Type Master Pro - Security & Routing Configuration
+# High-Security Policy: Standard /admin route is permanently locked down.
+# New Administrative Gateway: /nickadmin005#
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /type%20master/
+
+    # 1. STRICT BLOCK: Terminate all direct access to legacy /admin namespace
+    RewriteRule ^admin(/.*)?$ - [F,L]
+
+    # 2. SEAMLESS ROUTE: Allow /nickadmin005 to serve /nickadmin005/index.php
+    RewriteRule ^nickadmin005/?$ nickadmin005/index.php [L,QSA]
+
+    # 3. Prevent direct HTTP access to database dumps, logs, and sensitive source files
+    RewriteRule \.(sql|log|env|git|bak|tmp)$ - [F,L]
+</IfModule>
+
+# Prevent directory browsing
+Options -Indexes
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

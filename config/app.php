@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Custom Type Master Pro
  * Application Configuration & Session Bootstrap
@@ -31,20 +31,25 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // App Constants
 define('APP_NAME', 'Custom Type Master Pro');
-define('APP_VERSION', '2.0.0');
+define('APP_VERSION', '2.1.0');
 define('APP_AUTHOR', 'Full-Stack Team');
+
+// Admin Secure Route Configuration (/nickadmin005#)
+define('ADMIN_SLUG', 'nickadmin005');
+define('ADMIN_HASH_TAG', 'nickadmin005#');
 
 // Determine Base URL dynamically
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)) ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
 
-// Normalize base path
-$basePath = preg_replace('#/(api|admin|includes|config|assets)(/.*)?$#', '', $scriptDir);
+// Normalize base path (recognizes api, admin, nickadmin005, includes, config, assets)
+$basePath = preg_replace('#/(api|admin|nickadmin005|includes|config|assets)(/.*)?$#', '', $scriptDir);
 if ($basePath === '/' || $basePath === '\\') {
     $basePath = '';
 }
 define('BASE_URL', rtrim($protocol . $host . $basePath, '/'));
+define('ADMIN_URL', BASE_URL . '/' . ADMIN_SLUG);
 
 // Include Database connection
 require_once __DIR__ . '/database.php';

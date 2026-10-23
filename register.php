@@ -19,7 +19,7 @@ $username = '';
 $email = '';
 $fullName = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     if (!verify_csrf_token()) {
         $error = 'Security validation failed (invalid CSRF token). Please try again.';
     } else {
@@ -112,16 +112,14 @@ include __DIR__ . '/includes/header.php';
     <div class="col-md-8 col-lg-6">
       <div class="soft-card p-4 p-md-5">
         <div class="text-center mb-4">
-          <div class="brand-logo-badge mx-auto mb-3" style="width: 58px; height: 58px; box-shadow: var(--soft-raised);">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="2" width="20" height="20" rx="6" fill="#ff5532"/>
-              <rect x="4.5" y="4.5" width="15" height="15" rx="4" fill="#ffffff" fill-opacity="0.25" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
-              <path d="M8 9H16M12 9V17" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>
-              <circle cx="16.5" cy="7.5" r="1.5" fill="#ff7654"/>
+          <div class="brand-logo-badge mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #0a0a0a; border-radius: 12px; box-shadow: var(--shadow-md);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="20" height="20" rx="4" fill="#0a0a0a" stroke="#ffffff" stroke-width="1.8"/>
+              <path d="M7 9H17M12 9V17" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
             </svg>
           </div>
           <h2 class="fw-bold mb-1" style="color: var(--text-primary); letter-spacing: -0.5px;">Create Account</h2>
-          <p class="text-secondary small mb-0">Join Custom Type Master Pro to track your speed and precision</p>
+          <p class="text-secondary small mb-0">Join TypeMaster PRO to track your speed and precision</p>
         </div>
 
         <?php if (!empty($error)): ?>

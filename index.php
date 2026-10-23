@@ -21,17 +21,17 @@ include __DIR__ . '/includes/header.php';
   <!-- Hero Section -->
   <div class="row align-items-center g-4 g-lg-5 mb-5">
     <div class="col-lg-6">
-      <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill" style="background: var(--first-color-light); border: 1px solid rgba(255, 85, 50, 0.25);">
-        <i class="bi bi-fire" style="color: var(--first-color);"></i>
-        <span style="color: var(--first-color); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Pure Modern Web &bull; Version 2.0</span>
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary);">
+        <i class="bi bi-keyboard-fill"></i>
+        <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">TypeMaster PRO &bull; Version 2.0</span>
       </div>
 
-      <h1 class="display-4 fw-extrabold mb-3 lh-sm" style="color: var(--text-primary); letter-spacing: -1px;">
-        Accelerate Your <span style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Typing Speed</span> With Precision Analytics.
+      <h1 class="display-4 fw-extrabold mb-3 lh-sm" style="color: var(--text-primary); letter-spacing: -1.2px;">
+        Master Your Keystrokes. <span style="text-decoration: underline; text-underline-offset: 6px;">Elevate Your Speed</span>.
       </h1>
 
       <p class="lead text-secondary mb-4" style="font-size: 1.15rem; line-height: 1.7;">
-        Custom Type Master Pro gives you real-time keystroke diagnostics, scientific Gross & Net WPM formulas, distraction-free practice arenas, and in-depth speed trajectories.
+        TypeMaster PRO gives you real-time keystroke diagnostics, scientific Gross &amp; Net WPM formulas, distraction-free practice arenas, and in-depth speed trajectories.
       </p>
 
       <div class="d-flex flex-wrap gap-3 mb-4">
@@ -40,7 +40,7 @@ include __DIR__ . '/includes/header.php';
           <span>Create Free Account</span>
         </a>
         <a href="<?= BASE_URL ?>/practice.php" class="soft-btn px-4 py-3 fw-bold fs-6">
-          <i class="bi bi-play-circle-fill" style="color: var(--first-color);"></i>
+          <i class="bi bi-play-circle-fill"></i>
           <span>Full Practice Arena</span>
         </a>
         <a href="<?= BASE_URL ?>/login.php" class="soft-btn px-4 py-3 fw-bold fs-6" style="color: var(--second-color);">
@@ -55,12 +55,12 @@ include __DIR__ . '/includes/header.php';
           <div class="small text-secondary fw-semibold">Zero Input Lag</div>
         </div>
         <div class="col-4">
-          <div class="fw-extrabold fs-3" style="color: var(--first-color); line-height: 1.1;">Gross &amp; Net</div>
+          <div class="fw-extrabold fs-3" style="color: var(--text-primary); line-height: 1.1;">Gross &amp; Net</div>
           <div class="small text-secondary fw-semibold">Scientific Formulas</div>
         </div>
         <div class="col-4">
-          <div class="fw-extrabold fs-3 text-success" style="line-height: 1.1;">100% Free</div>
-          <div class="small text-secondary fw-semibold">No Grain &bull; Pure CSS</div>
+          <div class="fw-extrabold fs-3" style="color: var(--text-primary); line-height: 1.1;">100% Free</div>
+          <div class="small text-secondary fw-semibold">Modern &bull; Clean</div>
         </div>
       </div>
     </div>
@@ -71,16 +71,16 @@ include __DIR__ . '/includes/header.php';
         <!-- Top Controls: Mode & Time Selector -->
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pb-3 mb-3 border-bottom" style="border-color: var(--border-color) !important;">
           <div class="d-flex align-items-center gap-2">
-            <span class="badge rounded-pill px-2 py-1" style="background: var(--first-color-light); color: var(--first-color); font-weight: 700; font-size: 0.72rem;">
+            <span class="badge rounded-pill px-2.5 py-1 bg-black text-white" style="font-weight: 700; font-size: 0.72rem;">
               <i class="bi bi-lightning-charge-fill me-1"></i> LIVE SPEED TEST
             </span>
             <span class="text-secondary small fw-semibold">Click &amp; Type to Start</span>
           </div>
 
           <div class="d-flex gap-1" id="inlineDurationPicker">
-            <button type="button" class="btn btn-sm py-1 px-2 rounded-pill duration-btn active" data-duration="15" style="font-size: 0.75rem; font-weight: 700;">15s</button>
-            <button type="button" class="btn btn-sm py-1 px-2 rounded-pill duration-btn" data-duration="30" style="font-size: 0.75rem; font-weight: 700;">30s</button>
-            <button type="button" class="btn btn-sm py-1 px-2 rounded-pill duration-btn" data-duration="60" style="font-size: 0.75rem; font-weight: 700;">60s</button>
+            <button type="button" class="btn btn-sm py-1 px-2.5 rounded-pill duration-btn active" data-duration="15" style="font-size: 0.75rem; font-weight: 700;">15s</button>
+            <button type="button" class="btn btn-sm py-1 px-2.5 rounded-pill duration-btn" data-duration="30" style="font-size: 0.75rem; font-weight: 700;">30s</button>
+            <button type="button" class="btn btn-sm py-1 px-2.5 rounded-pill duration-btn" data-duration="60" style="font-size: 0.75rem; font-weight: 700;">60s</button>
           </div>
         </div>
 
@@ -89,13 +89,13 @@ include __DIR__ . '/includes/header.php';
           <div class="col-3">
             <div class="p-2 rounded-3" style="background: var(--bg-primary); border: 1px solid var(--border-color); box-shadow: var(--soft-inset);">
               <div class="text-secondary small" style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase;">WPM</div>
-              <div class="fs-4 fw-extrabold" id="inlineWpm" style="color: var(--first-color); line-height: 1.1;">0</div>
+              <div class="fs-4 fw-extrabold" id="inlineWpm" style="color: var(--text-primary); line-height: 1.1;">0</div>
             </div>
           </div>
           <div class="col-3">
             <div class="p-2 rounded-3" style="background: var(--bg-primary); border: 1px solid var(--border-color); box-shadow: var(--soft-inset);">
               <div class="text-secondary small" style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase;">Net WPM</div>
-              <div class="fs-4 fw-extrabold text-success" id="inlineNetWpm" style="line-height: 1.1;">0</div>
+              <div class="fs-4 fw-extrabold" id="inlineNetWpm" style="color: var(--text-primary); line-height: 1.1;">0</div>
             </div>
           </div>
           <div class="col-3">
@@ -107,7 +107,7 @@ include __DIR__ . '/includes/header.php';
           <div class="col-3">
             <div class="p-2 rounded-3" style="background: var(--bg-primary); border: 1px solid var(--border-color); box-shadow: var(--soft-inset);">
               <div class="text-secondary small" style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase;">Timer</div>
-              <div class="fs-4 fw-extrabold text-info" id="inlineTimer" style="line-height: 1.1;">15s</div>
+              <div class="fs-4 fw-extrabold" id="inlineTimer" style="color: var(--text-primary); line-height: 1.1;">15s</div>
             </div>
           </div>
         </div>

@@ -41,20 +41,18 @@ $pageTitle = $pageTitle ?? 'Custom Type Master Pro';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="<?= e(get_csrf_token()) ?>">
-  <meta name="theme-color" content="#ff5532">
+  <meta name="theme-color" content="#0a0a0a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="TypeMaster Pro">
   <link rel="manifest" href="<?= BASE_URL ?>/manifest.json">
-  <title><?= e($pageTitle) ?> — Custom Type Master Pro</title>
+  <title><?= e($pageTitle) ?> — TypeMaster Pro</title>
 
   <!-- Instant Client Theme Loader & PWA Service Worker -->
   <script>
     (function() {
       try {
-        var t = localStorage.getItem('typemaster_theme');
-        if (!t || t === 'white-orange') {
-          t = '<?= e($activeTheme) ?>' || 'light';
-        }
+        var t = localStorage.getItem('typemaster_theme') || '<?= e($activeTheme) ?>' || 'light';
+        if (t !== 'dark') t = 'light';
         document.documentElement.setAttribute('data-theme', t);
       } catch (e) {}
       if ('serviceWorker' in navigator) {
@@ -100,7 +98,7 @@ $pageTitle = $pageTitle ?? 'Custom Type Master Pro';
 $pdoCheck = getDBConnection();
 if (!$pdoCheck):
 ?>
-  <div class="alert alert-warning mb-0 border-0 rounded-0 text-center py-2">
+  <div class="alert alert-dark mb-0 border-0 rounded-0 text-center py-2 bg-black text-white">
     <i class="bi bi-exclamation-triangle-fill me-2"></i>
     <strong>Database Connection Notice:</strong> Unable to connect to MySQL database service on localhost:3306. Please verify that the database server is running.
   </div>
@@ -112,10 +110,10 @@ if (!$pdoCheck):
   <?php endif; ?>
 
   <div class="main-wrapper">
-    <!-- Top Navigation Bar (Soft UI Dashboard-Ready Header) -->
+    <!-- Top Navigation Bar (Modern B&W Dashboard-Ready Header) -->
     <?php
       $pageIcon = 'bi-speedometer2';
-      $pageBadgeTitle = 'Dashboard Hub';
+      $pageBadgeTitle = 'Dashboard';
       if (strpos($pageTitle, 'Practice') !== false || strpos($pageTitle, 'Typing Arena') !== false) {
           $pageIcon = 'bi-keyboard-fill';
           $pageBadgeTitle = 'Typing Arena';
@@ -124,105 +122,68 @@ if (!$pdoCheck):
           $pageBadgeTitle = 'Preferences';
       } elseif (strpos($pageTitle, 'History') !== false || strpos($pageTitle, 'Session Report') !== false || strpos($pageTitle, 'Results') !== false) {
           $pageIcon = 'bi-award-fill';
-          $pageBadgeTitle = 'Telemetry & Records';
+          $pageBadgeTitle = 'History & Telemetry';
       } elseif (strpos($pageTitle, 'Statistics') !== false || strpos($pageTitle, 'Analytics') !== false) {
           $pageIcon = 'bi-graph-up-arrow';
-          $pageBadgeTitle = 'Speed Analytics';
+          $pageBadgeTitle = 'Analytics';
       } elseif (strpos($pageTitle, 'Admin') !== false) {
           $pageIcon = 'bi-shield-lock-fill';
           $pageBadgeTitle = 'Admin Portal';
       }
     ?>
-    <header class="app-navbar">
+    <header class="app-navbar border-bottom px-3 px-md-4 py-2 d-flex align-items-center justify-content-between" style="background: var(--bg-secondary); border-color: var(--border-color) !important;">
       <div class="d-flex align-items-center gap-2 gap-md-3">
         <button id="sidebar-toggle-btn" class="btn btn-sm btn-control <?= $currentUser ? 'd-lg-none' : 'd-none' ?>" aria-label="Toggle sidebar">
           <i class="bi bi-list fs-5"></i>
         </button>
-        <a href="<?= BASE_URL ?>/<?= $currentUser ? 'dashboard.php' : 'index.php' ?>" class="app-brand me-1">
-          <div class="brand-logo-badge">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="2" width="20" height="20" rx="5" fill="#ff5532"/>
-              <rect x="4.5" y="4.5" width="15" height="15" rx="3.5" fill="#ffffff" fill-opacity="0.3" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
-              <path d="M8 9H16M12 9V17" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-              <circle cx="16.5" cy="7.5" r="1.5" fill="#ff7654"/>
+        <a href="<?= BASE_URL ?>/<?= $currentUser ? 'dashboard.php' : 'index.php' ?>" class="app-brand me-1 text-decoration-none d-flex align-items-center gap-2">
+          <div class="brand-logo-badge d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #0a0a0a; border-radius: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="20" height="20" rx="4" fill="#0a0a0a" stroke="#ffffff" stroke-width="1.8"/>
+              <path d="M7 9H17M12 9V17" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
             </svg>
           </div>
-          <div class="brand-name-wrap">
-            <span class="brand-name">Type<span class="brand-accent">Master</span></span>
-            <span class="brand-badge-pro">PRO</span>
+          <div class="brand-name-wrap d-flex align-items-baseline gap-1">
+            <span class="brand-name fw-bold" style="color: var(--text-primary); letter-spacing: -0.03em; font-size: 1.05rem;">TypeMaster</span>
+            <span class="badge bg-black text-white px-1.5 py-0.5 rounded" style="font-size: 0.62rem; font-weight: 800; letter-spacing: 0.05em;">PRO</span>
           </div>
         </a>
         
         <!-- Page Context Breadcrumb Pill -->
-        <span class="soft-nav-pill d-none d-md-inline-flex">
-          <i class="bi <?= $pageIcon ?>" style="color: var(--first-color);"></i>
+        <span class="d-none d-md-inline-flex align-items-center gap-1.5 px-2.5 py-1 rounded-pill small fw-semibold" style="background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.78rem;">
+          <i class="bi <?= $pageIcon ?>"></i>
           <span><?= e($pageBadgeTitle) ?></span>
         </span>
-
-        <!-- Engine Telemetry Status Dot -->
-        <div class="d-none d-xl-flex align-items-center gap-2 soft-status-badge">
-          <span class="status-pulse-dot"></span>
-          <span class="small fw-bold text-secondary">
-            <i class="bi bi-shield-check text-success me-1"></i>Zero Input Lag
-          </span>
-        </div>
       </div>
 
       <div class="d-flex align-items-center gap-2 gap-md-2">
         <!-- Quick Action: Practice Arena -->
-        <a href="<?= BASE_URL ?>/practice.php" class="btn btn-sm soft-btn-primary d-none d-sm-inline-flex align-items-center gap-1.5 shadow-sm" title="Launch Practice Drill">
+        <a href="<?= BASE_URL ?>/practice.php" class="btn btn-sm soft-btn-primary d-none d-sm-inline-flex align-items-center gap-1.5 px-3 py-1.5" title="Launch Practice Drill">
           <i class="bi bi-keyboard-fill"></i>
           <span>Practice</span>
         </a>
 
         <!-- Quick Action: Free Typing & Watch -->
-        <a href="<?= BASE_URL ?>/practice.php?mode=free" class="btn btn-sm btn-control d-none d-md-inline-flex align-items-center gap-1.5" title="Free Typing & Watch Timer">
-          <i class="bi bi-stopwatch-fill" style="color: var(--first-color);"></i>
+        <a href="<?= BASE_URL ?>/practice.php?mode=free" class="btn btn-sm btn-control d-none d-md-inline-flex align-items-center gap-1.5 px-3 py-1.5" title="Free Typing & Watch Timer">
+          <i class="bi bi-stopwatch-fill"></i>
           <span>Watch</span>
         </a>
 
         <!-- Quick Action: Install App on PC -->
-        <button type="button" class="btn btn-sm btn-control d-none d-lg-inline-flex align-items-center gap-1.5" id="btn-install-header" title="Install TypeMaster on PC / Desktop">
-          <i class="bi bi-laptop" style="color: var(--first-color);"></i>
-          <span>Install App</span>
+        <button type="button" class="btn btn-sm btn-control d-none d-lg-inline-flex align-items-center gap-1.5 px-3 py-1.5" id="btn-install-header" title="Install TypeMaster on PC / Desktop">
+          <i class="bi bi-laptop"></i>
+          <span>Install</span>
         </button>
 
-        <!-- Theme Picker Dropdown -->
-        <?php
-          $displayTheme = 'Soft UI White';
-          $themeIcon = 'bi-sun-fill';
-          $themeIconStyle = 'color: #ff5532 !important;';
-
-          if ($activeTheme === 'orange') {
-              $displayTheme = 'Dark Orange';
-              $themeIcon = 'bi-fire';
-              $themeIconStyle = 'color: #ff6a00 !important;';
-          } elseif ($activeTheme === 'dark') {
-              $displayTheme = 'Dark Obsidian';
-              $themeIcon = 'bi-moon-stars-fill text-primary';
-              $themeIconStyle = '';
-          } elseif ($activeTheme === 'cyberpunk') {
-              $displayTheme = 'Cyberpunk Neon';
-              $themeIcon = 'bi-lightning-charge-fill text-danger';
-              $themeIconStyle = '';
-          } elseif ($activeTheme === 'nord') {
-              $displayTheme = 'Nord Arctic';
-              $themeIcon = 'bi-snow text-info';
-              $themeIconStyle = '';
-          }
-        ?>
+        <!-- Modern B&W Theme Toggle Dropdown -->
         <div class="dropdown">
-          <button class="btn btn-sm btn-control dropdown-toggle d-flex align-items-center gap-1.5" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Switch Theme">
-            <i class="bi <?= $themeIcon ?>" style="<?= $themeIconStyle ?>"></i>
-            <span class="d-none d-md-inline ms-1"><?= $displayTheme ?></span>
+          <button class="btn btn-sm btn-control dropdown-toggle d-flex align-items-center gap-1.5 px-2.5 py-1.5" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Switch Theme">
+            <i class="bi bi-circle-half"></i>
+            <span class="d-none d-md-inline ms-1">Theme</span>
           </button>
-          <ul class="dropdown-menu dropdown-menu-end shadow border-secondary">
-            <li><h6 class="dropdown-header"><i class="bi bi-palette-fill me-1"></i>Select Color Theme</h6></li>
-            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#" data-set-theme="light"><i class="bi bi-sun-fill" style="color: #ff5532 !important;"></i> Soft UI White (Coral)</a></li>
-            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#" data-set-theme="orange"><i class="bi bi-fire" style="color: #ff6a00 !important;"></i> Dark Orange (Signature)</a></li>
-            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#" data-set-theme="dark"><i class="bi bi-moon-stars-fill text-primary"></i> Dark Obsidian</a></li>
-            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#" data-set-theme="cyberpunk"><i class="bi bi-lightning-charge-fill text-danger"></i> Cyberpunk Neon</a></li>
-            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#" data-set-theme="nord"><i class="bi bi-snow text-info"></i> Nord Arctic</a></li>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm border py-1" style="border-color: var(--border-color); background: var(--bg-card); min-width: 170px;">
+            <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 small fw-semibold" href="#" data-set-theme="light"><i class="bi bi-sun"></i> Light (White &amp; Black)</a></li>
+            <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 small fw-semibold" href="#" data-set-theme="dark"><i class="bi bi-moon-stars"></i> Dark (Black &amp; White)</a></li>
           </ul>
         </div>
 

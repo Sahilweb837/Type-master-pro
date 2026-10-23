@@ -95,7 +95,7 @@ include __DIR__ . '/includes/header.php';
       <h2 class="fw-bold text-light mb-1"><i class="bi bi-sliders text-info me-2"></i>Customization Settings</h2>
       <p class="text-secondary small mb-0">Fine-tune your visual environment, typography, caret behavior, and audio cues.</p>
     </div>
-    <a href="<?= BASE_URL ?>/practice.php" class="btn btn-outline-info btn-sm">
+    <a href="<?= BASE_URL ?>/practice.php" class="btn btn-outline-dark btn-sm">
       <i class="bi bi-play-circle me-1"></i> Test in Practice Arena
     </a>
   </div>
@@ -112,16 +112,13 @@ include __DIR__ . '/includes/header.php';
       <div class="col-lg-7">
         <!-- Visual Theme -->
         <div class="glass-card p-4 mb-4">
-          <h5 class="fw-bold text-light mb-3"><i class="bi bi-palette text-info me-2"></i>Theme & Visual Identity</h5>
+          <h5 class="fw-bold text-light mb-3"><i class="bi bi-palette me-2"></i>Theme &amp; Visual Identity</h5>
           <div class="row g-3">
             <div class="col-sm-6">
               <label class="form-label text-secondary small fw-bold">Active Theme</label>
               <select name="theme" id="settingTheme" class="form-select bg-dark text-light border-secondary">
-                <option value="light" <?= ($settings['theme'] === 'light' || $settings['theme'] === 'white-orange') ? 'selected' : '' ?>>Soft UI White (Signature Coral)</option>
-                <option value="orange" <?= ($settings['theme'] === 'orange') ? 'selected' : '' ?>>Dark Orange (Signature Brand)</option>
-                <option value="dark" <?= ($settings['theme'] === 'dark') ? 'selected' : '' ?>>Dark Obsidian</option>
-                <option value="cyberpunk" <?= ($settings['theme'] === 'cyberpunk') ? 'selected' : '' ?>>Cyberpunk Neon</option>
-                <option value="nord" <?= ($settings['theme'] === 'nord') ? 'selected' : '' ?>>Nord Arctic</option>
+                <option value="light" <?= ($settings['theme'] === 'light' || $settings['theme'] === 'white-orange') ? 'selected' : '' ?>>Light Mode (White &amp; Black)</option>
+                <option value="dark" <?= ($settings['theme'] === 'dark' || $settings['theme'] === 'orange' || $settings['theme'] === 'dark-orange' || $settings['theme'] === 'cyberpunk' || $settings['theme'] === 'nord') ? 'selected' : '' ?>>Dark Mode (Black &amp; White)</option>
               </select>
             </div>
             <div class="col-sm-6">
