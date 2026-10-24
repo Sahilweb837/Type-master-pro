@@ -5,13 +5,7 @@
 -- Character Set: utf8mb4 / utf8mb4_unicode_ci
 -- =====================================================================
 
-CREATE DATABASE IF NOT EXISTS `custom_type_master_pro` 
-  DEFAULT CHARACTER SET utf8mb4 
-  COLLATE utf8mb4_unicode_ci;
-
-USE `custom_type_master_pro`;
-
--- ---------------------------------------------------------------------
+ ---------------------------------------------------------------
 -- 1. Table: users
 -- Stores registered accounts, authentication hashes, and roles
 -- ---------------------------------------------------------------------

@@ -1,14 +1,9 @@
-<?php
+ <?php
 /**
  * Custom Type Master Pro
- * CSRF Protection Utilities
+ * CSRF Protection Utilities (Cloudways-hardened)
  */
 
-/**
- * Helper to detect if connection is HTTPS (including Cloudways, Cloudflare, AWS, Nginx reverse proxies).
- *
- * @return bool
- */
 function is_https_request(): bool {
     return (
         (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')
@@ -21,11 +16,9 @@ function is_https_request(): bool {
 }
 
 /**
- * Generates or retrieves the active session CSRF token.
- * Maintains a pool of valid recent tokens (up to 10) to support multi-tab navigation,
- * and automatically synchronizes with an XSRF-TOKEN cookie for double-submit reliability.
- *
- * @return string
+ * Generate or retrieve the active session CSRF token.
+ * IMPORTANT: Only generates a NEW token if none exists in session.
+ * Never regenerates on every call (that was the bug).
  */
 function get_csrf_token(): string {
     if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
@@ -36,8 +29,8 @@ function get_csrf_token(): string {
         $_SESSION['csrf_tokens'] = [];
     }
 
-    if (empty($_SESSION['csrf_token'])) {
-        // If an existing valid cookie token exists, reuse it to maintain continuity
+    // Only create a token if session has none
+    if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
         if (!empty($_COOKIE['XSRF-TOKEN']) && preg_match('/^[a-f0-9]{64}$/i', $_COOKIE['XSRF-TOKEN'])) {
             $_SESSION['csrf_token'] = $_COOKIE['XSRF-TOKEN'];
         } else {
@@ -45,7 +38,7 @@ function get_csrf_token(): string {
         }
     }
 
-    // Ensure current token is registered in the pool of valid tokens
+    // Add to pool if missing
     if (!in_array($_SESSION['csrf_token'], $_SESSION['csrf_tokens'], true)) {
         $_SESSION['csrf_tokens'][] = $_SESSION['csrf_token'];
         if (count($_SESSION['csrf_tokens']) > 10) {
@@ -53,27 +46,25 @@ function get_csrf_token(): string {
         }
     }
 
-    // Set or refresh the client-accessible XSRF-TOKEN cookie
+    // Cookie sync — but only set if cookie doesn't already match
     if (!headers_sent()) {
-        $isHttps = is_https_request();
-        @setcookie('XSRF-TOKEN', $_SESSION['csrf_token'], [
-            'expires'  => time() + 86400 * 7,
-            'path'     => '/',
-            'secure'   => $isHttps,
-            'httponly' => false,
-            'samesite' => 'Lax'
-        ]);
+        $cookieVal = $_COOKIE['XSRF-TOKEN'] ?? '';
+        if ($cookieVal !== $_SESSION['csrf_token']) {
+            @setcookie('XSRF-TOKEN', $_SESSION['csrf_token'], [
+                'expires'  => time() + 86400 * 7,
+                'path'     => '/',
+                'secure'   => is_https_request(),
+                'httponly' => false,
+                'samesite' => 'Lax'
+            ]);
+        }
     }
 
     return $_SESSION['csrf_token'];
 }
 
 /**
- * Verifies a CSRF token from POST, headers, or JSON body.
- * Validates against the active session token, recent token pool, and double-submit cookie.
- *
- * @param string|null $token
- * @return bool
+ * Verify CSRF token from POST, headers, or JSON body.
  */
 function verify_csrf_token(?string $token = null): bool {
     if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
@@ -81,11 +72,11 @@ function verify_csrf_token(?string $token = null): bool {
     }
 
     if ($token === null) {
-        $token = $_POST['csrf_token'] 
-              ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
+        $token = $_POST['csrf_token']
+              ?? $_POST['_token']              // common alias
+              ?? $_SERVER['HTTP_X_CSRF_TOKEN']
               ?? ($_SERVER['HTTP_X_XSRF_TOKEN'] ?? '');
 
-        // If still empty and request has a JSON body, inspect JSON payload
         if (empty($token) && !empty($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
             $rawInput = file_get_contents('php://input');
             if (!empty($rawInput)) {
@@ -98,20 +89,17 @@ function verify_csrf_token(?string $token = null): bool {
     }
 
     if (empty($token) || !is_string($token)) {
-        error_log(sprintf(
-            '[CSRF Warning] Validation failed: token is empty or invalid type. Session ID: %s',
-            session_id() ?: 'NONE'
-        ));
+        error_log('[CSRF] Empty token. Session ID: ' . (session_id() ?: 'NONE'));
         return false;
     }
 
-    // 1. Primary Check: Validate against active session token
+    // 1. Primary: session token
     $sessionToken = $_SESSION['csrf_token'] ?? '';
     if (!empty($sessionToken) && hash_equals($sessionToken, $token)) {
         return true;
     }
 
-    // 2. Secondary Check: Validate against recent valid tokens pool (multi-tab / back-button resilient)
+    // 2. Pool of recent tokens
     if (!empty($_SESSION['csrf_tokens']) && is_array($_SESSION['csrf_tokens'])) {
         foreach ($_SESSION['csrf_tokens'] as $validToken) {
             if (is_string($validToken) && hash_equals($validToken, $token)) {
@@ -120,10 +108,9 @@ function verify_csrf_token(?string $token = null): bool {
         }
     }
 
-    // 3. Fallback: Double-Submit Cookie verification (resilient against session storage glitches)
+    // 3. Double-submit cookie fallback
     $cookieToken = $_COOKIE['XSRF-TOKEN'] ?? '';
     if (!empty($cookieToken) && hash_equals($cookieToken, $token)) {
-        // Restore session token so subsequent operations remain synchronized
         $_SESSION['csrf_token'] = $cookieToken;
         if (!in_array($cookieToken, $_SESSION['csrf_tokens'] ?? [], true)) {
             $_SESSION['csrf_tokens'][] = $cookieToken;
@@ -131,8 +118,9 @@ function verify_csrf_token(?string $token = null): bool {
         return true;
     }
 
+    // Diagnostic log
     error_log(sprintf(
-        '[CSRF Warning] Token mismatch detected. Received token length: %d, session token exists: %s, cookie token exists: %s, pool size: %d',
+        '[CSRF] Mismatch. Len=%d Session=%s Cookie=%s Pool=%d',
         strlen($token),
         !empty($sessionToken) ? 'YES' : 'NO',
         !empty($cookieToken) ? 'YES' : 'NO',
@@ -142,9 +130,7 @@ function verify_csrf_token(?string $token = null): bool {
 }
 
 /**
- * Helper to render a hidden HTML input for forms.
- *
- * @return string
+ * Render hidden input.
  */
 function csrf_field(): string {
     $token = htmlspecialchars(get_csrf_token(), ENT_QUOTES, 'UTF-8');

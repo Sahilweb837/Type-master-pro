@@ -3,11 +3,6 @@
 -- Database Name: custom_type_master_pro
 -- =====================================================================
 
-CREATE DATABASE IF NOT EXISTS `custom_type_master_pro` 
-  DEFAULT CHARACTER SET utf8mb4 
-  COLLATE utf8mb4_unicode_ci;
-
-USE `custom_type_master_pro`;
 
 DROP TABLE IF EXISTS `typing_results`;
 DROP TABLE IF EXISTS `user_settings`;
