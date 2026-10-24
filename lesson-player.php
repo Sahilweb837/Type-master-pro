@@ -29,11 +29,11 @@ include __DIR__ . '/includes/header.php';
    LESSON PLAYER — PIXEL THEME + CLEAN SANS-SERIF
    ============================================================ */
 .lesson-player-wrapper {
-  --ink:        #000000;
-  --paper:      #ffffff;
-  --paper-soft: #f4f4f4;
-  --paper-hard: #e0e0e0;
-  --shadow:     3px;
+  --ink:        #f8fafc;
+  --paper:      #131a29;
+  --paper-soft: #192338;
+  --paper-hard: #0b0f17;
+  --shadow:     0px;
   --sans:       "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono:       "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
 
@@ -42,10 +42,10 @@ include __DIR__ . '/includes/header.php';
 }
 
 html[data-theme="dark"] .lesson-player-wrapper {
-  --ink:        #ffffff;
-  --paper:      #000000;
-  --paper-soft: #141414;
-  --paper-hard: #222222;
+  --ink:        #f8fafc;
+  --paper:      #131a29;
+  --paper-soft: #192338;
+  --paper-hard: #0b0f17;
 }
 
 /* ---------- Top row ---------- */

@@ -119,20 +119,20 @@ include __DIR__ . '/includes/header.php';
    B&W ANALYTICS PAGE — scoped, non-destructive
    ============================================================ */
 :root {
-    --bw-bg:        #ffffff;
-    --bw-surface:   #ffffff;
-    --bw-surface-2: #f7f7f7;
-    --bw-border:    #e5e5e5;
-    --bw-border-2:  #d4d4d4;
-    --bw-ink:       #0a0a0a;
-    --bw-ink-2:     #1f1f1f;
-    --bw-muted:     #6b6b6b;
-    --bw-muted-2:   #8f8f8f;
+    --bw-bg:        #0a0e17;
+    --bw-surface:   #141c2e;
+    --bw-surface-2: #192338;
+    --bw-border:    rgba(255, 255, 255, 0.08);
+    --bw-border-2:  rgba(255, 87, 34, 0.35);
+    --bw-ink:       #f8fafc;
+    --bw-ink-2:     #ffffff;
+    --bw-muted:     #94a3b8;
+    --bw-muted-2:   #64748b;
     --bw-radius:    14px;
     --bw-radius-sm: 10px;
-    --bw-shadow:    0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.05);
-    --bw-font:      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --bw-mono:      ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --bw-shadow:    0 8px 24px rgba(0, 0, 0, 0.4);
+    --bw-font:      'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --bw-mono:      'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .bw-page {
@@ -188,27 +188,31 @@ include __DIR__ . '/includes/header.php';
     border-radius: var(--bw-radius-sm);
     text-decoration: none;
     transition: all 0.2s ease;
-    border: 1.5px solid var(--bw-ink);
+    border: 1px solid var(--bw-border);
     cursor: pointer;
     white-space: nowrap;
 }
 .bw-btn-dark {
-    background: var(--bw-ink);
+    background: linear-gradient(135deg, #ff5500 0%, #ff7a00 100%);
     color: #fff;
+    border-color: rgba(255, 87, 34, 0.5);
+    box-shadow: 0 4px 14px rgba(255, 87, 34, 0.35);
 }
 .bw-btn-dark:hover {
-    background: #fff;
-    color: var(--bw-ink);
+    background: #ff7a00;
+    color: #fff;
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    box-shadow: 0 6px 18px rgba(255, 87, 34, 0.45);
 }
 .bw-btn-light {
-    background: #fff;
-    color: var(--bw-ink);
+    background: #192338;
+    color: #f8fafc;
+    border-color: rgba(255, 255, 255, 0.1);
 }
 .bw-btn-light:hover {
-    background: var(--bw-ink);
-    color: #fff;
+    background: #222f4b;
+    color: #ff7a00;
+    border-color: rgba(255, 87, 34, 0.4);
 }
 
 /* --- Cards --- */

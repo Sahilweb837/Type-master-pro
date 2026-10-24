@@ -406,43 +406,54 @@ html[data-theme="dark"] .practice-arena-wrap .typing-surface::before {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1.25rem;
-  background: var(--paper);
-  border: 3px solid var(--ink);
+  padding: 1.5rem;
+  background: rgba(19, 26, 41, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 87, 34, 0.35);
+  border-radius: 12px;
   cursor: pointer;
   text-align: center;
-  transition: opacity 0.2s ease;
-  z-index: 5;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 10;
+}
+.practice-arena-wrap .focus-overlay.hidden,
+.practice-arena-wrap .focus-overlay[style*="display: none"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 .practice-arena-wrap .focus-overlay .focus-icon-box {
-  width: 60px;
-  height: 60px;
-  background: var(--ink);
-  color: var(--paper);
+  width: 58px;
+  height: 58px;
+  background: rgba(255, 87, 34, 0.15);
+  color: #ff5722;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
-  border: 3px solid var(--ink);
+  margin-bottom: 0.85rem;
+  border: 1px solid rgba(255, 87, 34, 0.4);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(255, 87, 34, 0.3);
 }
 .practice-arena-wrap .focus-overlay .focus-icon-box i {
   font-size: 1.6rem;
-  color: var(--paper);
+  color: #ff5722;
 }
 .practice-arena-wrap .focus-overlay .focus-title {
   font-family: var(--sans);
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--ink);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
   letter-spacing: -0.01em;
   margin-bottom: 0.35rem;
 }
 .practice-arena-wrap .focus-overlay .focus-sub {
   font-family: var(--sans);
-  font-size: 0.82rem;
-  color: var(--ink);
-  opacity: 0.7;
-  max-width: 320px;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  max-width: 360px;
   line-height: 1.5;
 }
 
@@ -1416,10 +1427,102 @@ html[data-theme="dark"] .certificate-modal .cert-seal {
   </div>
 
   <!-- Real content -->
+  <!-- Real content -->
   <div id="practice-content-view" style="display:none;">
+
+    <!-- Panoramic Hero Banner (from Mockup) -->
+    <div class="dash-hero-banner mb-4">
+      <div class="dash-hero-overlay">
+        <div>
+          <div class="text-orange text-uppercase fw-bold mb-1" style="font-size: 0.72rem; letter-spacing: 0.15em; color: #ff7a00;">
+            Practice • Improve • Master
+          </div>
+          <h2 class="fw-bold mb-2 text-white" style="font-size: 1.85rem; letter-spacing: -0.5px;">
+            Typing Practice <span style="color: #ff5722;">Arena</span>
+          </h2>
+          <p class="text-secondary small mb-0" style="max-width: 520px; line-height: 1.5;">
+            Master your keyboard speed, accuracy, and rhythmic flow with 195+ curated drills.
+          </p>
+        </div>
+
+        <!-- Level XP Card -->
+        <div class="dash-level-card d-none d-md-block">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <div class="d-flex align-items-center gap-1.5">
+              <i class="bi bi-star-fill text-warning" style="font-size: 0.85rem;"></i>
+              <span class="fw-bold text-white small">Level 3 Master</span>
+            </div>
+            <span class="badge" style="background: rgba(255, 87, 34, 0.2); color: #ff7a00; font-size: 0.65rem;">Active Drill</span>
+          </div>
+          <div class="dash-level-bar">
+            <div class="dash-level-bar-fill" style="width: 65%;"></div>
+          </div>
+          <div class="d-flex justify-content-between text-secondary" style="font-size: 0.7rem;">
+            <span>350 XP</span>
+            <span>650 XP to Level 4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Mode Cards (from Mockup) -->
+    <div class="mode-row mb-4">
+      <a href="<?= BASE_URL ?>/practice.php?mode=passage" class="mode-card active">
+        <div class="d-flex align-items-center gap-3">
+          <div class="mode-card-icon" style="background: rgba(255, 87, 34, 0.15); color: #ff5722;">
+            <i class="bi bi-file-earmark-text-fill"></i>
+          </div>
+          <div>
+            <div class="fw-bold small text-white">Text Practice</div>
+            <div class="text-secondary" style="font-size: 0.75rem;">Practice with curated texts</div>
+          </div>
+        </div>
+        <i class="bi bi-chevron-right text-orange fs-6"></i>
+      </a>
+
+      <a href="<?= BASE_URL ?>/practice.php?mode=custom" class="mode-card">
+        <div class="d-flex align-items-center gap-3">
+          <div class="mode-card-icon" style="background: rgba(0, 230, 118, 0.1); color: #00e676;">
+            <i class="bi bi-speedometer2"></i>
+          </div>
+          <div>
+            <div class="fw-bold small text-white">Typing Test</div>
+            <div class="text-secondary" style="font-size: 0.75rem;">Check speed &amp; accuracy</div>
+          </div>
+        </div>
+        <i class="bi bi-chevron-right text-secondary fs-6"></i>
+      </a>
+
+      <a href="<?= BASE_URL ?>/lessons.php" class="mode-card">
+        <div class="d-flex align-items-center gap-3">
+          <div class="mode-card-icon" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8;">
+            <i class="bi bi-mortarboard-fill"></i>
+          </div>
+          <div>
+            <div class="fw-bold small text-white">Lessons</div>
+            <div class="text-secondary" style="font-size: 0.75rem;">Step by step learning</div>
+          </div>
+        </div>
+        <i class="bi bi-chevron-right text-secondary fs-6"></i>
+      </a>
+
+      <a href="<?= BASE_URL ?>/games.php" class="mode-card">
+        <div class="d-flex align-items-center gap-3">
+          <div class="mode-card-icon" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;">
+            <i class="bi bi-controller"></i>
+          </div>
+          <div>
+            <div class="fw-bold small text-white">Games</div>
+            <div class="text-secondary" style="font-size: 0.75rem;">Fun arcade practice</div>
+          </div>
+        </div>
+        <i class="bi bi-chevron-right text-secondary fs-6"></i>
+      </a>
+    </div>
+
     <div class="typing-arena-wrapper">
 
-      <!-- Ribbon -->
+      <!-- Ribbon Controls -->
       <div class="ribbon">
         <div class="ribbon-group">
           <span class="ribbon-label"><i class="bi bi-grid-fill"></i> Mode:</span>
@@ -1491,32 +1594,56 @@ html[data-theme="dark"] .certificate-modal .cert-seal {
           </div>
         </div>
 
-        <div class="zen-bar">
+        <div class="zen-bar p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: #131a29; border: 1px solid rgba(255,255,255,0.08);">
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <span class="zen-title" id="passage-title-display"><?= e($activePassage['title']) ?></span>
+            <span class="zen-title fw-bold text-white fs-6" id="passage-title-display"><?= e($activePassage['title']) ?></span>
             <?= get_difficulty_badge($activePassage['difficulty']) ?>
-            <span class="zen-meta"><strong id="passage-word-count-badge"><?= (int)$activePassage['word_count'] ?></strong> words</span>
-            <span class="zen-meta">• <strong id="passage-char-count-badge"><?= (int)$activePassage['char_count'] ?></strong> chars</span>
-          </div>
-          <div class="d-flex align-items-center gap-2 flex-wrap">
-            <div class="zen-timer-badge">
-              <i class="bi bi-stopwatch-fill"></i>
-              <span class="zen-timer-val" id="live-timer"><?= $selectedDuration ?>s</span>
-            </div>
-            <span class="strict-badge">
-              <i class="bi bi-slash-circle-fill"></i> Strict Rules
+            <span class="badge" style="background: rgba(255,255,255,0.06); color: #94a3b8; font-weight: 500;">
+              <strong id="passage-word-count-badge" class="text-white"><?= (int)$activePassage['word_count'] ?></strong> words
+            </span>
+            <span class="badge" style="background: rgba(255,255,255,0.06); color: #94a3b8; font-weight: 500;">
+              <strong id="passage-char-count-badge" class="text-white"><?= (int)$activePassage['char_count'] ?></strong> chars
             </span>
           </div>
 
-          <div class="d-none" aria-hidden="true">
-            <span id="live-words-count">0</span>
-            <span id="live-accuracy">100%</span>
-            <span id="live-wpm">0</span>
-            <span id="live-cpm">0</span>
-            <span id="live-chars-count">0</span>
-            <span id="live-lines-count">1</span>
-            <span id="live-net-wpm">0</span>
-            <span id="live-errors-count">0</span>
+          <!-- Prominent Live Telemetry Badges (Live Timer, Live Words, Live Speed, Live Acc) -->
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- Timer Badge -->
+            <div class="d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-2" style="background: rgba(255, 87, 34, 0.15); border: 1px solid rgba(255, 87, 34, 0.4); color: #ff7a00; font-family: 'JetBrains Mono', monospace; font-weight: 700;">
+              <i class="bi bi-clock-fill"></i>
+              <span id="live-timer" style="font-size: 0.95rem;"><?= $selectedDuration ?>s</span>
+            </div>
+
+            <!-- Words Counter Badge -->
+            <div class="d-flex align-items-center gap-1.5 px-2.5 py-1.5 rounded-2" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.8rem;">
+              <i class="bi bi-file-text-fill text-info"></i>
+              <span class="text-secondary">Words:</span>
+              <span id="live-words-count" class="text-white fw-bold">0</span>
+            </div>
+
+            <!-- Live Speed Badge -->
+            <div class="d-flex align-items-center gap-1.5 px-2.5 py-1.5 rounded-2" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.8rem;">
+              <i class="bi bi-speedometer2 text-warning"></i>
+              <span class="text-secondary">Speed:</span>
+              <span id="live-wpm" class="text-warning fw-bold">0</span>
+              <span style="font-size: 0.68rem; color: #64748b;">WPM</span>
+            </div>
+
+            <!-- Live Accuracy Badge -->
+            <div class="d-flex align-items-center gap-1.5 px-2.5 py-1.5 rounded-2" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.8rem;">
+              <i class="bi bi-bullseye text-success"></i>
+              <span class="text-secondary">Acc:</span>
+              <span id="live-accuracy" class="text-success fw-bold">100%</span>
+            </div>
+
+            <!-- Hidden metrics for calculation -->
+            <div class="d-none" aria-hidden="true">
+              <span id="live-cpm">0</span>
+              <span id="live-chars-count">0</span>
+              <span id="live-lines-count">1</span>
+              <span id="live-net-wpm">0</span>
+              <span id="live-errors-count">0</span>
+            </div>
           </div>
         </div>
 
@@ -1525,13 +1652,13 @@ html[data-theme="dark"] .certificate-modal .cert-seal {
         </div>
 
         <div class="position-relative">
-          <div class="typing-surface" id="typing-box-wrapper">
+          <div class="typing-surface" id="typing-box-wrapper" onclick="window.activateTypingFocus()" style="cursor: text;">
             <div id="typing-box" class="typing-box"></div>
           </div>
 
           <input type="text" id="hidden-typing-input" class="hidden-typing-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 
-          <div id="typing-focus-prompt" class="focus-overlay" style="position:absolute;top:0;left:0;">
+          <div id="typing-focus-prompt" class="focus-overlay" onclick="window.activateTypingFocus()" style="position:absolute;top:0;left:0;">
             <div class="focus-icon-box"><i class="bi bi-cursor-fill"></i></div>
             <div class="focus-title">Click anywhere here or start typing</div>
             <div class="focus-sub">Your live timer and word counter start on your first keypress</div>
@@ -2058,7 +2185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     --z-fixed: 100;
 }`;
 
-  let isBackspaceDisabled = true;
+  let isBackspaceDisabled = false;
 
   const engine = new TypingEngine({
     containerId: 'typing-box',
@@ -2106,13 +2233,51 @@ document.addEventListener('DOMContentLoaded', () => {
     onFinish: (result) => { displayResultsModal(result); }
   });
 
+  window.activateTypingFocus = function() {
+    const prompt = document.getElementById('typing-focus-prompt');
+    if (prompt) {
+      prompt.classList.add('hidden');
+      prompt.style.display = 'none';
+      prompt.style.pointerEvents = 'none';
+    }
+    if (engine && engine.input) {
+      engine.input.focus();
+    }
+  };
+
+  const promptEl = document.getElementById('typing-focus-prompt');
+  if (promptEl) {
+    promptEl.addEventListener('click', window.activateTypingFocus);
+  }
+  const surfaceEl = document.getElementById('typing-box-wrapper');
+  if (surfaceEl) {
+    surfaceEl.addEventListener('click', window.activateTypingFocus);
+  }
+
+  // Global keydown: starts live timer and word counter on first keystroke from anywhere!
+  window.addEventListener('keydown', (e) => {
+    if (['TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+      if (document.activeElement.id !== 'free-typing-textarea') return;
+    }
+    if (document.activeElement.tagName === 'INPUT' && document.activeElement.id !== 'hidden-typing-input') {
+      return;
+    }
+    if (document.querySelector('.modal.show')) return;
+
+    if (e.key === ' ' && document.activeElement.id !== 'free-typing-textarea') {
+      e.preventDefault();
+    }
+
+    window.activateTypingFocus();
+  });
+
   setTimeout(() => {
     const skel = document.getElementById('practice-skeleton-view');
     const content = document.getElementById('practice-content-view');
     if (skel) skel.style.display = 'none';
     if (content) {
       content.style.display = 'block';
-      if (engine && engine.input) engine.input.focus();
+      window.activateTypingFocus();
     }
   }, 220);
 
