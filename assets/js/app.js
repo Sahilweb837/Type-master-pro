@@ -96,15 +96,24 @@ function setTheme(theme) {
 function initSidebar() {
   const toggleBtn = document.getElementById('sidebar-toggle-btn');
   const sidebar = document.querySelector('.app-sidebar');
+  const container = document.querySelector('.app-container');
 
   if (toggleBtn && sidebar) {
-    toggleBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('show');
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (window.innerWidth < 992) {
+        sidebar.classList.toggle('show');
+      } else {
+        sidebar.classList.toggle('collapsed');
+        if (container) {
+          container.classList.toggle('sidebar-collapsed');
+        }
+      }
     });
 
     // Close when clicking outside on small screens
     document.addEventListener('click', (e) => {
-      if (window.innerWidth < 992 && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+      if (window.innerWidth < 992 && sidebar.classList.contains('show') && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
         sidebar.classList.remove('show');
       }
     });

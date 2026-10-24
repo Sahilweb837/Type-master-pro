@@ -480,15 +480,15 @@ if (!$pdoCheck):
   </div>
 <?php endif; ?>
 
-<div class="app-container">
+<div class="app-container <?= $currentUser ? 'has-sidebar' : 'no-sidebar' ?>">
   <?php if ($currentUser): ?>
     <?php include __DIR__ . '/sidebar.php'; ?>
   <?php endif; ?>
 
   <div class="main-wrapper">
     <?php
-      $pageIcon = 'bi-speedometer2';
-      $pageBadgeTitle = 'Dashboard';
+      $pageIcon = '';
+      $pageBadgeTitle = '';
       if (strpos($pageTitle, 'Practice') !== false || strpos($pageTitle, 'Typing Arena') !== false) {
           $pageIcon = 'bi-keyboard-fill'; $pageBadgeTitle = 'Typing Arena';
       } elseif (strpos($pageTitle, 'Settings') !== false || strpos($pageTitle, 'Customization') !== false) {
@@ -503,6 +503,8 @@ if (!$pdoCheck):
           $pageIcon = 'bi-controller'; $pageBadgeTitle = 'Arcade Arena';
       } elseif (strpos($pageTitle, 'Admin') !== false) {
           $pageIcon = 'bi-shield-lock-fill'; $pageBadgeTitle = 'Admin Portal';
+      } elseif (strpos($pageTitle, 'Dashboard') !== false) {
+          $pageIcon = 'bi-speedometer2'; $pageBadgeTitle = 'Dashboard';
       }
     ?>
 
@@ -510,7 +512,7 @@ if (!$pdoCheck):
 
       <div class="d-flex align-items-center gap-2" style="min-width:0;">
         <button id="sidebar-toggle-btn"
-                class="px-icon-btn <?= $currentUser ? 'd-lg-none' : 'd-none' ?>"
+                class="px-icon-btn <?= $currentUser ? '' : 'd-none' ?>"
                 aria-label="Toggle sidebar" type="button">
           <i class="bi bi-list"></i>
         </button>
@@ -534,10 +536,12 @@ if (!$pdoCheck):
           </div>
         </a>
 
+        <?php if (!empty($pageBadgeTitle)): ?>
         <span class="px-crumb d-none d-xl-inline-flex">
           <i class="bi <?= $pageIcon ?>"></i>
           <span><?= e($pageBadgeTitle) ?></span>
         </span>
+        <?php endif; ?>
       </div>
 
       <div class="d-flex align-items-center gap-1 gap-md-2">
@@ -616,7 +620,7 @@ if (!$pdoCheck):
       </div>
     </header>
 
-    <main class="flex-grow-1 p-3 p-md-4">
+    <main class="<?= isset($mainClass) ? e($mainClass) : (!empty($noMainPadding) ? 'flex-grow-1 p-0' : 'flex-grow-1 p-3 p-md-4') ?>">
       <?php
       $flash = get_flash();
       if ($flash):

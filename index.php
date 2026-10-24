@@ -14,6 +14,7 @@ if (is_logged_in()) {
 }
 
 $pageTitle = 'Master Your Typing Speed & Precision';
+$noMainPadding = true;
 include __DIR__ . '/includes/header.php';
 ?>
 

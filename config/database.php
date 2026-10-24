@@ -1,11 +1,19 @@
-<?php
+ <?php
 /**
  * Custom Type Master Pro
  * Database Connection Configuration (PDO)
- * Supports: .env file, Environment Variables, Cloud Database URLs, Dual-Host (localhost vs 127.0.0.1) & Socket Auto-Detection
+ * File: config/database.php
+ *
+ * App URL : https://phpstack-1264585-6742270.cloudwaysapps.com/
+ * Hosting : Cloudways (single server)
+ * DB Host : 127.0.0.1 (Cloudways same-server standard)
+ * DB Name : jgryfuqubz
+ * DB User : jgryfuqubz
+ * DB Pass : xD3F6P4ZzS
+ * DB Port : 3306
  */
 
-// 1. Optional lightweight .env file loader (zero external dependencies)
+// 1. Lightweight .env loader (safe if putenv() is disabled on Cloudways)
 (function() {
     $envFile = __DIR__ . '/../.env';
     if (@file_exists($envFile) && @is_readable($envFile)) {
@@ -27,7 +35,9 @@
                         }
                     }
                     if (!isset($_SERVER[$key]) && !isset($_ENV[$key])) {
-                        putenv("{$key}={$val}");
+                        if (function_exists('putenv')) {
+                            @putenv("{$key}={$val}");
+                        }
                         $_ENV[$key] = $val;
                         $_SERVER[$key] = $val;
                     }
@@ -37,7 +47,7 @@
     }
 })();
 
-// 2. Parse Cloud Database URLs (Render, Railway, Heroku, Supabase, CleverCloud, etc.)
+// 2. Parse Cloud Database URLs (optional, overrides defaults if present)
 $cloudDbUrl = getenv('DATABASE_URL') ?: (getenv('MYSQL_URL') ?: (getenv('JAWSDB_URL') ?: getenv('CLEARDB_DATABASE_URL')));
 $parsedUrl = [];
 if ($cloudDbUrl) {
@@ -51,14 +61,19 @@ if ($cloudDbUrl) {
     }
 }
 
-// 3. Resolve Database Credentials (Env var > Cloud URL > Defaults)
-// Note: On Linux / cPanel live servers, 'localhost' is standard as it connects via UNIX socket.
-$dbHost = getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? ($_SERVER['DB_HOST'] ?? ($parsedUrl['host'] ?? 'localhost')));
+// 3. Resolve Database Credentials
+// Cloudways defaults (hardcoded as last fallback)
+$dbHost = getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? ($_SERVER['DB_HOST'] ?? ($parsedUrl['host'] ?? '127.0.0.1')));
 $dbPort = getenv('DB_PORT') ?: ($_ENV['DB_PORT'] ?? ($_SERVER['DB_PORT'] ?? ($parsedUrl['port'] ?? '3306')));
 $dbName = getenv('DB_NAME') ?: ($_ENV['DB_NAME'] ?? ($_SERVER['DB_NAME'] ?? ($parsedUrl['name'] ?? 'jgryfuqubz')));
 $dbUser = getenv('DB_USER') ?: ($_ENV['DB_USER'] ?? ($_SERVER['DB_USER'] ?? ($parsedUrl['user'] ?? 'jgryfuqubz')));
-$dbPass = getenv('DB_PASS') ?: ($_ENV['DB_PASS'] ?? ($_SERVER['DB_PASS'] ?? ($parsedUrl['pass'] ?? 'jgryfuqubzxD3F6P4ZzS')));
+$dbPass = getenv('DB_PASS') ?: ($_ENV['DB_PASS'] ?? ($_SERVER['DB_PASS'] ?? ($parsedUrl['pass'] ?? 'xD3F6P4ZzS')));
 $dbCharset = getenv('DB_CHARSET') ?: ($_ENV['DB_CHARSET'] ?? ($_SERVER['DB_CHARSET'] ?? 'utf8mb4'));
+
+// Cloudways fix: localhost / ::1 ko 127.0.0.1 me force karo
+if ($dbHost === 'localhost' || $dbHost === '::1') {
+    $dbHost = '127.0.0.1';
+}
 
 if (!defined('DB_HOST')) define('DB_HOST', $dbHost);
 if (!defined('DB_PORT')) define('DB_PORT', $dbPort);
@@ -69,8 +84,6 @@ if (!defined('DB_CHARSET')) define('DB_CHARSET', $dbCharset);
 
 /**
  * Returns the last technical database connection error message for diagnostics.
- *
- * @return string
  */
 function getDBLastError(): string {
     global $g_dbLastError;
@@ -79,10 +92,6 @@ function getDBLastError(): string {
 
 /**
  * Returns a singleton PDO database connection instance.
- * Automatically tries primary credentials, dual-host (localhost vs 127.0.0.1),
- * UNIX domain sockets, and local dev fallbacks.
- *
- * @return PDO|null
  */
 function getDBConnection(): ?PDO {
     static $pdo = null;
@@ -102,32 +111,23 @@ function getDBConnection(): ?PDO {
 
     $attempts = [];
 
-    // Attempt 1: Configured host and credentials
+    // Attempt 1: 127.0.0.1 TCP (Cloudways standard)
     $attempts[] = [
         'dsn'  => sprintf('mysql:host=%s;port=%s;dbname=%s;charset=%s', DB_HOST, DB_PORT, DB_NAME, DB_CHARSET),
         'user' => DB_USER,
         'pass' => DB_PASS,
-        'desc' => 'Configured host (' . DB_USER . '@' . DB_HOST . ':' . DB_PORT . ')'
+        'desc' => 'Cloudways primary (' . DB_USER . '@' . DB_HOST . ':' . DB_PORT . '/' . DB_NAME . ')'
     ];
 
-    // Attempt 2: Dual-host resolution (If configured was localhost, try 127.0.0.1; if 127.0.0.1, try localhost)
-    if (DB_HOST === 'localhost') {
-        $attempts[] = [
-            'dsn'  => sprintf('mysql:host=127.0.0.1;port=%s;dbname=%s;charset=%s', DB_PORT, DB_NAME, DB_CHARSET),
-            'user' => DB_USER,
-            'pass' => DB_PASS,
-            'desc' => 'Dual-host fallback (127.0.0.1 TCP)'
-        ];
-    } elseif (DB_HOST === '127.0.0.1') {
-        $attempts[] = [
-            'dsn'  => sprintf('mysql:host=localhost;port=%s;dbname=%s;charset=%s', DB_PORT, DB_NAME, DB_CHARSET),
-            'user' => DB_USER,
-            'pass' => DB_PASS,
-            'desc' => 'Dual-host fallback (localhost Socket)'
-        ];
-    }
+    // Attempt 2: localhost fallback (in case Cloudways uses socket for localhost)
+    $attempts[] = [
+        'dsn'  => sprintf('mysql:host=localhost;port=%s;dbname=%s;charset=%s', DB_PORT, DB_NAME, DB_CHARSET),
+        'user' => DB_USER,
+        'pass' => DB_PASS,
+        'desc' => 'Fallback localhost'
+    ];
 
-    // Attempt 3: Known Linux / cPanel UNIX Sockets (for live servers where TCP networking is skipped)
+    // Attempt 3: Known UNIX sockets (Cloudways / cPanel)
     $knownSockets = [
         '/var/run/mysqld/mysqld.sock',
         '/tmp/mysql.sock',
@@ -140,24 +140,12 @@ function getDBConnection(): ?PDO {
                 'dsn'  => sprintf('mysql:unix_socket=%s;dbname=%s;charset=%s', $sock, DB_NAME, DB_CHARSET),
                 'user' => DB_USER,
                 'pass' => DB_PASS,
-                'desc' => 'Linux UNIX Socket (' . $sock . ')'
+                'desc' => 'UNIX Socket (' . $sock . ')'
             ];
             break;
         }
     }
 
-    // Attempt 4: Local development fallback (XAMPP / WAMP root with empty password)
-    $localDatabases = [DB_NAME, 'custom_type_master_pro', 'type_master'];
-    foreach (array_unique($localDatabases) as $fallbackDb) {
-        $attempts[] = [
-            'dsn'  => sprintf('mysql:host=127.0.0.1;port=%s;dbname=%s;charset=%s', DB_PORT, $fallbackDb, DB_CHARSET),
-            'user' => 'root',
-            'pass' => '',
-            'desc' => "Local dev fallback (root@127.0.0.1 / db={$fallbackDb})"
-        ];
-    }
-
-    // Execute connection attempts in sequence
     $errors = [];
     foreach ($attempts as $attempt) {
         try {
