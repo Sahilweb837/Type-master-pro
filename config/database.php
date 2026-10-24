@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * Custom Type Master Pro
  * Database Connection Configuration (PDO)
@@ -144,6 +144,17 @@ function getDBConnection(): ?PDO {
             ];
             break;
         }
+    }
+
+    // Attempt 4: Local development fallback (XAMPP / WAMP root with empty password)
+    $localDatabases = [DB_NAME, 'custom_type_master_pro', 'type_master'];
+    foreach (array_unique($localDatabases) as $fallbackDb) {
+        $attempts[] = [
+            'dsn'  => sprintf('mysql:host=127.0.0.1;port=%s;dbname=%s;charset=%s', DB_PORT, $fallbackDb, DB_CHARSET),
+            'user' => 'root',
+            'pass' => '',
+            'desc' => "Local dev fallback (root@127.0.0.1 / db={$fallbackDb})"
+        ];
     }
 
     $errors = [];

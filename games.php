@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * Custom Type Master Pro
  * Arcade Games Hub — Pixel Theme / Sans-Serif Readable

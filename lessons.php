@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * Custom Type Master Pro
  * Typing Lessons Curriculum Dashboard — Pixel Theme, Clean Sans-Serif

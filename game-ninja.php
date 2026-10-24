@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * Custom Type Master Pro
  * Game 1: Keyboard Ninja — HD Arcade Edition

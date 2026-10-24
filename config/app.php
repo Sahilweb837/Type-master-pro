@@ -30,7 +30,7 @@ $isHttps = (
 if (session_status() === PHP_SESSION_NONE) {
     // If the server's session save path is misconfigured or unwriteable, fallback to system temp dir
     $savePath = session_save_path();
-    if (!empty($savePath) && (!@is_dir($savePath) || !@is_writable($savePath))) {
+    if (empty($savePath) || !@is_dir($savePath) || !@is_writable($savePath)) {
         $sysTmp = sys_get_temp_dir();
         if (@is_dir($sysTmp) && @is_writable($sysTmp)) {
             @session_save_path($sysTmp);
@@ -50,6 +50,10 @@ if (session_status() === PHP_SESSION_NONE) {
     }
     @session_start();
 }
+
+// Early CSRF initialization before any headers/output can be dispatched
+require_once __DIR__ . '/../includes/csrf.php';
+get_csrf_token();
 
 // App Constants
 define('APP_NAME', 'Custom Type Master Pro');

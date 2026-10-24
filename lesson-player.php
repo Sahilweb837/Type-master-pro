@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * Custom Type Master Pro
  * Interactive Student Lesson Player — Pixel Theme, Clean Sans-Serif

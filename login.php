@@ -35,10 +35,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     $stmt = $pdo->prepare("
                         SELECT id, username, email, password_hash, full_name, role, avatar 
                         FROM users 
-                        WHERE username = :input OR email = :input 
+                        WHERE username = :u_input OR email = :e_input 
                         LIMIT 1
                     ");
-                    $stmt->execute([':input' => $loginInput]);
+                    $stmt->execute([':u_input' => $loginInput, ':e_input' => $loginInput]);
                     $user = $stmt->fetch();
 
                     if ($user && password_verify($password, $user['password_hash'])) {

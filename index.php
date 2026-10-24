@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * Custom Type Master Pro
  * Landing Page — Pixel Theme · Sans-Serif Readable

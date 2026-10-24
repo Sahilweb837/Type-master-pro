@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * Custom Type Master Pro
  * Meteor Matrix Defense — Enhanced HD Arcade Edition

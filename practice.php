@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * Custom Type Master Pro
  * Live Typing Practice Arena — Pixel Theme, Clean Sans-Serif

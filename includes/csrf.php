@@ -5,8 +5,25 @@
  */
 
 /**
+ * Helper to detect if connection is HTTPS (including Cloudways, Cloudflare, AWS, Nginx reverse proxies).
+ *
+ * @return bool
+ */
+function is_https_request(): bool {
+    return (
+        (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')
+        || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
+        || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
+        || (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && strtolower($_SERVER['HTTP_X_FORWARDED_SSL']) === 'on')
+        || (!empty($_SERVER['HTTP_X_FORWARDED_PORT']) && (int)$_SERVER['HTTP_X_FORWARDED_PORT'] === 443)
+        || (!empty($_SERVER['HTTP_CF_VISITOR']) && strpos($_SERVER['HTTP_CF_VISITOR'], '"scheme":"https"') !== false)
+    );
+}
+
+/**
  * Generates or retrieves the active session CSRF token.
- * Automatically synchronizes with an XSRF-TOKEN cookie for double-submit reliability.
+ * Maintains a pool of valid recent tokens (up to 10) to support multi-tab navigation,
+ * and automatically synchronizes with an XSRF-TOKEN cookie for double-submit reliability.
  *
  * @return string
  */
@@ -14,6 +31,11 @@ function get_csrf_token(): string {
     if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
         @session_start();
     }
+
+    if (!isset($_SESSION['csrf_tokens']) || !is_array($_SESSION['csrf_tokens'])) {
+        $_SESSION['csrf_tokens'] = [];
+    }
+
     if (empty($_SESSION['csrf_token'])) {
         // If an existing valid cookie token exists, reuse it to maintain continuity
         if (!empty($_COOKIE['XSRF-TOKEN']) && preg_match('/^[a-f0-9]{64}$/i', $_COOKIE['XSRF-TOKEN'])) {
@@ -23,13 +45,17 @@ function get_csrf_token(): string {
         }
     }
 
+    // Ensure current token is registered in the pool of valid tokens
+    if (!in_array($_SESSION['csrf_token'], $_SESSION['csrf_tokens'], true)) {
+        $_SESSION['csrf_tokens'][] = $_SESSION['csrf_token'];
+        if (count($_SESSION['csrf_tokens']) > 10) {
+            array_shift($_SESSION['csrf_tokens']);
+        }
+    }
+
     // Set or refresh the client-accessible XSRF-TOKEN cookie
     if (!headers_sent()) {
-        $isHttps = (
-            (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')
-            || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
-            || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
-        );
+        $isHttps = is_https_request();
         @setcookie('XSRF-TOKEN', $_SESSION['csrf_token'], [
             'expires'  => time() + 86400 * 7,
             'path'     => '/',
@@ -44,7 +70,7 @@ function get_csrf_token(): string {
 
 /**
  * Verifies a CSRF token from POST, headers, or JSON body.
- * Implements primary session check with double-submit cookie fallback for live servers.
+ * Validates against the active session token, recent token pool, and double-submit cookie.
  *
  * @param string|null $token
  * @return bool
@@ -71,9 +97,9 @@ function verify_csrf_token(?string $token = null): bool {
         }
     }
 
-    if (empty($token)) {
+    if (empty($token) || !is_string($token)) {
         error_log(sprintf(
-            '[CSRF Warning] Validation failed: token is empty. Session ID: %s',
+            '[CSRF Warning] Validation failed: token is empty or invalid type. Session ID: %s',
             session_id() ?: 'NONE'
         ));
         return false;
@@ -85,19 +111,32 @@ function verify_csrf_token(?string $token = null): bool {
         return true;
     }
 
-    // 2. Secondary Fallback: Double-Submit Cookie verification (resilient against session storage glitches)
+    // 2. Secondary Check: Validate against recent valid tokens pool (multi-tab / back-button resilient)
+    if (!empty($_SESSION['csrf_tokens']) && is_array($_SESSION['csrf_tokens'])) {
+        foreach ($_SESSION['csrf_tokens'] as $validToken) {
+            if (is_string($validToken) && hash_equals($validToken, $token)) {
+                return true;
+            }
+        }
+    }
+
+    // 3. Fallback: Double-Submit Cookie verification (resilient against session storage glitches)
     $cookieToken = $_COOKIE['XSRF-TOKEN'] ?? '';
     if (!empty($cookieToken) && hash_equals($cookieToken, $token)) {
         // Restore session token so subsequent operations remain synchronized
         $_SESSION['csrf_token'] = $cookieToken;
+        if (!in_array($cookieToken, $_SESSION['csrf_tokens'] ?? [], true)) {
+            $_SESSION['csrf_tokens'][] = $cookieToken;
+        }
         return true;
     }
 
     error_log(sprintf(
-        '[CSRF Warning] Token mismatch detected. Received token length: %d, session token exists: %s, cookie token exists: %s',
+        '[CSRF Warning] Token mismatch detected. Received token length: %d, session token exists: %s, cookie token exists: %s, pool size: %d',
         strlen($token),
         !empty($sessionToken) ? 'YES' : 'NO',
-        !empty($cookieToken) ? 'YES' : 'NO'
+        !empty($cookieToken) ? 'YES' : 'NO',
+        !empty($_SESSION['csrf_tokens']) ? count($_SESSION['csrf_tokens']) : 0
     ));
     return false;
 }

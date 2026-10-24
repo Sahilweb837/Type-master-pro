@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * Custom Type Master Pro
  * User Dashboard — MONOCHROME PRO UI v4.0
