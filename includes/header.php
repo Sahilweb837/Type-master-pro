@@ -11,7 +11,7 @@ require_once __DIR__ . '/../includes/functions.php';
 
 $currentUser = current_user();
 $userSettings = $currentUser ? get_user_settings($currentUser['id']) : [
-    'theme'               => 'light',
+    'theme'               => 'dark',
     'font_family'         => 'JetBrains Mono',
     'font_size'           => 22,
     'line_height'         => 1.8,
@@ -29,21 +29,16 @@ $userSettings = $currentUser ? get_user_settings($currentUser['id']) : [
     'show_live_word_count'=> 1
 ];
 
-$activeTheme = $userSettings['theme'] ?? 'light';
-if ($activeTheme === 'white-orange') {
-    $activeTheme = 'light';
-}
-if ($activeTheme !== 'dark') $activeTheme = 'light';
-
+$activeTheme = 'dark';
 $pageTitle = $pageTitle ?? 'Custom Type Master Pro';
 ?>
 <!DOCTYPE html>
-<html lang="en" data-theme="<?= e($activeTheme) ?>">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="csrf-token" content="<?= e(get_csrf_token()) ?>">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#0a0e17">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="TypeMaster Pro">
   <link rel="manifest" href="<?= BASE_URL ?>/manifest.json">
@@ -52,9 +47,9 @@ $pageTitle = $pageTitle ?? 'Custom Type Master Pro';
   <script>
     (function() {
       try {
-        var t = localStorage.getItem('typemaster_theme') || '<?= e($activeTheme) ?>' || 'light';
-        if (t !== 'dark') t = 'light';
-        document.documentElement.setAttribute('data-theme', t);
+        localStorage.setItem('typemaster_theme', 'dark');
+        localStorage.setItem('typoprac_theme', 'dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
       } catch (e) {}
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
@@ -93,23 +88,22 @@ $pageTitle = $pageTitle ?? 'Custom Type Master Pro';
 
   <style>
     /* ============================================================
-       HEADER — Pixel theme, sans-serif readable text
+       HEADER — Sleek Obsidian & Flame Orange (Matches Mockup)
        ============================================================ */
     .app-navbar {
-      --px-ink:    #000000;
-      --px-paper:  #ffffff;
-      --px-paper-2:#f0f0f0;
-      --px-shadow: 2px;
+      --px-ink:    #ffffff;
+      --px-paper:  #0b0f17;
+      --px-paper-2:#131a29;
+      --px-shadow: 0px;
 
       position: sticky;
       top: 0;
       z-index: 1030;
-      background: var(--px-paper) !important;
-      border-bottom: 4px solid var(--px-ink) !important;
-      padding: 0.55rem 0.85rem !important;
+      background: #0b0f17 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      padding: 0.65rem 1.25rem !important;
       font-family: var(--px-sans);
-      -webkit-font-smoothing: antialiased;
-      image-rendering: pixelated;
+      color: #ffffff;
     }
     html[data-theme="dark"] .app-navbar {
       --px-ink:    #ffffff;
@@ -508,113 +502,86 @@ if (!$pdoCheck):
       }
     ?>
 
-    <header class="app-navbar d-flex align-items-center justify-content-between gap-2">
+    <header class="app-navbar d-flex align-items-center justify-content-between gap-3 px-3 py-2" style="background: #0b0f17; border-bottom: 1px solid rgba(255,255,255,0.08); min-height: 64px;">
 
-      <div class="d-flex align-items-center gap-2" style="min-width:0;">
+      <div class="d-flex align-items-center gap-3" style="min-width:0;">
         <button id="sidebar-toggle-btn"
-                class="px-icon-btn <?= $currentUser ? '' : 'd-none' ?>"
+                class="px-icon-btn <?= $currentUser ? '' : 'd-none' ?> border-0 text-white"
+                style="background: rgba(255,255,255,0.05); width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center;"
                 aria-label="Toggle sidebar" type="button">
-          <i class="bi bi-list"></i>
+          <i class="bi bi-list fs-5"></i>
         </button>
 
-        <a href="<?= BASE_URL ?>/<?= $currentUser ? 'dashboard.php' : 'index.php' ?>"
-           class="px-brand" aria-label="TypeMaster PRO Home">
-          <div class="px-logo">
-            <svg width="18" height="18" viewBox="0 0 8 8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-              <rect x="0" y="0" width="8" height="8" fill="var(--px-ink)"/>
-              <rect x="1" y="1" width="3" height="1" fill="var(--px-paper)"/>
-              <rect x="2" y="2" width="1" height="4" fill="var(--px-paper)"/>
-              <rect x="5" y="1" width="1" height="5" fill="var(--px-paper)"/>
-              <rect x="6" y="1" width="1" height="1" fill="var(--px-paper)"/>
-              <rect x="6" y="3" width="1" height="1" fill="var(--px-paper)"/>
-              <rect x="6" y="5" width="1" height="1" fill="var(--px-paper)"/>
-            </svg>
+        <!-- Top Practice Pill Widget (from Mockup) -->
+        <a href="<?= BASE_URL ?>/practice.php?mode=passage" class="text-decoration-none d-flex align-items-center gap-3 px-3 py-1.5 rounded-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
+          <div style="width: 36px; height: 36px; background: rgba(255,87,34,0.15); border: 1px solid rgba(255,87,34,0.3); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ff5722;">
+            <i class="bi bi-keyboard-fill fs-5"></i>
           </div>
-          <div class="px-brand-text">
-            <span class="px-brand-name">TypeMaster<span class="px-live"></span></span>
-            <span class="px-brand-tag">PRO</span>
+          <div class="d-none d-sm-block text-start" style="line-height: 1.2;">
+            <div class="fw-bold text-white small">Practice</div>
+            <div class="text-secondary" style="font-size: 0.72rem;">Improve your typing skills</div>
           </div>
         </a>
-
-        <?php if (!empty($pageBadgeTitle)): ?>
-        <span class="px-crumb d-none d-xl-inline-flex">
-          <i class="bi <?= $pageIcon ?>"></i>
-          <span><?= e($pageBadgeTitle) ?></span>
-        </span>
-        <?php endif; ?>
       </div>
 
-      <div class="d-flex align-items-center gap-1 gap-md-2">
-        <a href="<?= BASE_URL ?>/lessons.php" class="px-btn px-hide-sm" title="Typing Lessons">
-          <i class="bi bi-mortarboard-fill"></i><span>Lessons</span>
-        </a>
-        <a href="<?= BASE_URL ?>/games.php" class="px-btn px-hide-sm" title="Arcade Games">
-          <i class="bi bi-controller"></i><span>Games</span>
-        </a>
-        <a href="<?= BASE_URL ?>/practice.php" class="px-btn-primary px-hide-sm" title="Launch Practice Drill">
-          <i class="bi bi-keyboard-fill"></i><span>Practice</span>
-        </a>
-        <a href="<?= BASE_URL ?>/practice.php?mode=free" class="px-btn d-none d-md-inline-flex" title="Free Typing">
-          <i class="bi bi-stopwatch-fill"></i><span>Watch</span>
-        </a>
-        <button type="button" class="px-btn d-none d-lg-inline-flex" id="btn-install-header" title="Install">
-          <i class="bi bi-laptop"></i><span>Install</span>
-        </button>
-
-        <div class="dropdown">
-          <button class="px-theme-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Switch Theme">
-            <i class="bi bi-circle-half"></i><span class="d-none d-md-inline">Theme</span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="#" data-set-theme="light"><i class="bi bi-sun-fill"></i> Light</a></li>
-            <li><a class="dropdown-item" href="#" data-set-theme="dark"><i class="bi bi-moon-stars-fill"></i> Dark</a></li>
-          </ul>
+      <div class="d-flex align-items-center gap-2 gap-md-3">
+        <!-- Daily Goal Ring (from Mockup) -->
+        <div class="d-none d-md-flex align-items-center gap-2.5 px-3 py-1.5 rounded-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
+          <svg width="34" height="34" viewBox="0 0 36 36" style="transform: rotate(-90deg);">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#ff5722" stroke-width="4" stroke-dasharray="66, 100"/>
+          </svg>
+          <div style="line-height: 1.2;">
+            <div class="text-secondary" style="font-size: 0.65rem;">Daily Goal</div>
+            <div class="fw-bold text-white" style="font-size: 0.82rem;">20 / 30 min</div>
+          </div>
         </div>
 
+        <!-- Notification Bell (from Mockup) -->
+        <button class="btn btn-sm text-secondary position-relative p-2 rounded-circle" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;" title="Notifications">
+          <i class="bi bi-bell-fill fs-6 text-secondary"></i>
+          <span class="position-absolute top-0 end-0 p-1 bg-danger border border-dark rounded-circle" style="transform: translate(-3px, 3px) !important;"></span>
+        </button>
+
         <?php if ($currentUser): ?>
+          <!-- Profile Pill (from Mockup) -->
           <div class="dropdown">
-            <button class="px-user-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
-              <div class="px-user-meta d-none d-xl-block">
-                <div class="px-user-name"><?= e($currentUser['full_name']) ?></div>
-                <div class="px-user-handle">@<?= e($currentUser['username']) ?></div>
+            <button class="d-flex align-items-center gap-2.5 px-2.5 py-1.5 rounded-3 text-start border-0 text-white" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08) !important; cursor: pointer;">
+              <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #ff5722, #ff8a00); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
+                <?= strtoupper(substr($currentUser['username'] ?? 'N', 0, 1)) ?>
               </div>
-              <div class="px-user-avatar">
-                <span><?= strtoupper(substr($currentUser['username'], 0, 1)) ?></span>
+              <div class="d-none d-sm-block text-start" style="line-height: 1.2;">
+                <div class="fw-bold text-white small"><?= e($currentUser['full_name'] ?? 'Nitin Kapoor') ?></div>
+                <div class="text-secondary" style="font-size: 0.7rem;">Typing Learner</div>
               </div>
+              <i class="bi bi-chevron-down text-secondary ms-1" style="font-size: 0.75rem;"></i>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li class="px-user-header">
-                <div class="u-name"><?= e($currentUser['full_name']) ?></div>
-                <div class="u-handle">@<?= e($currentUser['username']) ?></div>
-                <?php if (is_admin()): ?>
-                  <span class="px-role"><i class="bi bi-shield-lock-fill"></i> Admin</span>
-                <?php else: ?>
-                  <span class="px-role"><i class="bi bi-patch-check-fill"></i> Member</span>
-                <?php endif; ?>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="background: #131a29; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; min-width: 210px;">
+              <li class="px-3 py-2 border-bottom" style="border-color: rgba(255,255,255,0.08) !important;">
+                <div class="fw-bold text-white small"><?= e($currentUser['full_name'] ?? 'Nitin Kapoor') ?></div>
+                <div class="text-secondary" style="font-size: 0.72rem;">@<?= e($currentUser['username'] ?? 'learner') ?></div>
               </li>
-              <li><a class="dropdown-item" href="<?= BASE_URL ?>/dashboard.php"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-              <li><a class="dropdown-item" href="<?= BASE_URL ?>/games.php"><i class="bi bi-controller"></i> Games</a></li>
-              <li><a class="dropdown-item" href="<?= BASE_URL ?>/lessons.php"><i class="bi bi-mortarboard-fill"></i> Lessons</a></li>
-              <li><a class="dropdown-item" href="<?= BASE_URL ?>/practice.php?mode=passage"><i class="bi bi-keyboard-fill"></i> Passage Practice</a></li>
-              <li><a class="dropdown-item" href="<?= BASE_URL ?>/practice.php?mode=free"><i class="bi bi-stopwatch-fill"></i> Free &amp; Watch</a></li>
-              <li><a class="dropdown-item" href="<?= BASE_URL ?>/practice.php?mode=custom"><i class="bi bi-sliders2"></i> Custom Drills</a></li>
-              <li><a class="dropdown-item" href="<?= BASE_URL ?>/history.php"><i class="bi bi-award-fill"></i> History</a></li>
-              <li><a class="dropdown-item" href="<?= BASE_URL ?>/statistics.php"><i class="bi bi-graph-up-arrow"></i> Analytics</a></li>
-              <li><a class="dropdown-item" href="<?= BASE_URL ?>/settings.php"><i class="bi bi-gear-fill"></i> Settings</a></li>
+              <li><a class="dropdown-item py-2 text-light" href="<?= BASE_URL ?>/dashboard.php"><i class="bi bi-speedometer2 text-orange me-2"></i> Dashboard</a></li>
+              <li><a class="dropdown-item py-2 text-light" href="<?= BASE_URL ?>/practice.php?mode=passage"><i class="bi bi-keyboard-fill text-orange me-2"></i> Practice</a></li>
+              <li><a class="dropdown-item py-2 text-light" href="<?= BASE_URL ?>/lessons.php"><i class="bi bi-book-fill text-info me-2"></i> Lessons</a></li>
+              <li><a class="dropdown-item py-2 text-light" href="<?= BASE_URL ?>/games.php"><i class="bi bi-controller text-danger me-2"></i> Games</a></li>
+              <li><a class="dropdown-item py-2 text-light" href="<?= BASE_URL ?>/history.php"><i class="bi bi-award-fill text-warning me-2"></i> Certificates</a></li>
+              <li><a class="dropdown-item py-2 text-light" href="<?= BASE_URL ?>/statistics.php"><i class="bi bi-graph-up-arrow text-success me-2"></i> Progress</a></li>
+              <li><a class="dropdown-item py-2 text-light" href="<?= BASE_URL ?>/settings.php"><i class="bi bi-gear-fill text-secondary me-2"></i> Settings</a></li>
               <?php if (is_admin()): ?>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="<?= BASE_URL ?>/admin/index.php"><i class="bi bi-shield-lock-fill"></i> Admin Panel</a></li>
+                <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.08);"></li>
+                <li><a class="dropdown-item py-2 text-light" href="<?= BASE_URL ?>/admin/index.php"><i class="bi bi-shield-lock-fill text-warning me-2"></i> Admin Panel</a></li>
               <?php endif; ?>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="<?= BASE_URL ?>/logout.php"><i class="bi bi-box-arrow-right"></i> Sign Out</a></li>
+              <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.08);"></li>
+              <li><a class="dropdown-item py-2 text-danger" href="<?= BASE_URL ?>/logout.php"><i class="bi bi-box-arrow-right me-2"></i> Sign Out</a></li>
             </ul>
           </div>
         <?php else: ?>
-          <a href="<?= BASE_URL ?>/login.php" class="px-btn" title="Sign In">
-            <i class="bi bi-box-arrow-in-right"></i><span>Sign In</span>
+          <a href="<?= BASE_URL ?>/login.php" class="btn btn-outline-secondary btn-sm px-3 rounded-2 text-white" title="Sign In">
+            <i class="bi bi-box-arrow-in-right me-1"></i><span>Sign In</span>
           </a>
-          <a href="<?= BASE_URL ?>/register.php" class="px-btn-primary" title="Sign Up">
-            <i class="bi bi-person-plus-fill"></i><span>Sign Up</span>
+          <a href="<?= BASE_URL ?>/register.php" class="btn btn-warning btn-sm px-3 rounded-2 fw-bold text-dark" title="Sign Up" style="background: #ff5722; border-color: #ff5722; color: #fff !important;">
+            <i class="bi bi-person-plus-fill me-1"></i><span>Sign Up</span>
           </a>
         <?php endif; ?>
       </div>

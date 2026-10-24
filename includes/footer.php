@@ -388,42 +388,28 @@
         <div class="tm-footer-grid">
 
           <div>
-            <a href="<?= BASE_URL ?>/dashboard.php" class="tm-ft-brand">
-              <span class="tm-ft-brand-mark">
-                <svg width="20" height="20" viewBox="0 0 8 8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-                  <rect x="0" y="0" width="8" height="8" fill="currentColor"/>
-                  <rect x="1" y="1" width="3" height="1" fill="var(--ft-paper)"/>
-                  <rect x="2" y="2" width="1" height="4" fill="var(--ft-paper)"/>
-                  <rect x="5" y="1" width="1" height="5" fill="var(--ft-paper)"/>
-                  <rect x="6" y="1" width="1" height="1" fill="var(--ft-paper)"/>
-                  <rect x="6" y="3" width="1" height="1" fill="var(--ft-paper)"/>
-                  <rect x="6" y="5" width="1" height="1" fill="var(--ft-paper)"/>
-                </svg>
-              </span>
-              <span class="tm-ft-brand-name">
-                TypeMaster<span class="dot-pro">.pro</span>
-                <span class="tm-ft-badge">PRO</span>
-              </span>
+            <a href="<?= BASE_URL ?>/index.php" class="tm-ft-brand d-inline-flex align-items-center mb-3">
+              <img src="<?= BASE_URL ?>/assets/images/logo.png" alt="TypoPrac Logo" style="height: 42px; width: auto; object-fit: contain;">
             </a>
 
             <p class="tm-ft-desc">
-              Engineered for extreme typing precision, keystroke-level diagnostics, real-time WPM calculation, and distraction-free speed acceleration.
+              TypoPrac is the world's best free professional typing tutor and software. Designed with AI diagnostics, kindergarten letter games, high-speed arcade tests, and touch typing certifications.
             </p>
 
             <div class="tm-ft-status">
-              <span class="dot"></span>
-              <span>Engine Active &bull; Zero Lag</span>
+              <span class="dot" style="background: #ff5722;"></span>
+              <span>TypoPrac Engine &bull; Zero Latency</span>
             </div>
           </div>
 
           <div>
-            <h6 class="tm-ft-heading">Quick Nav</h6>
+            <h6 class="tm-ft-heading">Explore TypoPrac</h6>
             <ul class="tm-ft-links">
-              <li><a href="<?= BASE_URL ?>/practice.php"><i class="bi bi-play-circle"></i> Practice Arena</a></li>
-              <li><a href="<?= BASE_URL ?>/games.php"><i class="bi bi-controller"></i> Arcade Games</a></li>
-              <li><a href="<?= BASE_URL ?>/lessons.php"><i class="bi bi-mortarboard"></i> Typing Lessons</a></li>
-              <li><a href="<?= BASE_URL ?>/dashboard.php"><i class="bi bi-grid-fill"></i> Speed Dashboard</a></li>
-              <li><a href="<?= BASE_URL ?>/history.php"><i class="bi bi-clock-history"></i> Test History</a></li>
+              <li><a href="<?= BASE_URL ?>/practice.php"><i class="bi bi-play-circle text-orange"></i> Practice Arena</a></li>
+              <li><a href="<?= BASE_URL ?>/games.php"><i class="bi bi-controller text-danger"></i> Arcade &amp; Kids Games</a></li>
+              <li><a href="<?= BASE_URL ?>/game-kindergarten.php"><i class="bi bi-stars text-warning"></i> Kindergarten Typing</a></li>
+              <li><a href="<?= BASE_URL ?>/lessons.php"><i class="bi bi-mortarboard text-info"></i> Typing Lessons</a></li>
+              <li><a href="<?= BASE_URL ?>/dashboard.php"><i class="bi bi-speedometer2 text-orange"></i> Live Dashboard</a></li>
             </ul>
           </div>
 

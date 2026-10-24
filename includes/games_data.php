@@ -49,9 +49,23 @@ function ensure_game_table_exists(?PDO $pdo = null): void {
 function get_all_games(): array {
     return [
         [
+            'slug'        => 'kindergarten',
+            'title'       => 'Kindergarten Letter Jungle',
+            'badge'       => '🧸 Kids & Beginners',
+            'category'    => 'kids',
+            'icon'        => 'bi-stars',
+            'color'       => '#ff5722',
+            'description' => 'Joyful alphabet letter bubbles, friendly animals (Fox, Bear, Owl) and phonics audio voice. The perfect kindergarten typing adventure!',
+            'url'         => 'game-kindergarten.php',
+            'modes'       => ['ABC Alphabet', 'Home Row Animals', '3-Letter Phonics', 'Numbers 1-10'],
+            'difficulties'=> ['Baby Cub', 'Jungle Scout', 'Typing Wizard'],
+            'features'    => ['Floating Letter Bubbles', 'Voice & Phonics Audio', 'No Typo Penalties', 'Star Rewards']
+        ],
+        [
             'slug'        => 'ninja',
             'title'       => 'Keyboard Ninja',
             'badge'       => 'Most Popular',
+            'category'    => 'arcade',
             'icon'        => 'bi-slash-circle-fill',
             'color'       => '#ff4d00',
             'description' => 'Slash flying fruit targets mid-air with lightning katana strikes. Dodge explosive bombs and isolate keyboard rows to build reflex muscle memory.',

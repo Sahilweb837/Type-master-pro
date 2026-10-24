@@ -69,14 +69,11 @@ include __DIR__ . '/includes/header.php';
     <div class="col-md-7 col-lg-5">
       <div class="soft-card p-4 p-md-5">
         <div class="text-center mb-4">
-          <div class="brand-logo-badge mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #0a0a0a; border-radius: 12px; box-shadow: var(--shadow-md);">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="2" width="20" height="20" rx="4" fill="#0a0a0a" stroke="#ffffff" stroke-width="1.8"/>
-              <path d="M7 9H17M12 9V17" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <h2 class="fw-bold mb-1" style="color: var(--text-primary); letter-spacing: -0.5px;">Welcome Back</h2>
-          <p class="text-secondary small mb-0">Sign in to your TypeMaster PRO workspace</p>
+          <a href="<?= BASE_URL ?>/index.php" class="d-inline-block mb-3">
+            <img src="<?= BASE_URL ?>/assets/images/logo.png" alt="TypoPrac Logo" style="height: 48px; width: auto; object-fit: contain;">
+          </a>
+          <h2 class="fw-bold mb-1" style="color: var(--text-primary); letter-spacing: -0.5px;">Welcome to TypoPrac</h2>
+          <p class="text-secondary small mb-0">Sign in to your professional typing practice workspace</p>
         </div>
 
         <?php if (!empty($error)): ?>
@@ -122,8 +119,8 @@ include __DIR__ . '/includes/header.php';
             <a href="<?= BASE_URL ?>/practice.php" class="text-secondary text-decoration-none hover-coral">Guest Arena</a>
           </div>
 
-          <button type="submit" class="soft-btn soft-btn-primary w-100 py-3 fw-bold fs-6">
-            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to TypeMaster
+          <button type="submit" class="btn btn-typoprac-primary w-100 py-3 fw-bold fs-6">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to TypoPrac
           </button>
         </form>
 

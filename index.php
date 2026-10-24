@@ -1,4 +1,4 @@
-<?php
+ <?php
 /**
  * Custom Type Master Pro
  * Landing Page — Pixel Theme · Sans-Serif Readable
@@ -23,11 +23,11 @@ include __DIR__ . '/includes/header.php';
    PIXEL THEME · SANS-SERIF READABLE LANDING — TypeMaster PRO
    ============================================================ */
 :root {
-    --px-ink:      #000000;
-    --px-paper:    #ffffff;
-    --px-paper-2:  #f4f4f4;
-    --px-paper-3:  #e6e6e6;
-    --px-shadow:   3px;
+    --px-ink:      #f8fafc;
+    --px-paper:    #0a0e17;
+    --px-paper-2:  #141c2e;
+    --px-paper-3:  #192338;
+    --px-shadow:   0px;
 
     /* READABLE BODY */
     --px-sans:     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -40,10 +40,10 @@ include __DIR__ . '/includes/header.php';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap');
 
 html[data-theme="dark"] .tm-landing {
-    --px-ink:      #ffffff;
-    --px-paper:    #000000;
-    --px-paper-2:  #141414;
-    --px-paper-3:  #222222;
+    --px-ink:      #f8fafc;
+    --px-paper:    #0a0e17;
+    --px-paper-2:  #141c2e;
+    --px-paper-3:  #192338;
 }
 
 .tm-landing {

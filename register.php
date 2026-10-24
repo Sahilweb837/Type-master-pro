@@ -90,7 +90,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         ];
 
                         login_user($newUser);
-                        set_flash('success', 'Your account has been created successfully! Welcome to Custom Type Master Pro.');
+                        set_flash('success', 'Your account has been created successfully! Welcome to TypoPrac.');
                         header('Location: ' . BASE_URL . '/dashboard.php');
                         exit;
                     }
@@ -103,7 +103,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     }
 }
 
-$pageTitle = 'Create Account';
+$pageTitle = 'Create Free Account';
 include __DIR__ . '/includes/header.php';
 ?>
 
@@ -112,14 +112,11 @@ include __DIR__ . '/includes/header.php';
     <div class="col-md-8 col-lg-6">
       <div class="soft-card p-4 p-md-5">
         <div class="text-center mb-4">
-          <div class="brand-logo-badge mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #0a0a0a; border-radius: 12px; box-shadow: var(--shadow-md);">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="2" width="20" height="20" rx="4" fill="#0a0a0a" stroke="#ffffff" stroke-width="1.8"/>
-              <path d="M7 9H17M12 9V17" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <h2 class="fw-bold mb-1" style="color: var(--text-primary); letter-spacing: -0.5px;">Create Account</h2>
-          <p class="text-secondary small mb-0">Join TypeMaster PRO to track your speed and precision</p>
+          <a href="<?= BASE_URL ?>/index.php" class="d-inline-block mb-3">
+            <img src="<?= BASE_URL ?>/assets/images/logo.png" alt="TypoPrac Logo" style="height: 48px; width: auto; object-fit: contain;">
+          </a>
+          <h2 class="fw-bold mb-1" style="color: var(--text-primary); letter-spacing: -0.5px;">Create Your Account</h2>
+          <p class="text-secondary small mb-0">Join TypoPrac to track your speed, earn certificates &amp; save scores</p>
         </div>
 
         <?php if (!empty($error)): ?>
@@ -174,7 +171,7 @@ include __DIR__ . '/includes/header.php';
             </div>
           </div>
 
-          <button type="submit" class="soft-btn soft-btn-primary w-100 py-3 fw-bold fs-6">
+          <button type="submit" class="btn btn-typoprac-primary w-100 py-3 fw-bold fs-6">
             <i class="bi bi-check2-circle me-1"></i> Register Free Account
           </button>
         </form>

@@ -20,6 +20,9 @@ $settings = $currentUser ? get_user_settings($currentUser['id']) : [
     'show_live_wpm' => 1, 'show_live_accuracy' => 1, 'show_live_word_count' => 1
 ];
 
+require_once __DIR__ . '/includes/passages_data.php';
+$allPassagesList = get_all_passages();
+
 $pdo = getDBConnection();
 $selectedDifficulty = $_GET['difficulty'] ?? $settings['default_difficulty'] ?? 'intermediate';
 $selectedDuration = (int)($_GET['duration'] ?? $settings['default_duration'] ?? 60);
@@ -48,14 +51,7 @@ if ($pdo) {
 }
 
 if (!$activePassage) {
-    $activePassage = [
-        'id' => 0,
-        'title' => 'Welcome to Custom Type Master Pro',
-        'difficulty' => 'intermediate',
-        'content' => 'The World Wide Web relies on a foundational set of open protocols and standards. When a user requests a URL, the browser initiates a DNS lookup, establishes a secure TLS connection, and issues an HTTP request. The server interprets the request, queries relational databases using optimized SQL statements, and returns dynamic HTML, CSS, and JavaScript. Understanding this full-stack lifecycle empowers developers to build responsive and resilient web applications.',
-        'word_count' => 68,
-        'char_count' => 477
-    ];
+    $activePassage = ($passageId ? get_passage_by_id($passageId) : null) ?: get_random_passage($selectedDifficulty);
 }
 
 $pageTitle = 'Typing Practice Arena';
@@ -64,36 +60,38 @@ include __DIR__ . '/includes/header.php';
 
 <style>
 /* ============================================================
-   PRACTICE ARENA — Pixel Theme + Clean Sans-Serif
+   PRACTICE ARENA — TypoPrac Dark Obsidian & Flame Orange
    ============================================================ */
 .practice-arena-wrap {
-  --ink:        #000000;
-  --paper:      #ffffff;
-  --paper-soft: #f4f4f4;
-  --paper-hard: #e6e6e6;
-  --shadow:     3px;
+  --ink:        #f8fafc;
+  --paper:      #131a29;
+  --paper-soft: #192338;
+  --paper-hard: #0b0f17;
+  --shadow:     0px;
   --sans:       "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono:       "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
   font-family: var(--sans);
   color: var(--ink);
 }
 html[data-theme="dark"] .practice-arena-wrap {
-  --ink:        #ffffff;
-  --paper:      #000000;
-  --paper-soft: #141414;
-  --paper-hard: #222222;
+  --ink:        #f8fafc;
+  --paper:      #131a29;
+  --paper-soft: #192338;
+  --paper-hard: #0b0f17;
 }
 
 /* ---------- Generic surfaces ---------- */
 .practice-arena-wrap .pixel-card {
   background: var(--paper);
-  border: 3px solid var(--ink);
-  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 .practice-arena-wrap .pixel-card-lg {
   background: var(--paper);
-  border: 3px solid var(--ink);
-  box-shadow: 5px 5px 0 var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 /* ---------- Buttons ---------- */
@@ -107,17 +105,28 @@ html[data-theme="dark"] .practice-arena-wrap {
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
-  background: var(--paper);
-  color: var(--ink);
-  border: 3px solid var(--ink);
-  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  background: #192338;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   line-height: 1.2;
-  transition: transform 0.05s steps(1), box-shadow 0.05s steps(1), background 0.05s steps(1);
+  transition: all 0.15s ease;
   -webkit-appearance: none;
   appearance: none;
   text-decoration: none;
+}
+.practice-arena-wrap .px-btn:hover { background: #222f4b; color: #ff7a00; border-color: rgba(255, 87, 34, 0.4); }
+.practice-arena-wrap .px-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.practice-arena-wrap .px-btn-primary {
+  background: linear-gradient(135deg, #ff5500 0%, #ff7a00 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 87, 34, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(255, 87, 34, 0.45) !important;
 }
 .practice-arena-wrap .px-btn:hover { background: var(--paper-soft); color: var(--ink); }
 .practice-arena-wrap .px-btn:active {
@@ -2226,7 +2235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  setBackspaceMode(true);
+  setBackspaceMode(false);
 
   const toggleBackspaceBtn = document.getElementById('btn-toggle-backspace');
   if (toggleBackspaceBtn) {

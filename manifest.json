@@ -1,22 +1,17 @@
 {
-  "name": "Custom Type Master Pro",
-  "short_name": "TypeMaster",
-  "description": "Master touch typing speed and accuracy with real-time keystroke analytics",
+  "name": "TypoPrac — Professional Typing Practice Software",
+  "short_name": "TypoPrac",
+  "description": "World's Best Free Typing Master, Kids & Kindergarten Typing Games & Speed Telemetry",
   "start_url": "index.php",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ff5532",
+  "background_color": "#0a0e17",
+  "theme_color": "#ff5500",
   "orientation": "any",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ff5532'/><text x='50' y='65' font-size='50' font-weight='bold' text-anchor='middle' fill='%23ffffff'>T</text></svg>",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ff5532'/><text x='50' y='65' font-size='50' font-weight='bold' text-anchor='middle' fill='%23ffffff'>T</text></svg>",
+      "src": "assets/images/logo.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     }
   ]
 }

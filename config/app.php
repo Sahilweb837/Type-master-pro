@@ -17,6 +17,13 @@ if (ob_get_level() === 0) {
 // Set default timezone
 date_default_timezone_set('UTC');
 
+// Instruct Cloudways Varnish, Nginx, and CDNs not to cache dynamic PHP pages or strip cookies
+if (!headers_sent()) {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+}
+
 // Detect HTTPS behind reverse proxies, CDNs (e.g. Cloudflare), and standard SSL
 $isHttps = (
     (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')
@@ -56,9 +63,10 @@ require_once __DIR__ . '/../includes/csrf.php';
 get_csrf_token();
 
 // App Constants
-define('APP_NAME', 'Custom Type Master Pro');
-define('APP_VERSION', '2.1.0');
-define('APP_AUTHOR', 'Full-Stack Team');
+define('APP_NAME', 'TypoPrac');
+define('APP_TAGLINE', 'Professional Typing Practice Software');
+define('APP_VERSION', '3.0.0');
+define('APP_AUTHOR', 'TypoPrac Team');
 
 // Admin Secure Route Configuration (/nickadmin005#)
 define('ADMIN_SLUG', 'nickadmin005');

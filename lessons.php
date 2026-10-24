@@ -35,32 +35,34 @@ include __DIR__ . '/includes/header.php';
    LESSONS CURRICULUM — Pixel Theme + Clean Sans-Serif
    ============================================================ */
 .lessons-page {
-  --ink:        #000000;
-  --paper:      #ffffff;
-  --paper-soft: #f4f4f4;
-  --paper-hard: #e6e6e6;
-  --shadow:     3px;
+  --ink:        #f8fafc;
+  --paper:      #131a29;
+  --paper-soft: #192338;
+  --paper-hard: #0b0f17;
+  --shadow:     0px;
   --sans:       "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono:       "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
   font-family: var(--sans);
   color: var(--ink);
 }
 html[data-theme="dark"] .lessons-page {
-  --ink:        #ffffff;
-  --paper:      #000000;
-  --paper-soft: #141414;
-  --paper-hard: #222222;
+  --ink:        #f8fafc;
+  --paper:      #131a29;
+  --paper-soft: #192338;
+  --paper-hard: #0b0f17;
 }
 
 .lessons-page .pixel-card {
   background: var(--paper);
-  border: 3px solid var(--ink);
-  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 .lessons-page .pixel-card-lg {
   background: var(--paper);
-  border: 3px solid var(--ink);
-  box-shadow: 5px 5px 0 var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 /* ---------- Buttons ---------- */

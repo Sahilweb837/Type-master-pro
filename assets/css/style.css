@@ -5,85 +5,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap');
 
 :root,
-[data-theme="light"],
-[data-theme="white-orange"] {
-  /* =====================================================================
-     Modern Minimal Monochrome Design System — Black & White
-     ===================================================================== */
-  --header-height: 3.5rem;
-  --first-color: #0a0a0a;
-  --first-color-alt: #262626;
-  --first-color-light: #f4f4f5;
-  --first-color-glow: rgba(0, 0, 0, 0.08);
-  --second-color: #52525b;
-  --text-color: #0a0a0a;
-  --body-color: #fafafa;
-  --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  --normal-font-size: .938rem;
-  --small-font-size: .813rem;
-  --smaller-font-size: .75rem;
-  --z-tooltip: 10;
-  --z-fixed: 100;
-
-  /* Surfaces & Structural Color Tokens */
-  --bg-primary: #f8f9fa;
-  --bg-secondary: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card-hover: #fafafa;
-  --border-color: #e4e4e7;
-  --border-focus: #0a0a0a;
-  --text-primary: #0a0a0a;
-  --text-secondary: #52525b;
-  --text-muted: #a1a1aa;
-  --accent-primary: #0a0a0a;
-  --accent-glow: rgba(0, 0, 0, 0.08);
-  --accent-gradient: linear-gradient(135deg, #0a0a0a 0%, #27272a 100%);
-  --accent-subtle: rgba(0, 0, 0, 0.04);
-  --success: #15803d;
-  --warning: #b45309;
-  --danger: #dc2626;
-  --sidebar-width: 250px;
-  --navbar-height: 64px;
-
-  /* Clean Crisp Shadows */
-  --soft-raised: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.03);
-  --soft-raised-hover: 0 6px 20px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
-  --soft-flat: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --soft-inset: inset 0 1px 2px rgba(0, 0, 0, 0.04);
-  --soft-accent-glow: 0 4px 14px rgba(0, 0, 0, 0.12);
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.08);
-  --card-radius: 12px;
-  --transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* Typing Arena Defaults */
-  --typing-font: 'JetBrains Mono', monospace;
-  --typing-size: 22px;
-  --typing-line-height: 1.8;
-  --caret-color: #0a0a0a;
-  --char-correct: #0a0a0a;
-  --char-incorrect: #dc2626;
-  --char-untyped: #9ca3af;
-  --char-active-bg: #e4e4e7;
-}
-
-/* Dark Monochrome (Deep Obsidian Black & Pure White) */
 [data-theme="dark"],
 [data-theme="orange"],
 [data-theme="dark-orange"],
 [data-theme="cyberpunk"],
 [data-theme="nord"] {
+  /* =====================================================================
+     TypoPrac Signature Flame Orange & Deep Obsidian Theme (Default)
+     ===================================================================== */
   --header-height: 3.5rem;
-  --first-color: #ffffff;
-  --first-color-alt: #e4e4e7;
-  --first-color-light: #18181b;
-  --first-color-glow: rgba(255, 255, 255, 0.1);
-  --second-color: #a1a1aa;
-  --text-color: #fafafa;
-  --text-muted: #71717a;
-  --body-color: #09090b;
+  --first-color: #ff5722;
+  --first-color-alt: #ff7a00;
+  --first-color-light: #1e131d;
+  --first-color-glow: rgba(255, 87, 34, 0.35);
+  --second-color: #94a3b8;
+  --text-color: #f8fafc;
+  --text-muted: #64748b;
+  --body-color: #0a0e17;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
   --normal-font-size: 0.938rem;
   --small-font-size: 0.813rem;
@@ -91,42 +29,101 @@
   --z-tooltip: 10;
   --z-fixed: 100;
 
-  --bg-primary: #09090b;
-  --bg-secondary: #121215;
-  --bg-card: #121215;
-  --bg-card-hover: #18181b;
-  --border-color: #27272a;
-  --border-focus: #ffffff;
-  --text-primary: #fafafa;
-  --text-secondary: #a1a1aa;
-  --accent-primary: #ffffff;
-  --accent-glow: rgba(255, 255, 255, 0.12);
-  --accent-gradient: linear-gradient(135deg, #ffffff 0%, #e4e4e7 100%);
-  --accent-subtle: rgba(255, 255, 255, 0.08);
-  --success: #4ade80;
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111726;
+  --bg-card: #141c2e;
+  --bg-card-hover: #1a243a;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-focus: #ff5722;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-primary: #ff5722;
+  --accent-glow: rgba(255, 87, 34, 0.35);
+  --accent-gradient: linear-gradient(135deg, #ff5500 0%, #ff7a00 100%);
+  --accent-subtle: rgba(255, 87, 34, 0.12);
+  --success: #00e676;
   --warning: #facc15;
-  --danger: #f87171;
+  --danger: #ff5252;
   --sidebar-width: 250px;
   --navbar-height: 64px;
   --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.6);
   --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.8);
   --soft-raised: 0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3);
-  --soft-raised-hover: 0 4px 16px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4);
+  --soft-raised-hover: 0 6px 20px rgba(255, 87, 34, 0.25), 0 1px 4px rgba(0,0,0,0.4);
   --soft-flat: 0 1px 2px rgba(0,0,0,0.4);
   --soft-inset: inset 0 1px 3px rgba(0,0,0,0.6);
-  --soft-accent-glow: 0 4px 14px rgba(255,255,255,0.15);
+  --soft-accent-glow: 0 4px 18px rgba(255, 87, 34, 0.35);
   --card-radius: 12px;
   --transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 
   --typing-font: 'JetBrains Mono', monospace;
   --typing-size: 22px;
   --typing-line-height: 1.8;
-  --caret-color: #ffffff;
-  --char-correct: #ffffff;
-  --char-incorrect: #f87171;
-  --char-untyped: #52525b;
-  --char-active-bg: #27272a;
+  --caret-color: #ff5722;
+  --char-correct: #00e676;
+  --char-incorrect: #ff5252;
+  --char-untyped: #64748b;
+  --char-active-bg: rgba(255, 87, 34, 0.18);
+}
+
+[data-theme="light"],
+[data-theme="white-orange"] {
+  /* =====================================================================
+     TypoPrac Obsidian & Flame Orange Dark System (Zero White BG)
+     ===================================================================== */
+  --header-height: 3.5rem;
+  --first-color: #ff5722;
+  --first-color-alt: #ff7a00;
+  --first-color-light: #1e131d;
+  --first-color-glow: rgba(255, 87, 34, 0.35);
+  --second-color: #94a3b8;
+  --text-color: #f8fafc;
+  --text-muted: #64748b;
+  --body-color: #0a0e17;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  --normal-font-size: 0.938rem;
+  --small-font-size: 0.813rem;
+  --smaller-font-size: 0.75rem;
+  --z-tooltip: 10;
+  --z-fixed: 100;
+
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111726;
+  --bg-card: #141c2e;
+  --bg-card-hover: #1a243a;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-focus: #ff5722;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-primary: #ff5722;
+  --accent-glow: rgba(255, 87, 34, 0.35);
+  --accent-gradient: linear-gradient(135deg, #ff5500 0%, #ff7a00 100%);
+  --accent-subtle: rgba(255, 87, 34, 0.12);
+  --success: #00e676;
+  --warning: #facc15;
+  --danger: #ff5252;
+  --sidebar-width: 250px;
+  --navbar-height: 64px;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.8);
+  --soft-raised: 0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3);
+  --soft-raised-hover: 0 6px 20px rgba(255, 87, 34, 0.25), 0 1px 4px rgba(0,0,0,0.4);
+  --soft-flat: 0 1px 2px rgba(0,0,0,0.4);
+  --soft-inset: inset 0 1px 3px rgba(0,0,0,0.6);
+  --soft-accent-glow: 0 4px 18px rgba(255, 87, 34, 0.35);
+  --card-radius: 12px;
+  --transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --typing-font: 'JetBrains Mono', monospace;
+  --typing-size: 22px;
+  --typing-line-height: 1.8;
+  --caret-color: #ff5722;
+  --char-correct: #00e676;
+  --char-incorrect: #ff5252;
+  --char-untyped: #64748b;
+  --char-active-bg: rgba(255, 87, 34, 0.18);
 }
 
 /* Base resets & typography */
@@ -2457,10 +2454,255 @@ kbd.kbd-pro {
   }
 }
 
+/* =====================================================================
+   TypoPrac Design System v3.0 — Flame Orange & Dark Obsidian
+   ===================================================================== */
 
+/* Brand & Typography */
+.text-orange { color: #ff5722 !important; }
+.text-orange-gradient {
+  background: linear-gradient(135deg, #ff5500 0%, #ff8a00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+.bg-orange-gradient {
+  background: linear-gradient(135deg, #ff5500 0%, #ff7a00 100%) !important;
+}
 
+/* TypoPrac Official Logo display */
+.typoprac-brand-img {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(255, 87, 34, 0.25));
+  transition: transform 0.2s ease;
+}
+.typoprac-brand-img:hover {
+  transform: scale(1.03);
+}
+.typoprac-brand-sm {
+  height: 28px;
+}
+.typoprac-brand-lg {
+  height: 52px;
+}
 
+/* Radiant Flame Orange Buttons */
+.btn-typoprac-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #ff5500 0%, #ff7a00 100%);
+  color: #ffffff !important;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem 1.4rem;
+  box-shadow: 0 4px 18px rgba(255, 87, 34, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none !important;
+  cursor: pointer;
+}
+.btn-typoprac-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 87, 34, 0.55);
+  filter: brightness(1.08);
+}
+.btn-typoprac-primary:active {
+  transform: translateY(0);
+}
 
+.btn-typoprac-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(255, 87, 34, 0.08);
+  color: #ff5722 !important;
+  border: 1px solid rgba(255, 87, 34, 0.4);
+  border-radius: 10px;
+  padding: 0.6rem 1.3rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-decoration: none !important;
+}
+.btn-typoprac-outline:hover {
+  background: rgba(255, 87, 34, 0.18);
+  border-color: #ff5722;
+  box-shadow: 0 4px 14px rgba(255, 87, 34, 0.2);
+}
 
+/* Glass & Surface Cards */
+.typoprac-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.typoprac-card:hover {
+  border-color: rgba(255, 87, 34, 0.35);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
 
- */
+.typoprac-card-glow {
+  border-color: rgba(255, 87, 34, 0.6) !important;
+  box-shadow: 0 0 25px rgba(255, 87, 34, 0.25) !important;
+}
+
+/* Sidebar Active Pill */
+.sidebar-link.active {
+  background: linear-gradient(90deg, rgba(255, 87, 34, 0.22) 0%, rgba(255, 87, 34, 0.08) 100%) !important;
+  border-left: 3px solid #ff5722 !important;
+  color: #ffffff !important;
+}
+.sidebar-link.active i {
+  color: #ff5722 !important;
+  filter: drop-shadow(0 0 6px rgba(255, 87, 34, 0.6));
+}
+
+/* Hero Mountain Sunset Container */
+.typoprac-hero-banner {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center 30%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 240px;
+}
+.typoprac-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(10, 14, 23, 0.94) 0%, rgba(10, 14, 23, 0.8) 45%, rgba(10, 14, 23, 0.4) 100%);
+  display: flex;
+  align-items: center;
+  padding: 2.2rem 2.5rem;
+}
+@media (max-width: 768px) {
+  .typoprac-hero-overlay {
+    background: linear-gradient(180deg, rgba(10, 14, 23, 0.88) 0%, rgba(10, 14, 23, 0.96) 100%);
+    padding: 1.5rem;
+  }
+}
+
+/* XP Card on Hero */
+.typoprac-xp-card {
+  background: rgba(19, 26, 42, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 1rem 1.4rem;
+  min-width: 260px;
+}
+.typoprac-xp-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+  overflow: hidden;
+  margin: 0.6rem 0 0.4rem;
+}
+.typoprac-xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff5500, #ff8a00);
+  border-radius: 99px;
+  box-shadow: 0 0 10px rgba(255, 87, 34, 0.7);
+}
+
+/* Quick Mode Selector Cards (Horizontal row) */
+.mode-card-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  text-decoration: none !important;
+  color: var(--text-primary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mode-card-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 87, 34, 0.5);
+  box-shadow: 0 6px 20px rgba(255, 87, 34, 0.15);
+}
+.mode-card-item.active {
+  border-color: #ff5722 !important;
+  box-shadow: 0 0 20px rgba(255, 87, 34, 0.25) !important;
+  background: rgba(255, 87, 34, 0.05);
+}
+.mode-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+  background: rgba(255, 87, 34, 0.12);
+  color: #ff5722;
+}
+
+/* Keyboard and Posture Guide */
+.v-keyboard-box {
+  background: #0d121c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1.2rem;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+.v-key {
+  height: 42px;
+  border-radius: 6px;
+  background: #172030;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  transition: all 0.1s ease;
+  user-select: none;
+}
+.v-key.key-home {
+  background: rgba(255, 87, 34, 0.2);
+  border-color: rgba(255, 87, 34, 0.5);
+  color: #ff5722;
+  box-shadow: 0 0 10px rgba(255, 87, 34, 0.35);
+}
+.v-key.key-active {
+  background: #ff5722 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(255, 87, 34, 0.85) !important;
+  transform: translateY(2px);
+}
+.v-key.key-correct {
+  background: #00e676 !important;
+  color: #000000 !important;
+  box-shadow: 0 0 12px rgba(0, 230, 118, 0.6) !important;
+}
+
+/* Hands guide illustration */
+.hands-overlay-guide {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0.35;
+  transition: opacity 0.3s ease;
+}
+.v-keyboard-box:hover .hands-overlay-guide {
+  opacity: 0.55;
+}

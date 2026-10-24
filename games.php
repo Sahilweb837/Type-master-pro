@@ -12,6 +12,7 @@ $currentUser = current_user();
 $userId = $currentUser ? (int)$currentUser['id'] : 0;
 
 $highScores = [
+    'kindergarten' => get_user_game_high_score($userId, 'kindergarten'),
     'ninja'   => get_user_game_high_score($userId, 'ninja'),
     'space'   => get_user_game_high_score($userId, 'space'),
     'racer'   => get_user_game_high_score($userId, 'racer'),
@@ -20,6 +21,7 @@ $highScores = [
 ];
 
 $leaderboards = [
+    'kindergarten' => get_game_leaderboard('kindergarten', 6),
     'ninja'   => get_game_leaderboard('ninja', 6),
     'space'   => get_game_leaderboard('space', 6),
     'racer'   => get_game_leaderboard('racer', 6),
@@ -38,21 +40,22 @@ include __DIR__ . '/includes/header.php';
 
 <style>
 .arcade-hub {
-  --px-ink:    #000000;
-  --px-paper:  #ffffff;
-  --px-paper-2:#f0f0f0;
-  --px-paper-3:#e0e0e0;
-  --px-shadow: 3px;
+  --px-ink:    #f8fafc;
+  --px-paper:  #131a29;
+  --px-paper-2:#192338;
+  --px-paper-3:#0b0f17;
+  --px-shadow: 0px;
   --px-sans:   "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --px-pixel:  "Press Start 2P", "Courier New", monospace;
   --px-mono:   "JetBrains Mono", ui-monospace, monospace;
   font-family: var(--px-sans);
+  color: #f8fafc;
 }
 html[data-theme="dark"] .arcade-hub {
-  --px-ink:    #ffffff;
-  --px-paper:  #000000;
-  --px-paper-2:#1a1a1a;
-  --px-paper-3:#222222;
+  --px-ink:    #f8fafc;
+  --px-paper:  #131a29;
+  --px-paper-2:#192338;
+  --px-paper-3:#0b0f17;
 }
 
 /* Buttons — sans-serif readable */
@@ -673,7 +676,68 @@ html[data-theme="dark"] .arcade-hub-header::before {
     </div>
   </div>
 
+  <!-- Featured Category Banners (Kindergarten & Arcade) -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="p-4 rounded-4 position-relative overflow-hidden d-flex flex-column justify-content-between" style="min-height: 200px; background: url('<?= BASE_URL ?>/assets/images/kids-typing-banner.jpg') center/cover no-repeat; border: 2px solid rgba(255, 87, 34, 0.4); box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
+        <div class="position-absolute inset-0" style="inset: 0; background: linear-gradient(90deg, rgba(10, 14, 23, 0.94) 0%, rgba(10, 14, 23, 0.75) 60%, rgba(10, 14, 23, 0.3) 100%); z-index: 1;"></div>
+        <div class="position-relative z-2">
+          <span class="badge px-2.5 py-1 rounded-pill mb-2" style="background: rgba(255, 87, 34, 0.2); border: 1px solid #ff5722; color: #ff5722; font-weight: 800; font-size: 0.72rem;">
+            🧸 AGES 4-8 &bull; KINDERGARTEN
+          </span>
+          <h3 class="fw-bold text-white mb-1">Kindergarten Letter Jungle</h3>
+          <p class="text-light opacity-75 small mb-3" style="max-width: 380px;">Joyful alphabet adventure with friendly animals (Fox, Bear, Owl), phonics voice audio, and floating bubbles!</p>
+          <a href="<?= BASE_URL ?>/game-kindergarten.php" class="btn btn-sm text-white fw-bold px-3 py-2 rounded-3 d-inline-flex align-items-center gap-2" style="background: linear-gradient(135deg, #ff5500, #ff7a00); box-shadow: 0 4px 14px rgba(255, 87, 34, 0.4);">
+            <i class="bi bi-play-circle-fill"></i> Play Kindergarten Game
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="p-4 rounded-4 position-relative overflow-hidden d-flex flex-column justify-content-between" style="min-height: 200px; background: url('<?= BASE_URL ?>/assets/images/arcade-banner.jpg') center/cover no-repeat; border: 2px solid rgba(255, 87, 34, 0.4); box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
+        <div class="position-absolute inset-0" style="inset: 0; background: linear-gradient(90deg, rgba(10, 14, 23, 0.94) 0%, rgba(10, 14, 23, 0.75) 60%, rgba(10, 14, 23, 0.3) 100%); z-index: 1;"></div>
+        <div class="position-relative z-2">
+          <span class="badge px-2.5 py-1 rounded-pill mb-2" style="background: rgba(0, 230, 118, 0.2); border: 1px solid #00e676; color: #00e676; font-weight: 800; font-size: 0.72rem;">
+            ⚡ HIGH-SPEED PRO &bull; ARCADE
+          </span>
+          <h3 class="fw-bold text-white mb-1">Cyber Ninja &amp; Meteor Defense</h3>
+          <p class="text-light opacity-75 small mb-3" style="max-width: 380px;">High-level reflex training! Slice flying fruit, dodge cyber bombs, and vaporize falling orbital meteors at 120+ WPM.</p>
+          <a href="<?= BASE_URL ?>/game-ninja.php" class="btn btn-sm text-white fw-bold px-3 py-2 rounded-3 d-inline-flex align-items-center gap-2" style="background: linear-gradient(135deg, #00e676, #00b0ff); color: #000 !important; box-shadow: 0 4px 14px rgba(0, 230, 118, 0.4);">
+            <i class="bi bi-lightning-charge-fill"></i> Enter Arcade Arena
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="row g-4 mb-5">
+
+    <!-- Kindergarten Card -->
+    <div class="col-lg-4 col-md-6">
+      <div class="arcade-game-card" style="border-color: rgba(255, 87, 34, 0.4);">
+        <div class="card-top-row">
+          <div class="card-hero-icon" style="background: rgba(255, 87, 34, 0.15); color: #ff5722;"><i class="bi bi-stars"></i></div>
+          <span class="card-tag-pill" style="border-color: #ff5722; color: #ff5722;">★ Kindergarten &amp; Kids</span>
+        </div>
+        <h4>Letter Jungle Adventure</h4>
+        <p>Float through the jungle! Pop cheerful letter bubbles with Freddy Fox &amp; Barnaby Bear. Phonics audio &amp; zero typo penalties.</p>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <span class="feature-pill-badge"><i class="bi bi-check2"></i> Voice Phonics</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2"></i> Kids ABC</span>
+          <span class="feature-pill-badge"><i class="bi bi-check2"></i> Star Rewards</span>
+        </div>
+        <div class="arcade-card-foot">
+          <div>
+            <div class="best-label">Best Score</div>
+            <div class="best-score"><?= number_format($highScores['kindergarten']['score'] ?? 0) ?> PTS</div>
+          </div>
+          <a href="<?= BASE_URL ?>/game-kindergarten.php" class="px-btn px-btn-primary px-btn-sm" style="background: linear-gradient(135deg, #ff5500, #ff7a00); color: #fff;">
+            <span>Play</span><i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
 
     <div class="col-lg-4 col-md-6">
       <div class="arcade-game-card">
